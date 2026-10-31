@@ -8,6 +8,22 @@ import { CLIENT_ERROR_CODES, httpStatusMessage, readEnvelope } from './response-
 /** Trailing slashes trimmed so `${base}${path}` never doubles up. */
 export const API_BASE = (process.env.NEXT_PUBLIC_API_URL || '/api').replace(/\/+$/, '');
 
+/**
+ * A bearer token used ONLY while pointing at the Prism mock, before the auth
+ * module exists (SRV-07).
+ *
+ * The mock enforces the contract's bearerAuth and 401s without one, which
+ * otherwise makes every screen unviewable during Sprints 1-2. Prism accepts
+ * any value, so this is a placeholder, not a credential.
+ *
+ * Guarded on NEXT_PUBLIC_API_URL containing a localhost mock port so it can
+ * never attach to a real backend: a hardcoded token that reaches production is
+ * a far worse bug than an unviewable dev screen. Delete this once login works.
+ */
+const MOCK_BEARER = /localhost:40\d\d/.test(process.env.NEXT_PUBLIC_API_URL ?? '')
+  ? 'mock-only-not-a-credential'
+  : undefined;
+
 export class ApiError extends Error {
   readonly code: string;
   readonly details: unknown;
@@ -36,6 +52,7 @@ async function request<T>(method: string, path: string, options: RequestOptions 
       headers: {
         Accept: 'application/json',
         ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
+        ...(MOCK_BEARER ? { Authorization: `Bearer ${MOCK_BEARER}` } : {}),
         ...headers,
       },
       body: body === undefined ? undefined : JSON.stringify(body),
