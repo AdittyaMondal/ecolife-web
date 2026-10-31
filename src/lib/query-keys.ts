@@ -52,4 +52,5 @@ export const qk = {
   organization: () => [...root, 'organization'] as const,
   myOrganization: () => [...root, 'organization', 'me'] as const,
   orgMembers: (id: number) => [...root, 'organization', id, 'members'] as const,
+  adminOrgs: (status?: string) => [...root, 'admin', 'organizations', status ?? 'all'] as const,
 };

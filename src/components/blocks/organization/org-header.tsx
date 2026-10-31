@@ -17,23 +17,26 @@ import {
   ShieldCheck,
   UserCheck,
 } from 'lucide-react';
+import Link from 'next/link';
 import * as React from 'react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ConfirmDialog } from '@/components/ui/dialog';
 import { useLeaveOrganization } from '@/hooks/use-organization';
 import { initials } from '@/lib/format';
+import { cn } from '@/lib/utils';
 import type { Organization } from '@/types/api';
 
 export interface OrgHeaderProps {
   organization: Organization;
   role: 'owner' | 'member';
+  isAdmin?: boolean;
   onEditClick?: () => void;
 }
 
-export function OrgHeader({ organization, role, onEditClick }: OrgHeaderProps) {
+export function OrgHeader({ organization, role, isAdmin, onEditClick }: OrgHeaderProps) {
   const [copied, setCopied] = React.useState(false);
   const [leaveDialogOpen, setLeaveDialogOpen] = React.useState(false);
   const leaveOrg = useLeaveOrganization();
@@ -260,10 +263,23 @@ export function OrgHeader({ organization, role, onEditClick }: OrgHeaderProps) {
 
         {/* Pending Approval Notice */}
         {organization.status === 'pending' && (
-          <div className="rounded-sm border border-warning/40 bg-warning-surface p-4 text-xs space-y-1">
-            <div className="flex items-center gap-2 font-bold text-foreground">
-              <Clock className="size-4 text-warning" aria-hidden="true" />
-              <span>Registration Under Review</span>
+          <div className="rounded-sm border border-warning/40 bg-warning-surface p-4 text-xs space-y-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="flex items-center gap-2 font-bold text-foreground">
+                <Clock className="size-4 text-warning" aria-hidden="true" />
+                <span>Registration Under Review</span>
+              </div>
+              {isAdmin && (
+                <Link
+                  href="/admin"
+                  className={cn(
+                    buttonVariants({ variant: 'secondary', size: 'sm' }),
+                    'text-xs h-7 self-start sm:self-auto',
+                  )}
+                >
+                  Review in Admin Panel →
+                </Link>
+              )}
             </div>
             <p className="text-muted-foreground leading-relaxed">
               Your organization registration is currently being verified by the EcoLife review team.

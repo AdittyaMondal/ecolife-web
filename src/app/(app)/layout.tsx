@@ -15,6 +15,7 @@ import {
   Moon,
   ShoppingBag,
   Sun,
+  ShieldCheck,
   Trophy,
   User,
 } from 'lucide-react';
@@ -243,6 +244,31 @@ function AppLayoutShell({ children }: { children: React.ReactNode }) {
               );
             })}
           </nav>
+
+          {/* Admin Navigation (Staff Only) */}
+          {me?.role === 'admin' && (
+            <nav aria-label="Staff administration" className="flex flex-col gap-1">
+              <p className="px-3 pb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground flex items-center justify-between">
+                <span>Operations</span>
+                <span className="rounded-xs bg-amber-500/20 px-1.5 py-0.2 text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+                  Staff
+                </span>
+              </p>
+              <Link
+                href="/admin"
+                aria-current={isActivePath(pathname, '/admin') ? 'page' : undefined}
+                className={cn(
+                  'flex min-h-11 items-center gap-3 rounded-sm px-3 py-2 text-sm font-medium transition',
+                  isActivePath(pathname, '/admin')
+                    ? 'bg-amber-600 font-semibold text-white'
+                    : 'text-foreground hover:bg-muted',
+                )}
+              >
+                <ShieldCheck className="size-4 shrink-0 text-amber-500" aria-hidden="true" />
+                <span>Admin Review</span>
+              </Link>
+            </nav>
+          )}
         </div>
 
         {/* Bottom User Card — outer rounded-sm (12px), p-1 (4px) inset, inner avatar rounded-xs (8px) */}

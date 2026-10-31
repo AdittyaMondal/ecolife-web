@@ -106,6 +106,7 @@ export default function OrganizationPage() {
       <OrgHeader
         organization={org}
         role={role}
+        isAdmin={me?.role === 'admin'}
         onEditClick={role === 'owner' ? () => setEditDialogOpen(true) : undefined}
       />
 

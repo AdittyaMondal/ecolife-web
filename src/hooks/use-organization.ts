@@ -1,5 +1,5 @@
 import { queryOptions, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api } from '@/lib/fetcher';
+import { api, qs } from '@/lib/fetcher';
 import { qk } from '@/lib/query-keys';
 import type {
   AddOrganizationMemberBody,
@@ -9,6 +9,8 @@ import type {
   MyOrganization,
   Organization,
   OrganizationMemberList,
+  Page,
+  ReviewOrganizationBody,
   UpdateOrganizationBody,
 } from '@/types/api';
 
@@ -94,3 +96,25 @@ export function useLeaveOrganization() {
     },
   });
 }
+
+export const adminOrganizationsQuery = (status?: string) =>
+  queryOptions({
+    queryKey: qk.adminOrgs(status),
+    queryFn: () =>
+      api.get<Page<Organization>>(
+        `/admin/organizations${qs({ status: status === 'all' ? undefined : status, limit: 100 })}`,
+      ),
+  });
+
+export function useReviewOrganization() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, body }: { id: number; body: ReviewOrganizationBody }) =>
+      api.post<Organization>(`/admin/organizations/${id}/review`, body),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['ecolife', 'admin'] });
+      qc.invalidateQueries({ queryKey: qk.myOrganization() });
+    },
+  });
+}
+
