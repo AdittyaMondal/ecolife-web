@@ -8,10 +8,15 @@ export const qk = {
   all: root,
   health: () => [...root, 'health'] as const,
   home: () => [...root, 'home'] as const,
+  trackToday: () => [...root, 'track', 'today'] as const,
   trackHistory: () => [...root, 'track', 'history'] as const,
   goals: () => [...root, 'goals'] as const,
+  goalProgress: (id: number) => [...root, 'goals', id, 'progress'] as const,
   marketplace: () => [...root, 'marketplace'] as const,
   events: () => [...root, 'events'] as const,
   leaderboard: () => [...root, 'leaderboard'] as const,
+  leaderboardPage: (period: string, scope: string) =>
+    [...root, 'leaderboard', { period, scope }] as const,
+  myRank: () => [...root, 'leaderboard', 'me'] as const,
   profile: () => [...root, 'profile'] as const,
 };

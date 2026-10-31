@@ -4937,9 +4937,9 @@ export interface components {
             streak: components["schemas"]["Streak"];
             week: components["schemas"]["HomeWeek"];
             breakdown30d: components["schemas"]["Breakdown"];
-            activeGoal: components["schemas"]["ActiveGoalSummary"];
+            activeGoal: components["schemas"]["ActiveGoalSummary"] | null;
             leaderboard: components["schemas"]["LeaderboardPeek"];
-            nextEvent: components["schemas"]["NextEvent"];
+            nextEvent: components["schemas"]["NextEvent"] | null;
         };
         HomeToday: {
             /** @example 2026-10-31 */
@@ -5057,7 +5057,7 @@ export interface components {
             daysLeft: number;
             /** @example true */
             onTrack: boolean;
-        } | null;
+        };
         LeaderboardPeek: {
             /** @description Top 3 */
             top: (components["schemas"]["UserSummary"] & {
@@ -5088,7 +5088,7 @@ export interface components {
             venueName: string;
             /** @example true */
             passReady: boolean;
-        } | null;
+        };
         TrackToday: {
             /** @example 2026-10-31 */
             date: string;
@@ -5220,7 +5220,7 @@ export interface components {
             logged: boolean;
         };
         GoalsList: {
-            active: components["schemas"]["Goal"];
+            active: components["schemas"]["Goal"] | null;
             past: components["schemas"]["Goal"][];
         };
         Goal: {
@@ -5253,7 +5253,7 @@ export interface components {
             settledAt: string | null;
             /** @example 2026-10-31T09:00:00.000Z */
             createdAt: string;
-        } | null;
+        };
         CreateGoalBody: {
             /**
              * @example reduce_percent
@@ -5444,7 +5444,7 @@ export interface components {
              * @enum {string}
              */
             status: "placed" | "confirmed" | "shipped" | "delivered" | "cancelled";
-            address: components["schemas"]["Address"];
+            address: components["schemas"]["Address"] | null;
             /** @example 2026-10-31T10:02:00.000Z */
             createdAt: string;
         };
@@ -5467,7 +5467,7 @@ export interface components {
             pincode: string;
             /** @example true */
             isDefault: boolean;
-        } | null;
+        };
         PlaceOrderBody: {
             /** @example 480 */
             offeredCoins: number;
@@ -5555,11 +5555,7 @@ export interface components {
             isCoHost: boolean;
             /** @example true */
             registered: boolean;
-            /**
-             * @example registered
-             * @enum {string|null}
-             */
-            passStatus: "registered" | "checked_in" | "cancelled" | "no_show" | null;
+            passStatus: ("registered" | "checked_in" | "cancelled" | "no_show") | null;
         };
         CreateEventBody: {
             /** @example Beach clean-up, Versova */
@@ -5656,7 +5652,8 @@ export interface components {
             checkedInCount: number;
             /** @example 100 */
             capacity: number;
-            attendeeReward: components["schemas"]["RewardGrant"] & (Record<string, never> | null);
+            /** @description Null when already checked in — the reward was granted on the first scan */
+            attendeeReward: components["schemas"]["RewardGrant"] | null;
         };
         ScanBody: {
             /** @example yJ8kQ2mXp... */
