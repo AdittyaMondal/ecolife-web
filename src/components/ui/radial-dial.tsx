@@ -5,6 +5,19 @@ import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
+/**
+ * Polar to cartesian, with y inverted because SVG counts downwards.
+ *
+ * Module scope, not component scope: defined inside, it is a new function
+ * on every render, so a `useMemo` that uses it either omits it (and goes
+ * stale) or includes it (and never memoises). Pure geometry has no reason
+ * to be recreated per render.
+ */
+function polarToCartesian(cx: number, cy: number, angleDeg: number, radius: number) {
+  const angleRad = (angleDeg * Math.PI) / 180;
+  return { x: cx + radius * Math.cos(angleRad), y: cy - radius * Math.sin(angleRad) };
+}
+
 export interface RadialDialProps {
   value: number;
   min: number;
@@ -43,17 +56,9 @@ export function RadialDial({
   const fraction = Math.min(Math.max((value - min) / (max - min), 0), 1);
   const currentAngle = startAngle + fraction * sweepAngle;
 
-  const polarToCartesian = (angleDeg: number, radius: number) => {
-    const rad = (angleDeg * Math.PI) / 180;
-    return {
-      x: cx + radius * Math.cos(rad),
-      y: cy + radius * Math.sin(rad),
-    };
-  };
-
   const describeArc = (fromDeg: number, toDeg: number, radius: number) => {
-    const start = polarToCartesian(fromDeg, radius);
-    const end = polarToCartesian(toDeg, radius);
+    const start = polarToCartesian(cx, cy, fromDeg, radius);
+    const end = polarToCartesian(cx, cy, toDeg, radius);
     const largeArc = Math.abs(toDeg - fromDeg) > 180 ? 1 : 0;
     return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArc} 1 ${end.x} ${end.y}`;
   };
@@ -113,7 +118,7 @@ export function RadialDial({
     }
   };
 
-  const knobPos = polarToCartesian(currentAngle, r);
+  const knobPos = polarToCartesian(cx, cy, currentAngle, r);
 
   // Ticks along the dial
   const ticks = React.useMemo(() => {
@@ -122,8 +127,8 @@ export function RadialDial({
     for (let i = 0; i <= count; i++) {
       const f = i / count;
       const angle = startAngle + f * sweepAngle;
-      const p1 = polarToCartesian(angle, r - 6);
-      const p2 = polarToCartesian(angle, r + 4);
+      const p1 = polarToCartesian(cx, cy, angle, r - 6);
+      const p2 = polarToCartesian(cx, cy, angle, r + 4);
       list.push({ id: i, p1, p2, isMajor: i % 2 === 0 });
     }
     return list;
@@ -144,6 +149,12 @@ export function RadialDial({
         <svg
           ref={dialRef}
           viewBox="0 0 200 200"
+          // The interactive element is the wrapper, which carries the role,
+          // label and keyboard handling. The graphic itself adds nothing a
+          // screen reader has not already been told, so it is hidden rather
+          // than given a title that would be read out twice.
+          aria-hidden="true"
+          focusable="false"
           className="size-44 sm:size-48 cursor-grab active:cursor-grabbing select-none"
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}

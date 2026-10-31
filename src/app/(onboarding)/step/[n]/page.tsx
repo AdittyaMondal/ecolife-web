@@ -47,6 +47,7 @@ import {
   useCompleteOnboarding,
   useSaveOnboardingStep,
 } from '@/hooks/use-onboarding';
+import { ApiError } from '@/lib/fetcher';
 import { formatKg } from '@/lib/format';
 import { qk } from '@/lib/query-keys';
 import { cn } from '@/lib/utils';
@@ -147,6 +148,19 @@ const WASTE_HABITS: { value: OnboardingStep5['wasteHabit']; label: string; desc:
     desc: 'All household waste goes into a single bin',
   },
 ];
+
+/**
+ * "You already finished onboarding" in all the shapes the server can say it.
+ *
+ * `ONB_002` is the contract; the message checks are a belt-and-braces
+ * fallback for an older server. Typed `unknown` rather than `any` so the
+ * narrowing is visible instead of assumed.
+ */
+function isAlreadyComplete(error: unknown): boolean {
+  if (!(error instanceof ApiError)) return false;
+  if (error.code === 'ONB_002') return true;
+  return error.message.includes('already complete') || error.message.includes('already set up');
+}
 
 export default function OnboardingStepPage() {
   return (
@@ -311,24 +325,16 @@ function OnboardingStepContent() {
               onSuccess: (res) => {
                 setCompletedResult(res);
               },
-              onError: (err: any) => {
-                if (
-                  err?.code === 'ONB_002' ||
-                  err?.message?.includes('already complete') ||
-                  err?.message?.includes('already set up')
-                ) {
+              onError: (err: unknown) => {
+                if (isAlreadyComplete(err)) {
                   onAlreadyComplete();
                 }
               },
             });
           }
         },
-        onError: (err: any) => {
-          if (
-            err?.code === 'ONB_002' ||
-            err?.message?.includes('already complete') ||
-            err?.message?.includes('already set up')
-          ) {
+        onError: (err: unknown) => {
+          if (isAlreadyComplete(err)) {
             onAlreadyComplete();
           }
         },

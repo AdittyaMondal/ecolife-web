@@ -9,11 +9,42 @@
 import { CLIENT_ERROR_CODES, httpStatusMessage, readEnvelope } from './response-envelope';
 import { clearSession, getAccessToken, hasSessionHint, type Session, setSession } from './session';
 
-/** Trailing slashes trimmed so `${base}${path}` never doubles up. Defaults to local ecolife-server (:4000). */
-export const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1').replace(
-  /\/+$/,
-  '',
-);
+const CONFIGURED_BASE = (process.env.NEXT_PUBLIC_API_URL || '/api').replace(/\/+$/, '');
+
+/** Loopback in any of its spellings, with or without a port. */
+const LOOPBACK = /^https?:\/\/(?:localhost|127\.0\.0\.1|\[::1\])(?::\d+)?(?:[/?#]|$)/;
+
+/**
+ * Where the browser sends API calls.
+ *
+ * Defaults to `/api` — the same-origin route handlers, which forward to the
+ * server with cookies attached. That default is correct in every
+ * environment, which a hardcoded host never is: this file briefly defaulted
+ * to `http://localhost:4000/api/v1`, and because `NEXT_PUBLIC_*` is inlined
+ * at BUILD time, the deployed bundle told every visitor's browser to call
+ * their own machine. It fails as NETWORK_ERROR, and over https it is
+ * blocked as mixed content before it even gets that far.
+ *
+ * The loopback guard is the second line of defence: a build arg pointing at
+ * localhost is only ever meaningful when the page itself is on localhost.
+ * Anywhere else it is a misconfiguration, so fall back rather than ship a
+ * site that cannot talk to anything.
+ */
+function resolveBase(): string {
+  if (typeof window === 'undefined') return CONFIGURED_BASE;
+  if (!LOOPBACK.test(CONFIGURED_BASE)) return CONFIGURED_BASE;
+  if (LOOPBACK.test(window.location.origin)) return CONFIGURED_BASE;
+
+  console.warn(
+    `[api] NEXT_PUBLIC_API_URL is "${CONFIGURED_BASE}" but this page is served from ` +
+      `${window.location.origin}. A visitor's browser cannot reach your localhost. ` +
+      'Falling back to the same-origin /api proxy. Set it as a Dokploy BUILD ARG, ' +
+      'or leave it empty.',
+  );
+  return '/api';
+}
+
+export const API_BASE = resolveBase();
 
 /**
  * Fallback bearer token used ONLY while pointing at the local Prism mock

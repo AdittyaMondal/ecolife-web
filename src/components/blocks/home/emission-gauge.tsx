@@ -3,6 +3,19 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 
+/**
+ * Polar to cartesian, with y inverted because SVG counts downwards.
+ *
+ * Module scope, not component scope: defined inside, it is a new function
+ * on every render, so a `useMemo` that uses it either omits it (and goes
+ * stale) or includes it (and never memoises). Pure geometry has no reason
+ * to be recreated per render.
+ */
+function polarToCartesian(cx: number, cy: number, angleDeg: number, radius: number) {
+  const angleRad = (angleDeg * Math.PI) / 180;
+  return { x: cx + radius * Math.cos(angleRad), y: cy - radius * Math.sin(angleRad) };
+}
+
 export interface EmissionGaugeProps {
   currentKg: number;
   baselineKg: number;
@@ -18,7 +31,9 @@ export function EmissionGauge({
   currentKg,
   baselineKg,
   className,
-  logged = false,
+  // Part of the public props and passed by callers, but the gauge renders
+  // the same either way — the "inferred" treatment lives in HeroToday.
+  logged: _logged = false,
 }: EmissionGaugeProps) {
   const [mounted, setMounted] = React.useState(false);
 
@@ -48,18 +63,11 @@ export function EmissionGauge({
   const baselineAngle = startAngle - baselineRatio * totalSweep;
 
   // Polar to Cartesian conversion
-  const polarToCartesian = (angleDeg: number, radius: number) => {
-    const angleRad = (angleDeg * Math.PI) / 180;
-    return {
-      x: cx + radius * Math.cos(angleRad),
-      y: cy - radius * Math.sin(angleRad),
-    };
-  };
 
   // SVG arc path generator
   const describeArc = (startDeg: number, endDeg: number, radius: number) => {
-    const start = polarToCartesian(startDeg, radius);
-    const end = polarToCartesian(endDeg, radius);
+    const start = polarToCartesian(cx, cy, startDeg, radius);
+    const end = polarToCartesian(cx, cy, endDeg, radius);
     const sweepFlag = 1; // clockwise in screen space when going from larger angle to smaller
     const largeArcFlag = Math.abs(startDeg - endDeg) > 180 ? 1 : 0;
     return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArcFlag} ${sweepFlag} ${end.x} ${end.y}`;
@@ -73,9 +81,9 @@ export function EmissionGauge({
       const ratio = i / count;
       const angle = startAngle - ratio * totalSweep;
       const val = ratio * maxKg;
-      const inner = polarToCartesian(angle, r - 6);
-      const outer = polarToCartesian(angle, r + 4);
-      const labelPos = polarToCartesian(angle, r - 20);
+      const inner = polarToCartesian(cx, cy, angle, r - 6);
+      const outer = polarToCartesian(cx, cy, angle, r + 4);
+      const labelPos = polarToCartesian(cx, cy, angle, r - 20);
 
       items.push({
         id: i,
@@ -108,8 +116,8 @@ export function EmissionGauge({
   const isNormal = Math.abs(delta) < 0.1;
   const isHigh = delta > 0.1;
 
-  const baselineMarkerPos = polarToCartesian(baselineAngle, r + 9);
-  const baselineInnerPos = polarToCartesian(baselineAngle, r - 8);
+  const baselineMarkerPos = polarToCartesian(cx, cy, baselineAngle, r + 9);
+  const baselineInnerPos = polarToCartesian(cx, cy, baselineAngle, r - 8);
 
   return (
     <div className={cn('relative flex flex-col items-center select-none', className)}>
