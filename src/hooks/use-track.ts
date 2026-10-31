@@ -1,5 +1,5 @@
 import { queryOptions, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api } from '@/lib/fetcher';
+import { api, qs } from '@/lib/fetcher';
 import { qk } from '@/lib/query-keys';
 import type { components } from '@/types/generated/api';
 
@@ -8,6 +8,8 @@ export type TrackToday = components['schemas']['TrackToday'];
 export type DailyAnswers = components['schemas']['DailyAnswers'];
 export type LogResult = components['schemas']['LogResult'];
 export type Trip = components['schemas']['Trip'];
+export type HistoryPoint = components['schemas']['HistoryPoint'];
+export type TrackGranularity = 'day' | 'week' | 'month';
 
 /**
  * A trip row in the form, with a client-only id.
@@ -25,6 +27,20 @@ export const trackTodayQuery = () =>
     staleTime: 30_000,
   });
 
+export const trackHistoryQuery = (
+  from: string,
+  to: string,
+  granularity: TrackGranularity = 'day',
+) =>
+  queryOptions({
+    queryKey: qk.trackHistoryRange(from, to, granularity),
+    queryFn: () =>
+      api
+        .get<{ points: HistoryPoint[] }>(`/track/history${qs({ from, to, granularity })}`)
+        .then((r) => r.points),
+    staleTime: 60_000,
+  });
+
 /**
  * Submitting the daily log — the core loop.
  *
@@ -40,8 +56,18 @@ export function useSubmitLog() {
   const qc = useQueryClient();
   return useMutation({
     mutationKey: ['track', 'submit'],
-    mutationFn: (input: { logDate: string; answers: DailyAnswers }) =>
-      api.post<LogResult>('/track/logs', { ...input, clientLogId: crypto.randomUUID() }),
+    mutationFn: (input: { logDate: string; answers: DailyAnswers; existingLogId?: number }) => {
+      if (input.existingLogId !== undefined) {
+        return api.patch<LogResult>(`/track/logs/${input.existingLogId}`, {
+          answers: input.answers,
+        });
+      }
+      return api.post<LogResult>('/track/logs', {
+        logDate: input.logDate,
+        answers: input.answers,
+        clientLogId: crypto.randomUUID(),
+      });
+    },
     onSuccess: () => {
       // Home shows today's number, the streak and the wallet; all three moved.
       qc.invalidateQueries({ queryKey: qk.home() });
@@ -49,6 +75,7 @@ export function useSubmitLog() {
       qc.invalidateQueries({ queryKey: qk.trackHistory() });
       qc.invalidateQueries({ queryKey: qk.goals() });
       qc.invalidateQueries({ queryKey: qk.leaderboard() });
+      qc.invalidateQueries({ queryKey: qk.me() });
     },
   });
 }

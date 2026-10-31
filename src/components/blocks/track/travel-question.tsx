@@ -1,4 +1,6 @@
 import { Plus, RotateCcw, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input, Select } from '@/components/ui/input';
 import type { DailyAnswers, Trip, TripRow } from '@/hooks/use-track';
 
 export interface TravelQuestionProps {
@@ -58,7 +60,7 @@ export function TravelQuestion({ trips, onChange, defaults }: TravelQuestionProp
   };
 
   return (
-    <fieldset className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
+    <fieldset className="rounded-lg border border-border bg-card p-4">
       <legend className="px-1 text-base font-semibold text-foreground">
         1. How did you get around today?
       </legend>
@@ -66,26 +68,22 @@ export function TravelQuestion({ trips, onChange, defaults }: TravelQuestionProp
         Add each trip taken today. Leaving this empty means you did not travel.
       </p>
 
-      {/* Prominent "Same as usual" action */}
-      <div className="mt-4 rounded-lg border border-primary/20 bg-secondary/60 p-3 sm:flex sm:items-center sm:justify-between sm:gap-4">
-        <div className="text-xs text-muted-foreground sm:text-sm">
-          <span className="font-medium text-foreground">Default commute: </span>
+      {/* Concentric "Same as usual" banner: outer rounded-sm (12px), p-1 (4px), inner button rounded-xs (8px) */}
+      <div className="mt-4 flex flex-col justify-between gap-2 rounded-sm border border-tertiary/40 bg-accent p-3 sm:flex-row sm:items-center">
+        <div className="text-xs text-accent-foreground sm:text-sm">
+          <span className="font-semibold">Default commute: </span>
           <span>{defaultSummary}</span>
         </div>
-        <button
-          type="button"
-          onClick={handleApplyDefaults}
-          className="mt-2.5 inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-xs transition hover:bg-eco-700 hover:text-eco-50 sm:mt-0 sm:w-auto dark:hover:bg-eco-300 dark:hover:text-eco-950"
-        >
-          <RotateCcw className="size-4 shrink-0" aria-hidden="true" />
+        <Button type="button" variant="secondary" size="sm" onClick={handleApplyDefaults}>
+          <RotateCcw className="size-3.5 shrink-0" aria-hidden="true" />
           <span>Same as usual</span>
-        </button>
+        </Button>
       </div>
 
       {/* Trips list */}
-      <div className="mt-4 space-y-3">
+      <div className="mt-4 space-y-2.5">
         {trips.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-border py-4 text-center text-sm text-muted-foreground">
+          <div className="rounded-sm border border-dashed border-border py-4 text-center text-sm text-muted-foreground">
             No travel logged today (0 km).
           </div>
         ) : (
@@ -94,24 +92,24 @@ export function TravelQuestion({ trips, onChange, defaults }: TravelQuestionProp
             return (
               <div
                 key={trip._id}
-                className="flex flex-col gap-2 rounded-lg border border-border bg-background p-3 sm:flex-row sm:items-center sm:gap-3"
+                className="flex flex-col gap-2 rounded-sm border border-border bg-muted/50 p-2 sm:flex-row sm:items-center"
               >
                 <div className="flex-1">
                   <label htmlFor={`trip-mode-${idx}`} className="sr-only">
                     Trip {idx + 1} transport mode
                   </label>
-                  <select
+                  <Select
                     id={`trip-mode-${idx}`}
                     value={trip.mode}
                     onChange={(e) => handleModeChange(idx, e.target.value as Trip['mode'])}
-                    className="min-h-11 w-full rounded-lg border border-input bg-card px-3 py-2 text-sm text-foreground focus-visible:outline-2 focus-visible:outline-ring"
+                    className="rounded-xs"
                   >
                     {TRAVEL_MODES.map((m) => (
                       <option key={m.value} value={m.value}>
                         {m.label}
                       </option>
                     ))}
-                  </select>
+                  </Select>
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -119,7 +117,7 @@ export function TravelQuestion({ trips, onChange, defaults }: TravelQuestionProp
                     <label htmlFor={`trip-km-${idx}`} className="sr-only">
                       Trip {idx + 1} distance in kilometres
                     </label>
-                    <input
+                    <Input
                       id={`trip-km-${idx}`}
                       type="number"
                       min="0"
@@ -127,10 +125,10 @@ export function TravelQuestion({ trips, onChange, defaults }: TravelQuestionProp
                       disabled={isWfh}
                       value={isWfh ? 0 : trip.km}
                       onChange={(e) => handleKmChange(idx, e.target.value)}
-                      className="min-h-11 w-24 rounded-lg border border-input bg-card px-3 pr-8 py-2 text-sm tabular-nums text-foreground focus-visible:outline-2 focus-visible:outline-ring disabled:opacity-50"
+                      className="tabular w-28 rounded-xs pr-9"
                     />
                     <span
-                      className="pointer-events-none absolute right-2.5 text-xs text-muted-foreground"
+                      className="pointer-events-none absolute right-3 text-xs text-muted-foreground"
                       aria-hidden="true"
                     >
                       km
@@ -141,7 +139,7 @@ export function TravelQuestion({ trips, onChange, defaults }: TravelQuestionProp
                     type="button"
                     onClick={() => handleRemoveTrip(idx)}
                     aria-label={`Remove trip ${idx + 1}`}
-                    className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-border bg-card text-muted-foreground transition hover:border-destructive/40 hover:text-destructive"
+                    className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xs border border-border bg-card text-muted-foreground transition hover:border-destructive/40 hover:text-destructive"
                   >
                     <Trash2 className="size-4" aria-hidden="true" />
                   </button>
@@ -151,14 +149,10 @@ export function TravelQuestion({ trips, onChange, defaults }: TravelQuestionProp
           })
         )}
 
-        <button
-          type="button"
-          onClick={handleAddTrip}
-          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg border border-dashed border-input bg-card px-4 py-2 text-sm font-medium text-foreground transition hover:bg-secondary/60 sm:w-auto"
-        >
+        <Button type="button" variant="outline" onClick={handleAddTrip}>
           <Plus className="size-4" aria-hidden="true" />
           <span>Add another trip</span>
-        </button>
+        </Button>
       </div>
     </fieldset>
   );

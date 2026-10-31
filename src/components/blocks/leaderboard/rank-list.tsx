@@ -1,7 +1,10 @@
 import { Flame } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
 import type { LeaderboardRow } from '@/hooks/use-leaderboard';
+import { initials } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
 export interface RankListProps {
@@ -11,96 +14,101 @@ export interface RankListProps {
 export function RankList({ rows }: RankListProps) {
   if (rows.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+      <Card className="p-6 text-center text-sm text-muted-foreground">
         No additional rankings in this view.
-      </div>
+      </Card>
     );
   }
 
   return (
-    <div className="space-y-2">
-      <h2 className="text-sm font-semibold tracking-tight text-foreground">Rankings</h2>
-      <ol className="divide-y divide-border rounded-xl border border-border bg-card shadow-sm">
+    <Card className="p-4">
+      <div className="mb-3 flex items-center justify-between">
+        <h2 className="text-sm font-bold tracking-tight text-foreground">All Ranked Members</h2>
+        <span className="text-xs text-muted-foreground">{rows.length} more</span>
+      </div>
+
+      {/* Concentric rows: Card rounded-lg (28px) + p-4 (16px) -> row rounded-sm (12px) + p-2 (8px) -> avatar rounded-xs (8px) */}
+      <ol className="space-y-2">
         {rows.map((row) => {
+          const profileHref = row.isMe ? '/profile' : `/users/${row.id}`;
           return (
-            <li
-              key={row.id}
-              className={cn(
-                'flex items-center justify-between p-3 sm:p-4 transition hover:bg-secondary/40',
-                row.isMe &&
-                  'bg-eco-50/90 font-medium dark:bg-eco-950/40 border-l-4 border-l-primary',
-              )}
-            >
-              {/* Rank and User Profile Link */}
+            <li key={row.id}>
               <Link
-                href="/profile"
+                href={profileHref}
                 aria-label={`View ${row.name}'s profile, ranked #${row.rank}`}
-                className="flex min-h-11 flex-1 min-w-0 items-center gap-3 pr-2"
+                className={cn(
+                  'flex min-h-12 items-center justify-between gap-3 rounded-sm border p-2 transition',
+                  row.isMe
+                    ? 'border-primary bg-accent/50 font-semibold'
+                    : 'border-border bg-muted/30 hover:border-primary/40 hover:bg-muted/70',
+                )}
               >
-                {/* Rank number */}
-                <span className="w-8 shrink-0 text-center text-sm font-bold tabular-nums text-muted-foreground">
-                  #{row.rank}
-                </span>
+                <div className="flex min-w-0 flex-1 items-center gap-3">
+                  {/* Rank tile */}
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-xs bg-card text-xs font-bold tabular-nums text-muted-foreground border border-border">
+                    #{row.rank}
+                  </span>
 
-                {/* Avatar */}
-                <div
-                  className={cn(
-                    'flex size-10 shrink-0 items-center justify-center rounded-full border border-border bg-muted text-xs font-semibold uppercase text-foreground',
-                    row.isMe && 'border-primary ring-1 ring-primary/40',
-                  )}
-                >
-                  {row.avatarUrl ? (
-                    <Image
-                      src={row.avatarUrl}
-                      alt=""
-                      width={40}
-                      height={40}
-                      // unoptimized: the avatar bucket has no remotePatterns entry yet, and
-                      // these are 40px. Revisit with the uploads ticket.
-                      unoptimized
-                      className="size-full rounded-full object-cover"
-                    />
-                  ) : (
-                    row.name.slice(0, 2)
-                  )}
-                </div>
+                  {/* Avatar tile */}
+                  <div
+                    className={cn(
+                      'flex size-9 shrink-0 items-center justify-center rounded-xs border text-xs font-bold uppercase',
+                      row.isMe
+                        ? 'border-primary bg-primary text-primary-foreground'
+                        : 'border-border bg-card text-foreground',
+                    )}
+                  >
+                    {row.avatarUrl ? (
+                      <Image
+                        src={row.avatarUrl}
+                        alt=""
+                        width={36}
+                        height={36}
+                        unoptimized
+                        className="size-full rounded-xs object-cover"
+                      />
+                    ) : (
+                      initials(row.name)
+                    )}
+                  </div>
 
-                {/* Name and Location */}
-                <div className="flex min-w-0 flex-col">
-                  <div className="flex items-center gap-1.5">
-                    <span className="truncate text-sm font-semibold text-foreground">
-                      {row.name}
-                    </span>
-                    {row.isMe && (
-                      <span className="shrink-0 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-bold text-primary-foreground">
-                        You
+                  {/* Name & City */}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <span className="truncate text-sm font-semibold text-foreground">
+                        {row.name}
+                      </span>
+                      {row.isMe && <Badge tone="primary">You</Badge>}
+                    </div>
+                    {row.city && (
+                      <span className="block truncate text-xs text-muted-foreground">
+                        {row.city}
                       </span>
                     )}
                   </div>
-                  {row.city && (
-                    <span className="truncate text-xs text-muted-foreground">{row.city}</span>
-                  )}
+                </div>
+
+                {/* Stats: Streak & Points */}
+                <div className="flex shrink-0 items-center gap-3 pr-1 text-right">
+                  <div className="hidden items-center gap-1 rounded-xs bg-card px-2 py-1 text-xs font-medium text-positive border border-border sm:flex">
+                    <Flame className="size-3.5 shrink-0" aria-hidden="true" />
+                    <span className="tabular-nums">{row.currentStreak}d</span>
+                  </div>
+
+                  <div className="min-w-16">
+                    <span className="block text-sm font-bold tabular-nums text-foreground">
+                      {row.pointsTotal.toLocaleString()}
+                    </span>
+                    <span className="block text-[10px] uppercase tracking-wider text-muted-foreground">
+                      pts
+                    </span>
+                  </div>
                 </div>
               </Link>
-
-              {/* Stats: Streak and Points */}
-              <div className="flex shrink-0 items-center gap-3 pl-2 text-right">
-                <div className="hidden sm:flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400">
-                  <Flame className="size-3.5 shrink-0" aria-hidden="true" />
-                  <span className="tabular-nums">{row.currentStreak}d</span>
-                </div>
-
-                <div className="min-w-16">
-                  <span className="block text-sm font-semibold tabular-nums text-foreground">
-                    {row.pointsTotal.toLocaleString()}
-                  </span>
-                  <span className="block text-[10px] text-muted-foreground">pts</span>
-                </div>
-              </div>
             </li>
           );
         })}
       </ol>
-    </div>
+    </Card>
   );
 }

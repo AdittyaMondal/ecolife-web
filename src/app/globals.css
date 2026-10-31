@@ -4,55 +4,162 @@
    not by prefers-color-scheme, so the user's choice always wins. */
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* ════════════════════════════════════════════════════════════════════════════
+   THE GEOMETRIC SYSTEM — read DESIGN.md before touching anything in here.
+
+   One base unit (4px). Four insets. Five radii. Every radius is the radius of
+   the thing it contains PLUS the inset between them, so corners are always
+   concentric:
+
+       outer radius = inner radius + inset
+
+       xs  8   ── smallest: thumbs, badges, tiles inside a control
+       sm 12   = xs  8 + 4   controls: buttons, inputs, rows, wells
+       md 20   = sm 12 + 8   media and sub-panels inset 8 from a card
+       lg 28   = sm 12 + 16  cards        (inset 16 → controls)
+                 = md 20 + 8  media cards (inset 8  → media)
+       xl 36   = sm 12 + 24  feature surfaces, dialogs (inset 24 → controls)
+
+   Utilities are generated from these, so `rounded-lg` IS the card radius and
+   `p-4` IS the card inset. Nothing else is allowed — no rounded-[13px].
+   ════════════════════════════════════════════════════════════════════════════ */
+
 @theme {
-  /* ── The eco scale — EcoLife's green identity. Primary is eco-600. ───────── */
-  --color-eco-50: #f0fdf4;
-  --color-eco-100: #dcfce7;
-  --color-eco-200: #bbf7d0;
-  --color-eco-300: #86efac;
-  --color-eco-400: #4ade80;
-  --color-eco-500: #22c55e;
-  --color-eco-600: #16a34a;
-  --color-eco-700: #15803d;
-  --color-eco-800: #166534;
-  --color-eco-900: #14532d;
-  --color-eco-950: #052e16;
+  /* ── Reset Tailwind's radius scale to ours alone ────────────────────────── */
+  --radius-*: initial;
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 28px;
+  --radius-xl: 36px;
+  --radius-full: 9999px;
+
+  /* Base unit. `p-1` = 4, `p-2` = 8, `p-4` = 16, `p-6` = 24. */
+  --spacing: 4px;
+
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* ── Lime — Primary #A8DB36, Tertiary #83C43C ────────────────────────────── */
+  --color-lime-50: #f6fbe7;
+  --color-lime-100: #ebf6c9;
+  --color-lime-200: #d9ee98;
+  --color-lime-300: #c4e465;
+  --color-lime-400: #a8db36; /* PRIMARY */
+  --color-lime-500: #83c43c; /* TERTIARY */
+  --color-lime-600: #659a2b;
+  --color-lime-700: #4d7522;
+  --color-lime-800: #3a581c;
+  --color-lime-900: #2b4116;
+
+  /* ── Forest — Secondary #244D36 ──────────────────────────────────────────── */
+  --color-forest-50: #eef4f0;
+  --color-forest-100: #d3e4d9;
+  --color-forest-200: #a9c9b5;
+  --color-forest-300: #78a68a;
+  --color-forest-400: #4f8264;
+  --color-forest-500: #36664a;
+  --color-forest-600: #2c5940;
+  --color-forest-700: #244d36; /* SECONDARY */
+  --color-forest-800: #1b3b29;
+  --color-forest-900: #132a1d;
+
+  /* ── Neutral — #202820, a green-grey ─────────────────────────────────────── */
+  --color-neutral-0: #ffffff;
+  --color-neutral-50: #f5f7f2;
+  --color-neutral-100: #ebeee6;
+  --color-neutral-200: #d9ded3;
+  --color-neutral-300: #bcc4b5;
+  --color-neutral-400: #949d8c;
+  --color-neutral-500: #6e7767;
+  --color-neutral-600: #535b4e;
+  --color-neutral-700: #3b423a;
+  --color-neutral-800: #2a312a;
+  --color-neutral-900: #202820; /* NEUTRAL */
+  --color-neutral-950: #151a15;
+
+  --animate-fade-in: fade-in 240ms cubic-bezier(0.2, 0, 0, 1);
+  --animate-rise: rise 320ms cubic-bezier(0.2, 0, 0, 1);
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
 
 /* ── Semantic tokens — light (default) ────────────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #052e16;
+  --background: #f5f7f2;
+  --foreground: #202820;
   --card: #ffffff;
-  --card-foreground: #052e16;
-  --primary: #16a34a;
-  --primary-foreground: #052e16;
-  --secondary: #f0fdf4;
-  --muted: #f1f5f3;
-  --muted-foreground: #4b5a53;
-  --accent: #dcfce7;
-  --border: #dfe5e2;
-  --input: #7d8d85;
-  --ring: #16a34a;
-  --destructive: #b91c1c;
+  --card-foreground: #202820;
+  --muted: #ebeee6;
+  --muted-foreground: #535b4e;
+  --border: #d9ded3;
+  --input: #7c8574;
+
+  --primary: #a8db36;
+  --primary-foreground: #202820;
+  --secondary: #244d36;
+  --secondary-foreground: #f6fbe7;
+  --tertiary: #83c43c;
+  --tertiary-foreground: #202820;
+
+  --accent: #ebf6c9;
+  --accent-foreground: #244d36;
+  /* Text-safe green for links and positive numbers on light surfaces. */
+  --positive: #3a581c;
+  --ring: #244d36;
+
+  --destructive: #b42318;
+  --destructive-foreground: #ffffff;
+  --warning: #9a5b00;
+  --warning-surface: #fff4dc;
+  --danger-surface: #fdecea;
 }
 
 /* ── Semantic tokens — dark ───────────────────────────────────────────────── */
 .dark {
-  --background: #0a1410;
-  --foreground: #ecfdf3;
-  --card: #11201a;
-  --card-foreground: #ecfdf3;
-  --primary: #4ade80;
-  --primary-foreground: #052e16;
-  --secondary: #16251e;
-  --muted: #16251e;
-  --muted-foreground: #9fb3a9;
-  --accent: #1d3b2c;
-  --border: #22362c;
-  --input: #637a6e;
-  --ring: #4ade80;
-  --destructive: #f87171;
+  --background: #151a15;
+  --foreground: #eef2ea;
+  --card: #202820;
+  --card-foreground: #eef2ea;
+  --muted: #2a312a;
+  --muted-foreground: #a7b09f;
+  --border: #343c33;
+  --input: #6e7767;
+
+  --primary: #a8db36;
+  --primary-foreground: #202820;
+  --secondary: #244d36;
+  --secondary-foreground: #ebf6c9;
+  --tertiary: #83c43c;
+  --tertiary-foreground: #202820;
+
+  --accent: #2b3a22;
+  --accent-foreground: #d9ee98;
+  --positive: #a8db36;
+  --ring: #a8db36;
+
+  --destructive: #f97066;
+  --destructive-foreground: #202820;
+  --warning: #f5b94a;
+  --warning-surface: #3a2e14;
+  --danger-surface: #3b1d1a;
 }
 
 /* Expose the semantic tokens as Tailwind colour utilities (bg-card, text-muted-foreground, …). */
@@ -61,16 +168,25 @@
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-tertiary: var(--tertiary);
+  --color-tertiary-foreground: var(--tertiary-foreground);
   --color-accent: var(--accent);
-  --color-border: var(--border);
-  --color-input: var(--input);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-positive: var(--positive);
   --color-ring: var(--ring);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-warning: var(--warning);
+  --color-warning-surface: var(--warning-surface);
+  --color-danger-surface: var(--danger-surface);
 }
 
 @layer base {
@@ -78,9 +194,15 @@
     border-color: var(--border);
   }
 
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
   body {
     background-color: var(--background);
     color: var(--foreground);
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "cv11";
     -webkit-font-smoothing: antialiased;
   }
 
@@ -88,6 +210,18 @@
   :focus-visible {
     outline: 2px solid var(--ring);
     outline-offset: 2px;
+  }
+
+  /* Native modal dialogs: stop scroll gestures chaining to the page behind.
+     No overflow:hidden on <body> — that removes the scrollbar and shifts layout. */
+  dialog:modal {
+    overscroll-behavior: contain;
+  }
+  dialog::backdrop {
+    overflow: hidden;
+    overscroll-behavior: contain;
+    background: color-mix(in srgb, var(--color-neutral-950) 60%, transparent);
+    backdrop-filter: blur(4px);
   }
 
   /* !important is deliberate and the only way this works: the reset has to beat
@@ -102,5 +236,20 @@
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
+  }
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@utility pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom), 0px);
+}
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
   }
 }

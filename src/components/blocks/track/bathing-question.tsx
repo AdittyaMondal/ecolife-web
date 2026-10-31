@@ -22,7 +22,7 @@ const BATH_OPTIONS = [
 
 export function BathingQuestion({ value, onChange }: BathingQuestionProps) {
   return (
-    <fieldset className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
+    <fieldset className="rounded-lg border border-border bg-card p-4">
       <legend className="px-1 text-base font-semibold text-foreground">
         4. How did you bathe?
       </legend>

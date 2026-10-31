@@ -9,6 +9,11 @@ export interface ChipProps extends React.ButtonHTMLAttributes<HTMLButtonElement>
   children: React.ReactNode;
 }
 
+/**
+ * Geometric Consistency:
+ * Chips inside a `rounded-lg` (28px) card with `p-4` (16px) inset use `rounded-sm` (12px),
+ * matching all other controls on the same surface level.
+ */
 export const Chip = React.forwardRef<HTMLButtonElement, ChipProps>(
   ({ className, selected = false, onToggle, icon, children, disabled, ...props }, ref) => {
     return (
@@ -21,10 +26,10 @@ export const Chip = React.forwardRef<HTMLButtonElement, ChipProps>(
         disabled={disabled}
         onClick={onToggle}
         className={cn(
-          'inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition active:scale-[0.98]',
+          'inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-sm px-4 py-2 text-sm font-medium transition active:scale-[0.98]',
           selected
-            ? 'border-2 border-primary bg-primary text-primary-foreground shadow-xs'
-            : 'border border-input bg-card text-foreground hover:bg-secondary/70 hover:border-primary/50',
+            ? 'border border-primary bg-primary font-semibold text-primary-foreground'
+            : 'border border-input bg-card text-foreground hover:border-tertiary hover:bg-accent/50',
           disabled && 'cursor-not-allowed opacity-40',
           className,
         )}

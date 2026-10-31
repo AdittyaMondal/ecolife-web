@@ -51,14 +51,14 @@ export function WasteQuestion({ value = [], onChange }: WasteQuestionProps) {
   };
 
   return (
-    <fieldset className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
+    <fieldset className="rounded-lg border border-border bg-card p-4">
       <legend className="px-1 text-base font-semibold text-foreground">5. Waste today?</legend>
       <p className="mt-1 text-sm text-muted-foreground">
         Select all actions you took today. Selecting &ldquo;None of these&rdquo; clears the other
         options.
       </p>
 
-      <div className="mt-4 flex flex-wrap gap-2.5">
+      <div className="mt-4 flex flex-wrap gap-2">
         {WASTE_ITEMS.map((item) => {
           const isSelected = value.includes(item.value);
           return (

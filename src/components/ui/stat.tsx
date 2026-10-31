@@ -18,7 +18,7 @@ export const Stat = React.forwardRef<HTMLDivElement, StatProps>(
       <div ref={ref} className={cn('flex flex-col', className)} {...props}>
         <span className="text-sm font-medium text-muted-foreground">{label}</span>
         <div className="mt-1 flex items-baseline gap-2">
-          <span className="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+          <span className="tabular text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
             {value}
           </span>
         </div>
@@ -28,7 +28,7 @@ export const Stat = React.forwardRef<HTMLDivElement, StatProps>(
             className={cn(
               'mt-1 flex items-center gap-1 text-sm font-medium',
               trend.isPositive
-                ? 'text-eco-600 dark:text-eco-400'
+                ? 'text-positive'
                 : trend.direction === 'neutral'
                   ? 'text-muted-foreground'
                   : 'text-destructive',

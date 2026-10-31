@@ -9,7 +9,7 @@ export interface MealsQuestionProps {
 
 export function MealsQuestion({ vegMeals, nonVegMeals, veganMeals, onChange }: MealsQuestionProps) {
   return (
-    <fieldset className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
+    <fieldset className="rounded-lg border border-border bg-card p-4">
       <legend className="px-1 text-base font-semibold text-foreground">
         2. What did you eat today?
       </legend>
@@ -17,11 +17,10 @@ export function MealsQuestion({ vegMeals, nonVegMeals, veganMeals, onChange }: M
         Count each meal eaten today by dietary category.
       </p>
 
-      <div className="mt-4 divide-y divide-border">
-        {/* Vegetarian */}
-        <div className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mt-4 space-y-2">
+        <div className="flex flex-col gap-2 rounded-sm border border-border bg-muted/40 p-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <label htmlFor="stepper-veg-meals" className="text-sm font-medium text-foreground">
+            <label htmlFor="stepper-veg-meals" className="text-sm font-semibold text-foreground">
               Vegetarian meals
             </label>
             <p className="text-xs text-muted-foreground">Dairy, eggs, vegetables, grains</p>
@@ -36,10 +35,12 @@ export function MealsQuestion({ vegMeals, nonVegMeals, veganMeals, onChange }: M
           />
         </div>
 
-        {/* Non-Vegetarian */}
-        <div className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2 rounded-sm border border-border bg-muted/40 p-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <label htmlFor="stepper-non-veg-meals" className="text-sm font-medium text-foreground">
+            <label
+              htmlFor="stepper-non-veg-meals"
+              className="text-sm font-semibold text-foreground"
+            >
               Non-vegetarian meals
             </label>
             <p className="text-xs text-muted-foreground">Meat, poultry, seafood</p>
@@ -54,10 +55,9 @@ export function MealsQuestion({ vegMeals, nonVegMeals, veganMeals, onChange }: M
           />
         </div>
 
-        {/* Vegan */}
-        <div className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2 rounded-sm border border-border bg-muted/40 p-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <label htmlFor="stepper-vegan-meals" className="text-sm font-medium text-foreground">
+            <label htmlFor="stepper-vegan-meals" className="text-sm font-semibold text-foreground">
               Vegan meals
             </label>
             <p className="text-xs text-muted-foreground">100% plant-based, no animal products</p>

@@ -16,6 +16,11 @@ export interface StepperProps {
   'aria-describedby'?: string;
 }
 
+/**
+ * Concentric Stepper:
+ * Outer group is `rounded-sm` (12px) with `p-1` (4px) inset.
+ * Inner +/- buttons are `rounded-xs` (8px = 12px − 4px).
+ */
 export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
   (
     {
@@ -53,25 +58,28 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
         ref={ref}
         role="group"
         aria-label={label ? `${label} stepper` : 'Number stepper'}
-        className={cn('inline-flex items-center gap-2', className)}
+        className={cn(
+          'inline-flex items-center gap-1 rounded-sm border border-border bg-muted p-1',
+          className,
+        )}
       >
         <button
           type="button"
           onClick={handleDecrement}
           disabled={disabled || isMin}
           aria-label={`Decrease ${accessibleLabel}`}
-          className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-input bg-card text-foreground shadow-xs transition hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex min-h-9 min-w-9 items-center justify-center rounded-xs bg-card text-foreground transition hover:bg-accent hover:text-accent-foreground disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Minus className="size-4" aria-hidden="true" />
         </button>
 
-        <div className="flex min-w-12 flex-col items-center justify-center px-1">
+        <div className="flex min-w-12 flex-col items-center justify-center px-2">
           <span
             id={id}
             aria-live="polite"
             aria-atomic="true"
             aria-describedby={ariaDescribedBy}
-            className="text-lg font-semibold tabular-nums text-foreground"
+            className="tabular text-base font-semibold text-foreground"
           >
             {value}
           </span>
@@ -83,7 +91,7 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
           onClick={handleIncrement}
           disabled={disabled || isMax}
           aria-label={`Increase ${accessibleLabel}`}
-          className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg border border-input bg-card text-foreground shadow-xs transition hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex min-h-9 min-w-9 items-center justify-center rounded-xs bg-card text-foreground transition hover:bg-accent hover:text-accent-foreground disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Plus className="size-4" aria-hidden="true" />
         </button>

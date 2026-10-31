@@ -18,13 +18,13 @@ export function GoalCard({ activeGoal }: GoalCardProps) {
         </CardHeader>
         <CardContent>
           <EmptyState
-            icon={<Target className="size-8 text-muted-foreground" aria-hidden="true" />}
+            icon={<Target className="size-6" aria-hidden="true" />}
             title="No active goal"
             description="Set a reduction target to stay accountable and earn bonus rewards."
             action={
               <Link
-                href="/track/goals"
-                className="inline-flex min-h-11 items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition hover:bg-eco-700 hover:text-eco-50 dark:hover:bg-eco-300 dark:hover:text-eco-950"
+                href="/track/goals/new"
+                className="inline-flex min-h-11 items-center justify-center rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-tertiary"
               >
                 Set your first goal
               </Link>
@@ -42,17 +42,17 @@ export function GoalCard({ activeGoal }: GoalCardProps) {
           <CardTitle id="active-goal-heading">Active goal</CardTitle>
           <Link
             href="/track/goals"
-            className="inline-flex min-h-11 items-center text-xs font-medium text-primary hover:underline"
+            className="inline-flex min-h-9 items-center text-xs font-semibold text-positive hover:underline"
           >
-            Manage goals
+            Manage goals →
           </Link>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 rounded-sm border border-border bg-muted/40 p-3">
           <div className="flex items-center justify-between text-sm">
-            <span className="font-medium text-foreground">{activeGoal.label}</span>
-            <span className="text-xs font-semibold text-foreground">
+            <span className="font-semibold text-foreground">{activeGoal.label}</span>
+            <span className="tabular text-xs font-semibold text-foreground">
               {Math.round(activeGoal.progressPct)}%
             </span>
           </div>
@@ -63,18 +63,18 @@ export function GoalCard({ activeGoal }: GoalCardProps) {
           />
         </div>
 
-        <div className="flex items-center justify-between border-t border-border pt-3 text-sm">
-          <span className="text-muted-foreground">
+        <div className="flex items-center justify-between text-sm">
+          <span className="tabular text-muted-foreground">
             {activeGoal.daysLeft} {activeGoal.daysLeft === 1 ? 'day' : 'days'} left
           </span>
 
           {activeGoal.onTrack ? (
-            <span className="flex items-center gap-1.5 font-medium text-eco-600 dark:text-eco-400">
+            <span className="flex items-center gap-1.5 font-semibold text-positive">
               <CheckCircle2 className="size-4 shrink-0" aria-hidden="true" />
               <span>On track</span>
             </span>
           ) : (
-            <span className="flex items-center gap-1.5 font-medium text-destructive">
+            <span className="flex items-center gap-1.5 font-semibold text-destructive">
               <AlertTriangle className="size-4 shrink-0" aria-hidden="true" />
               <span>Needs attention</span>
             </span>
