@@ -95,7 +95,26 @@ function isCrossSite(request: NextRequest): boolean {
 
   const origin = request.headers.get('origin');
   if (!origin) return false;
-  return origin !== new URL(request.url).origin;
+
+  /**
+   * Compare against the host the CLIENT addressed, not `request.url`.
+   *
+   * Behind a reverse proxy, `request.url` is the INTERNAL url — Traefik
+   * forwards to http://container:3000, so `new URL(request.url).origin` is
+   * `http://localhost:3000` and never matches the public origin a browser
+   * sends. Using it rejected every state-changing request on the deployed
+   * site as cross-site, while working perfectly in local dev where the two
+   * happen to be the same. `x-forwarded-host` is what the proxy sets to the
+   * public name; `host` covers the no-proxy case.
+   */
+  const expectedHost = request.headers.get('x-forwarded-host') ?? request.headers.get('host');
+  if (!expectedHost) return true;
+  try {
+    return new URL(origin).host !== expectedHost;
+  } catch {
+    // A malformed Origin is not something to wave through.
+    return true;
+  }
 }
 
 const SAFE_METHODS = new Set(['GET', 'HEAD']);
