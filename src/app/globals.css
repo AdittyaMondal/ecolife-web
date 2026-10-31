@@ -1,0 +1,106 @@
+@import "tailwindcss";
+
+/* Dark mode is driven by a `.dark` class on <html> (next-themes attribute="class"),
+   not by prefers-color-scheme, so the user's choice always wins. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* ── The eco scale — EcoLife's green identity. Primary is eco-600. ───────── */
+  --color-eco-50: #f0fdf4;
+  --color-eco-100: #dcfce7;
+  --color-eco-200: #bbf7d0;
+  --color-eco-300: #86efac;
+  --color-eco-400: #4ade80;
+  --color-eco-500: #22c55e;
+  --color-eco-600: #16a34a;
+  --color-eco-700: #15803d;
+  --color-eco-800: #166534;
+  --color-eco-900: #14532d;
+  --color-eco-950: #052e16;
+}
+
+/* ── Semantic tokens — light (default) ────────────────────────────────────── */
+:root {
+  --background: #ffffff;
+  --foreground: #052e16;
+  --card: #ffffff;
+  --card-foreground: #052e16;
+  --primary: #16a34a;
+  --primary-foreground: #052e16;
+  --secondary: #f0fdf4;
+  --muted: #f1f5f3;
+  --muted-foreground: #4b5a53;
+  --accent: #dcfce7;
+  --border: #dfe5e2;
+  --input: #7d8d85;
+  --ring: #16a34a;
+  --destructive: #b91c1c;
+}
+
+/* ── Semantic tokens — dark ───────────────────────────────────────────────── */
+.dark {
+  --background: #0a1410;
+  --foreground: #ecfdf3;
+  --card: #11201a;
+  --card-foreground: #ecfdf3;
+  --primary: #4ade80;
+  --primary-foreground: #052e16;
+  --secondary: #16251e;
+  --muted: #16251e;
+  --muted-foreground: #9fb3a9;
+  --accent: #1d3b2c;
+  --border: #22362c;
+  --input: #637a6e;
+  --ring: #4ade80;
+  --destructive: #f87171;
+}
+
+/* Expose the semantic tokens as Tailwind colour utilities (bg-card, text-muted-foreground, …). */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-destructive: var(--destructive);
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Accessibility baseline: a focus ring that is always visible, never removed. */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  /* !important is deliberate and the only way this works: the reset has to beat
+     Tailwind's own animation and transition utilities. biome.json turns
+     noImportantStyles off for this file alone. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

@@ -1,0 +1,33 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+
+# next.js
+/.next/
+/out/
+/build
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# generated from ../ecolife-server/openapi.json — run `pnpm gen:api`
+/src/types/generated/api.d.ts
+
+# env — .env.example is the only committed one
+.env*
+!.env.example
+
+# testing
+/coverage
+
+# misc
+.DS_Store
+*.pem
+.vercel
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+.pnpm-debug.log*
