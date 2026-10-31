@@ -9,6 +9,15 @@ export type DailyAnswers = components['schemas']['DailyAnswers'];
 export type LogResult = components['schemas']['LogResult'];
 export type Trip = components['schemas']['Trip'];
 
+/**
+ * A trip row in the form, with a client-only id.
+ *
+ * The travel question is a removable list. An array index as React key makes a
+ * deletion reuse the previous row's DOM node, so focus and caret land on the
+ * wrong input. `_id` never leaves the client — it is stripped before submit.
+ */
+export type TripRow = Trip & { _id: string };
+
 export const trackTodayQuery = () =>
   queryOptions({
     queryKey: qk.trackToday(),

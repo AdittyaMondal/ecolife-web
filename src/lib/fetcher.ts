@@ -16,13 +16,22 @@ export const API_BASE = (process.env.NEXT_PUBLIC_API_URL || '/api').replace(/\/+
  * otherwise makes every screen unviewable during Sprints 1-2. Prism accepts
  * any value, so this is a placeholder, not a credential.
  *
- * Guarded on NEXT_PUBLIC_API_URL containing a localhost mock port so it can
- * never attach to a real backend: a hardcoded token that reaches production is
- * a far worse bug than an unviewable dev screen. Delete this once login works.
+ * The fence is a WHITELIST of exact loopback hosts, anchored at both ends. The
+ * first version of this used `/localhost:40\d\d/` unanchored, which a URL like
+ * `https://evil.com/?x=localhost:4010` satisfies — it would have attached the
+ * token to a request leaving the machine. A hardcoded token reaching a real
+ * backend is a far worse bug than an unviewable dev screen. Ported from
+ * ecolife-mobile's token-store.ts, which got this right first.
+ *
+ * Delete this once login works.
  */
-const MOCK_BEARER = /localhost:40\d\d/.test(process.env.NEXT_PUBLIC_API_URL ?? '')
-  ? 'mock-only-not-a-credential'
-  : undefined;
+const LOOPBACK_MOCK_URL = /^https?:\/\/(?:localhost|127\.0\.0\.1)(?::40\d{2})(?:[/?#]|$)/;
+
+const MOCK_BEARER =
+  process.env.NODE_ENV !== 'production' &&
+  LOOPBACK_MOCK_URL.test(process.env.NEXT_PUBLIC_API_URL ?? '')
+    ? 'prism-mock-token'
+    : undefined;
 
 export class ApiError extends Error {
   readonly code: string;
