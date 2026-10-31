@@ -1,0 +1,20 @@
+# Keep the build context small and secrets out of it. `COPY . .` in the builder
+# stage would otherwise pull .env.local straight into an image layer, where it
+# stays recoverable even if a later layer removes it.
+
+.git
+.gitignore
+node_modules
+.next
+out
+coverage
+
+# Secrets — this is the important one, given COPY . .
+.env
+.env.*
+
+# Not needed to build or serve
+.github/
+*.md
+Dockerfile
+.dockerignore

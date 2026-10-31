@@ -76,3 +76,27 @@ response body is never shown to a user.
   `ecolife-mobile` mirrors. Change both repos together.
 - Mobile-first: designed at 360px, no horizontal scroll at 320px. WCAG 2.2 AA.
 - Recharts is bundled. Never a CDN script tag.
+
+## Docker / Dokploy
+
+Verified by building and running the image locally (31/10/2026): all routes
+answer 200, the landing page renders, it runs as non-root `nextjs` (uid 1001),
+and it is 294 MB. Requires `output: 'standalone'` in `next.config.ts`.
+
+```bash
+docker build -t ecolife-web --build-arg NEXT_PUBLIC_API_URL=https://api.example.com/api/v1 .
+docker run -p 3000:3000 ecolife-web
+```
+
+### The one that will definitely catch you
+
+**`NEXT_PUBLIC_*` is baked into the client bundle at BUILD time.** Setting
+`NEXT_PUBLIC_API_URL` as a *runtime* environment variable in Dokploy has no
+effect at all — the browser gets whatever was compiled in. It must be passed as
+a **build argument**, and changing it requires a rebuild, not a restart.
+
+In Dokploy: put it under **Build Args**, not Environment. If the deployed app
+tries to call `localhost:4010`, this is why.
+
+`API_URL_INTERNAL` is different — it is read server-side at runtime by
+`src/lib/api.ts`, so that one does belong in Environment.
