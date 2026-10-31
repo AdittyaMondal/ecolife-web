@@ -22,9 +22,9 @@ export function LeaderboardPeek({ leaderboard }: LeaderboardPeekProps) {
           <CardTitle id="leaderboard-heading">Leaderboard</CardTitle>
           <Link
             href="/leaderboard"
-            className="inline-flex min-h-11 items-center text-xs font-medium text-primary hover:underline"
+            className="inline-flex min-h-9 items-center text-xs font-semibold text-positive hover:underline"
           >
-            Full ranking
+            Full ranking →
           </Link>
         </div>
       </CardHeader>
@@ -35,26 +35,29 @@ export function LeaderboardPeek({ leaderboard }: LeaderboardPeekProps) {
             return (
               <li
                 key={user.id}
-                className="flex items-center justify-between rounded-lg p-2 text-sm transition hover:bg-secondary/40"
+                className="flex items-center justify-between rounded-sm border border-border bg-muted/40 p-2.5 text-sm transition hover:bg-accent/50"
               >
                 <div className="flex items-center gap-2.5">
-                  {/* role="img" so the medal emoji is announced as its meaning.
-                      aria-label is not supported on a bare span (role=generic). */}
                   <span
                     role="img"
-                    className="flex size-6 shrink-0 items-center justify-center text-base"
+                    className="flex size-7 shrink-0 items-center justify-center rounded-xs bg-card text-sm"
                     aria-label={`Rank ${user.rank}`}
                   >
                     {badge}
                   </span>
                   <div className="flex flex-col">
-                    <span className="font-medium text-foreground">{user.name}</span>
+                    <Link
+                      href={`/users/${user.id}`}
+                      className="font-semibold text-foreground hover:underline"
+                    >
+                      {user.name}
+                    </Link>
                     {user.city && (
                       <span className="text-xs text-muted-foreground">{user.city}</span>
                     )}
                   </div>
                 </div>
-                <span className="text-xs font-semibold text-foreground">
+                <span className="tabular text-xs font-semibold text-foreground">
                   {user.pointsTotal.toLocaleString()} pts
                 </span>
               </li>
@@ -62,16 +65,16 @@ export function LeaderboardPeek({ leaderboard }: LeaderboardPeekProps) {
           })}
         </ul>
 
-        <div className="border-t border-border pt-2.5">
-          <div className="flex items-center justify-between rounded-lg bg-secondary/70 p-2.5 px-3 text-sm">
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-primary">#{leaderboard.me.rank ?? '—'}</span>
-              <span className="font-medium text-foreground">You</span>
-            </div>
-            <span className="text-xs font-semibold text-foreground">
-              {leaderboard.me.pointsTotal.toLocaleString()} pts
+        <div className="flex items-center justify-between rounded-sm border border-tertiary/40 bg-accent p-3 text-sm text-accent-foreground">
+          <div className="flex items-center gap-2">
+            <span className="tabular rounded-xs bg-secondary px-2 py-0.5 text-xs font-semibold text-secondary-foreground">
+              #{leaderboard.me.rank ?? '—'}
             </span>
+            <span className="font-semibold">You</span>
           </div>
+          <span className="tabular text-xs font-semibold">
+            {leaderboard.me.pointsTotal.toLocaleString()} pts
+          </span>
         </div>
       </CardContent>
     </Card>

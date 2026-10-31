@@ -16,9 +16,15 @@ export interface SegmentedControlProps<T extends string | number> {
   disabled?: boolean;
   className?: string;
   label?: string;
+  fullWidth?: boolean;
   'aria-label'?: string;
 }
 
+/**
+ * Geometric Concentricity:
+ * Outer track is `rounded-sm` (12px) with `p-1` (4px) inset and `gap-1` (4px).
+ * Each inner segment is `rounded-xs` (8px = 12px − 4px).
+ */
 export function SegmentedControl<T extends string | number>({
   name,
   options,
@@ -27,6 +33,7 @@ export function SegmentedControl<T extends string | number>({
   disabled = false,
   className,
   label,
+  fullWidth = true,
   'aria-label': ariaLabel,
 }: SegmentedControlProps<T>) {
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -69,7 +76,8 @@ export function SegmentedControl<T extends string | number>({
       aria-label={label || ariaLabel || name}
       onKeyDown={handleKeyDown}
       className={cn(
-        'grid w-full auto-cols-fr grid-flow-col rounded-xl border border-input bg-muted/40 p-1 gap-1',
+        'grid auto-cols-fr grid-flow-col gap-1 rounded-sm border border-border bg-muted p-1',
+        fullWidth && 'w-full',
         className,
       )}
     >
@@ -91,10 +99,10 @@ export function SegmentedControl<T extends string | number>({
               if (!isDisabled) onChange(opt.value);
             }}
             className={cn(
-              'flex min-h-11 min-w-0 flex-1 items-center justify-center rounded-lg px-2.5 py-2 text-center text-sm transition',
+              'flex min-h-10 min-w-0 flex-1 items-center justify-center rounded-xs px-3 py-2 text-center text-sm transition',
               isSelected
-                ? 'bg-primary text-primary-foreground font-semibold shadow-xs'
-                : 'text-muted-foreground hover:bg-secondary/60 hover:text-foreground font-medium',
+                ? 'bg-primary font-semibold text-primary-foreground shadow-2xs'
+                : 'font-medium text-muted-foreground hover:bg-card/70 hover:text-foreground',
               isDisabled && 'cursor-not-allowed opacity-40',
             )}
           >

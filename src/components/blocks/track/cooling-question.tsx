@@ -7,7 +7,7 @@ export interface CoolingQuestionProps {
 }
 
 const AC_OPTIONS = [
-  { value: '0' as const, label: '0', ariaLabel: 'Zero hours of air conditioning' },
+  { value: '0' as const, label: '0 h', ariaLabel: 'Zero hours of air conditioning' },
   { value: '1_3' as const, label: '1–3 h', ariaLabel: 'One to three hours of air conditioning' },
   { value: '4_8' as const, label: '4–8 h', ariaLabel: 'Four to eight hours of air conditioning' },
   {
@@ -19,7 +19,7 @@ const AC_OPTIONS = [
 
 export function CoolingQuestion({ value, onChange }: CoolingQuestionProps) {
   return (
-    <fieldset className="rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
+    <fieldset className="rounded-lg border border-border bg-card p-4">
       <legend className="px-1 text-base font-semibold text-foreground">
         3. How long was the AC on?
       </legend>

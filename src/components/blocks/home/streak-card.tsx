@@ -1,4 +1,4 @@
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Flame } from 'lucide-react';
 import Link from 'next/link';
 import { Card } from '@/components/ui/card';
 import type { Home } from '@/hooks/use-home';
@@ -9,20 +9,20 @@ export interface StreakCardProps {
 
 export function StreakCard({ streak }: StreakCardProps) {
   return (
-    <Card aria-labelledby="streak-heading" className="p-0 sm:p-0">
+    <Card aria-labelledby="streak-heading" variant="media">
       <Link
         href="/track"
-        className="flex min-h-11 items-center justify-between rounded-xl p-4 transition hover:bg-secondary sm:p-5"
+        className="flex min-h-12 items-center justify-between rounded-md bg-muted/50 p-3 transition hover:bg-accent/60"
       >
         <div className="flex items-center gap-3">
-          <span className="text-2xl" role="img" aria-label="Fire emoji">
-            🔥
+          <span className="flex size-10 items-center justify-center rounded-sm bg-secondary text-primary">
+            <Flame className="size-5" aria-hidden="true" />
           </span>
           <div>
-            <h2 id="streak-heading" className="text-base font-medium text-foreground">
-              {streak.current}-day streak
+            <h2 id="streak-heading" className="tabular text-base font-semibold text-foreground">
+              {streak.current}-day logging streak
             </h2>
-            <p className="text-sm text-muted-foreground">
+            <p className="tabular text-xs text-muted-foreground">
               Personal best: {streak.longest} {streak.longest === 1 ? 'day' : 'days'}
             </p>
           </div>

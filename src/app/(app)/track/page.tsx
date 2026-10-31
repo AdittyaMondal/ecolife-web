@@ -1,87 +1,75 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { AlertCircle, ArrowRight, CheckCircle2, Loader2 } from 'lucide-react';
+import { Loader2, Plus, Target } from 'lucide-react';
 import Link from 'next/link';
 import * as React from 'react';
+import { GoalHistoryList } from '@/components/blocks/goals/goal-history-list';
+import { GoalProgressCard } from '@/components/blocks/goals/goal-progress-card';
 import { BathingQuestion } from '@/components/blocks/track/bathing-question';
 import { CoolingQuestion } from '@/components/blocks/track/cooling-question';
 import { MealsQuestion } from '@/components/blocks/track/meals-question';
 import { ResultSheet } from '@/components/blocks/track/result-sheet';
 import { TravelQuestion } from '@/components/blocks/track/travel-question';
 import { WasteQuestion } from '@/components/blocks/track/waste-question';
-import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorBanner } from '@/components/ui/error-banner';
+import { SegmentedControl } from '@/components/ui/segmented-control';
 import { Skeleton } from '@/components/ui/skeleton';
-import { type DailyAnswers, type TripRow, trackTodayQuery, useSubmitLog } from '@/hooks/use-track';
-import { ApiError } from '@/lib/fetcher';
+import { goalsQuery } from '@/hooks/use-goals';
+import {
+  type DailyAnswers,
+  type TrackGranularity,
+  type TripRow,
+  trackHistoryQuery,
+  trackTodayQuery,
+  useSubmitLog,
+} from '@/hooks/use-track';
+import { formatDate, todayYmd } from '@/lib/format';
 
 function TrackSkeletons() {
   return (
     <div className="space-y-6" aria-hidden="true">
-      {/* Question 1 Skeleton */}
-      <Card className="space-y-3 p-4 sm:p-5">
+      <Card className="space-y-3">
         <Skeleton className="h-5 w-64" />
         <Skeleton className="h-4 w-80" />
-        <Skeleton className="h-11 w-full rounded-lg" />
-        <Skeleton className="h-11 w-full rounded-lg" />
+        <Skeleton className="h-11 w-full" />
       </Card>
-
-      {/* Question 2 Skeleton */}
-      <Card className="space-y-4 p-4 sm:p-5">
+      <Card className="space-y-4">
         <Skeleton className="h-5 w-52" />
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <Skeleton className="h-4 w-32" />
-            <Skeleton className="h-11 w-32 rounded-lg" />
-          </div>
-          <div className="flex items-center justify-between">
-            <Skeleton className="h-4 w-36" />
-            <Skeleton className="h-11 w-32 rounded-lg" />
-          </div>
-          <div className="flex items-center justify-between">
-            <Skeleton className="h-4 w-28" />
-            <Skeleton className="h-11 w-32 rounded-lg" />
-          </div>
-        </div>
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-12 w-full" />
       </Card>
-
-      {/* Question 3 Skeleton */}
-      <Card className="space-y-3 p-4 sm:p-5">
+      <Card className="space-y-3">
         <Skeleton className="h-5 w-48" />
-        <Skeleton className="h-11 w-full rounded-lg" />
+        <Skeleton className="h-11 w-full" />
       </Card>
-
-      {/* Question 4 Skeleton */}
-      <Card className="space-y-3 p-4 sm:p-5">
-        <Skeleton className="h-5 w-40" />
-        <Skeleton className="h-11 w-full rounded-lg" />
-      </Card>
-
-      {/* Question 5 Skeleton */}
-      <Card className="space-y-3 p-4 sm:p-5">
-        <Skeleton className="h-5 w-36" />
-        <div className="flex flex-wrap gap-2">
-          <Skeleton className="h-11 w-32 rounded-full" />
-          <Skeleton className="h-11 w-36 rounded-full" />
-          <Skeleton className="h-11 w-32 rounded-full" />
-        </div>
-      </Card>
-
-      <Skeleton className="h-12 w-full rounded-lg" />
     </div>
   );
 }
 
 export default function TrackPage() {
   const { data, error, isPending, refetch, isFetching } = useQuery(trackTodayQuery());
+  const { data: goalsData } = useQuery(goalsQuery());
   const submitMutation = useSubmitLog();
 
+  // History series state
+  const [granularity, setGranularity] = React.useState<TrackGranularity>('day');
+  const [range, setRange] = React.useState<{ from: string; to: string }>({
+    from: '2026-10-01',
+    to: '2026-10-31',
+  });
+
+  React.useEffect(() => {
+    setRange({ from: todayYmd(-29), to: todayYmd(0) });
+  }, []);
+
+  const { data: historyPoints } = useQuery(trackHistoryQuery(range.from, range.to, granularity));
+
   // Local form state
-  /**
-   * Rows carry a client-only `_id`. The trip list is removable, and an array
-   * index as React key makes a deletion reuse the previous row's DOM node, so
-   * focus and caret land on the wrong input. `_id` is stripped before submit.
-   */
   const [trips, setTrips] = React.useState<TripRow[]>([]);
   const [vegMeals, setVegMeals] = React.useState(0);
   const [nonVegMeals, setNonVegMeals] = React.useState(0);
@@ -96,7 +84,6 @@ export default function TrackPage() {
 
   const [initialized, setInitialized] = React.useState(false);
 
-  // Initialize or prefill state when data lands
   React.useEffect(() => {
     if (data && !initialized) {
       if (data.existingLog) {
@@ -109,7 +96,6 @@ export default function TrackPage() {
         setBathChoice(ans.bathChoice ?? 'bucket');
         setWasteActions(ans.wasteActions ? [...ans.wasteActions] : []);
       } else {
-        // Safe defaults from server
         const def = data.defaults;
         setTrips([]);
         setVegMeals(def?.vegMeals ?? 0);
@@ -140,165 +126,231 @@ export default function TrackPage() {
     submitMutation.mutate({
       logDate: data.date,
       answers,
+      existingLogId: data.existingLog?.id,
     });
   };
 
   const hasExistingLog = Boolean(data?.existingLog);
-  const isUpdating = hasExistingLog;
   const isSubmittedSuccessfully = submitMutation.isSuccess && submitMutation.data;
+
+  const maxHistoryKg = React.useMemo(
+    () => Math.max(...(historyPoints ?? []).map((p) => Math.max(p.totalKg, p.baselineTotalKg)), 1),
+    [historyPoints],
+  );
 
   return (
     <main
-      className="mx-auto w-full max-w-3xl space-y-6 px-4 py-6 sm:py-10"
+      className="mx-auto w-full max-w-3xl space-y-8 px-4 py-6 sm:py-10"
       aria-busy={isPending || submitMutation.isPending}
     >
       {/* Page Header */}
-      <header className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Daily Track</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+            Daily Track &amp; Goals
+          </h1>
           <p className="text-sm text-muted-foreground">
-            Answer 5 quick questions to calculate your daily footprint in under 30 seconds.
+            Log your 5 daily questions to compute today&apos;s footprint and advance your reduction
+            goals.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <Link
-            href="/track/goals"
-            className="inline-flex min-h-11 items-center gap-1.5 text-xs font-semibold text-primary hover:underline"
-          >
-            <span>Goals &amp; Targets</span>
-            <ArrowRight className="size-3.5" aria-hidden="true" />
-          </Link>
-        </div>
+        <Link
+          href="#goals-section"
+          className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-sm border border-border bg-card px-4 py-2 text-xs font-semibold text-foreground transition hover:border-tertiary hover:bg-accent"
+        >
+          <Target className="size-4 text-positive" aria-hidden="true" />
+          <span>Jump to Goals</span>
+        </Link>
       </header>
 
-      {/* Main Content States */}
-      {isPending ? (
-        <>
-          <p className="sr-only" role="status">
-            Loading today&apos;s questions…
-          </p>
-          <TrackSkeletons />
-        </>
-      ) : error ? (
-        <div
-          role="alert"
-          className="rounded-xl border border-destructive/30 bg-card p-5 text-card-foreground shadow-sm"
-        >
-          <div className="flex items-start gap-3">
-            <AlertCircle className="mt-0.5 size-5 shrink-0 text-destructive" aria-hidden="true" />
-            <div>
-              <h2 className="text-base font-semibold text-destructive">
-                Could not load today&apos;s questions
-              </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {error instanceof ApiError ? error.message : 'Please check your connection.'}
-              </p>
-              {error instanceof ApiError && error.code && (
-                <p className="mt-1 font-mono text-xs text-muted-foreground">{error.code}</p>
-              )}
-              <button
-                type="button"
-                onClick={() => refetch()}
-                disabled={isFetching}
-                className="mt-4 inline-flex min-h-11 items-center justify-center rounded-lg bg-primary px-4 font-medium text-primary-foreground shadow-sm transition hover:bg-eco-700 hover:text-eco-50 disabled:opacity-60 dark:hover:bg-eco-300 dark:hover:text-eco-950"
-              >
-                {isFetching ? 'Checking…' : 'Try again'}
-              </button>
-            </div>
-          </div>
-        </div>
-      ) : isSubmittedSuccessfully ? (
-        /* Result Sheet on mutation success (no refetch needed) */
-        <ResultSheet
-          result={submitMutation.data}
-          onEdit={() => {
-            submitMutation.reset();
-          }}
-        />
-      ) : (
-        /* The 5 Daily Questions Form */
-        <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-          {/* Notice if editing existing log */}
-          {hasExistingLog && (
-            <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-secondary/70 p-3 text-sm text-foreground">
-              <CheckCircle2 className="size-4 shrink-0 text-primary" aria-hidden="true" />
-              <span>
-                You already logged today. Updating this form will adjust today&apos;s footprint.
-              </span>
-            </div>
-          )}
-
-          {/* Mutation Error Alert (keeps answers intact) */}
-          {submitMutation.isError && (
-            <div
-              role="alert"
-              className="rounded-xl border border-destructive/40 bg-card p-4 text-card-foreground shadow-sm"
-            >
-              <div className="flex items-start gap-2.5">
-                <AlertCircle
-                  className="mt-0.5 size-4 shrink-0 text-destructive"
-                  aria-hidden="true"
-                />
-                <div>
-                  <h2 className="text-sm font-semibold text-destructive">
-                    Failed to save your answers
-                  </h2>
-                  <p className="mt-0.5 text-xs text-muted-foreground">
-                    {submitMutation.error instanceof ApiError
-                      ? submitMutation.error.message
-                      : 'Something went wrong while saving. Your answers have been preserved — please try again.'}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* 1. Travel Question */}
-          <TravelQuestion trips={trips} onChange={setTrips} defaults={data.defaults} />
-
-          {/* 2. Meals Question */}
-          <MealsQuestion
-            vegMeals={vegMeals}
-            nonVegMeals={nonVegMeals}
-            veganMeals={veganMeals}
-            onChange={({ vegMeals: v, nonVegMeals: nv, veganMeals: vg }) => {
-              setVegMeals(v);
-              setNonVegMeals(nv);
-              setVeganMeals(vg);
+      {/* SECTION 1: Daily 5-Question Log */}
+      <section aria-label="Daily footprint questions" className="space-y-6">
+        {isPending ? (
+          <>
+            <p className="sr-only" role="status">
+              Loading today&apos;s questions…
+            </p>
+            <TrackSkeletons />
+          </>
+        ) : error ? (
+          <ErrorBanner
+            title="Could not load today's questions"
+            error={error}
+            onRetry={() => refetch()}
+            isRetrying={isFetching}
+          />
+        ) : isSubmittedSuccessfully ? (
+          <ResultSheet
+            result={submitMutation.data}
+            onEdit={() => {
+              submitMutation.reset();
             }}
           />
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+            {hasExistingLog && (
+              <div className="flex items-center justify-between gap-2 rounded-sm border border-tertiary/40 bg-accent p-3 text-sm text-accent-foreground">
+                <span>
+                  You already logged today ({data.date}). Updating adjusts your footprint before
+                  02:00 tomorrow.
+                </span>
+                <Badge variant="secondary">Editing</Badge>
+              </div>
+            )}
 
-          {/* 3. Cooling Question — rendered ONLY when askCooling is true */}
-          {data.askCooling && <CoolingQuestion value={acHoursBucket} onChange={setAcHoursBucket} />}
+            {submitMutation.isError && (
+              <ErrorBanner title="Failed to save your answers" error={submitMutation.error} />
+            )}
 
-          {/* 4. Bathing Question */}
-          <BathingQuestion value={bathChoice} onChange={setBathChoice} />
+            <TravelQuestion trips={trips} onChange={setTrips} defaults={data.defaults} />
 
-          {/* 5. Waste Question */}
-          <WasteQuestion value={wasteActions} onChange={setWasteActions} />
+            <MealsQuestion
+              vegMeals={vegMeals}
+              nonVegMeals={nonVegMeals}
+              veganMeals={veganMeals}
+              onChange={({ vegMeals: v, nonVegMeals: nv, veganMeals: vg }) => {
+                setVegMeals(v);
+                setNonVegMeals(nv);
+                setVeganMeals(vg);
+              }}
+            />
 
-          {/* Submit Action */}
-          <div className="pt-2">
-            <button
+            {data.askCooling && (
+              <CoolingQuestion value={acHoursBucket} onChange={setAcHoursBucket} />
+            )}
+
+            <BathingQuestion value={bathChoice} onChange={setBathChoice} />
+
+            <WasteQuestion value={wasteActions} onChange={setWasteActions} />
+
+            <Button
               type="submit"
+              variant="primary"
+              size="lg"
+              className="w-full"
               disabled={submitMutation.isPending}
-              className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary px-6 py-3 text-base font-semibold text-primary-foreground shadow-sm transition hover:bg-eco-700 hover:text-eco-50 disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-eco-300 dark:hover:text-eco-950"
             >
               {submitMutation.isPending ? (
                 <>
                   <Loader2 className="size-5 animate-spin" aria-hidden="true" />
                   <span>Saving today&apos;s log…</span>
                 </>
-              ) : isUpdating ? (
+              ) : hasExistingLog ? (
                 <span>Update today&apos;s log</span>
               ) : (
-                <span>Save today&apos;s log</span>
+                <span>Save today&apos;s log &amp; claim rewards</span>
               )}
-            </button>
-          </div>
-        </form>
+            </Button>
+          </form>
+        )}
+      </section>
+
+      {/* SECTION 2: Footprint Time Series History */}
+      {historyPoints && historyPoints.length > 0 && (
+        <Card aria-labelledby="history-heading" className="space-y-4">
+          <CardHeader>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <CardTitle id="history-heading">Footprint History</CardTitle>
+                <p className="text-xs text-muted-foreground">
+                  Daily emissions compared against your baseline ({range.from} to {range.to})
+                </p>
+              </div>
+              <SegmentedControl
+                className="w-48"
+                label="History granularity"
+                value={granularity}
+                onChange={setGranularity}
+                options={[
+                  { value: 'day', label: 'Day' },
+                  { value: 'week', label: 'Week' },
+                  { value: 'month', label: 'Month' },
+                ]}
+              />
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3 pt-0">
+            <div className="grid grid-cols-7 gap-1.5 rounded-sm border border-border bg-muted/40 p-3 sm:grid-cols-10">
+              {historyPoints.slice(-10).map((pt) => {
+                const heightPct = Math.max(12, Math.round((pt.totalKg / maxHistoryKg) * 100));
+                const underBaseline = pt.totalKg <= pt.baselineTotalKg;
+                return (
+                  <div key={pt.date} className="flex flex-col items-center gap-1.5">
+                    <div className="flex h-24 w-full items-end justify-center rounded-xs bg-card p-1">
+                      <div
+                        className={
+                          underBaseline
+                            ? 'w-full rounded-[4px] bg-primary transition-all'
+                            : 'w-full rounded-[4px] bg-secondary transition-all'
+                        }
+                        style={{ height: `${heightPct}%` }}
+                        title={`${pt.date}: ${pt.totalKg.toFixed(1)} kg (baseline ${pt.baselineTotalKg.toFixed(1)} kg)`}
+                      />
+                    </div>
+                    <span className="tabular text-[11px] font-semibold text-foreground">
+                      {pt.totalKg.toFixed(1)}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground">{formatDate(pt.date)}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
       )}
+
+      {/* SECTION 3: Goals Section (Integrated directly in Track Page as requested) */}
+      <section
+        id="goals-section"
+        aria-labelledby="goals-section-heading"
+        className="space-y-6 pt-2"
+      >
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2
+              id="goals-section-heading"
+              className="text-xl font-semibold tracking-tight text-foreground"
+            >
+              Carbon Reduction Goals
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Freeze a weekly, monthly, or quarterly target to earn bonus points and coins.
+            </p>
+          </div>
+
+          {!goalsData?.active && (
+            <Link
+              href="/track/goals/new"
+              className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-tertiary"
+            >
+              <Plus className="size-4" aria-hidden="true" />
+              <span>Set a new goal</span>
+            </Link>
+          )}
+        </div>
+
+        {goalsData?.active ? (
+          <GoalProgressCard activeGoal={goalsData.active} />
+        ) : (
+          <EmptyState
+            icon={<Target className="size-6" aria-hidden="true" />}
+            title="No active reduction goal"
+            description="Challenge yourself to cut emissions by a percentage or stay under a daily kg cap."
+            action={
+              <Link
+                href="/track/goals/new"
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-sm bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-tertiary"
+              >
+                <Plus className="size-4" aria-hidden="true" />
+                <span>Create reduction goal</span>
+              </Link>
+            }
+          />
+        )}
+
+        {goalsData && <GoalHistoryList past={goalsData.past} />}
+      </section>
     </main>
   );
 }

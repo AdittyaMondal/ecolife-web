@@ -34,6 +34,19 @@ export function useCreateGoal() {
   });
 }
 
+export function useUpdateGoal() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, ...body }: Partial<CreateGoalBody> & { id: number }) =>
+      api.patch<Goal>(`/goals/${id}`, body),
+    onSuccess: (_g, vars) => {
+      qc.invalidateQueries({ queryKey: qk.goals() });
+      qc.invalidateQueries({ queryKey: qk.goalProgress(vars.id) });
+      qc.invalidateQueries({ queryKey: qk.home() });
+    },
+  });
+}
+
 export function useCancelGoal() {
   const qc = useQueryClient();
   return useMutation({

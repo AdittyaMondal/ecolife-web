@@ -1,14 +1,14 @@
-/**
- * Hand-written API types.
- *
- * The real types are generated from ../ecolife-server/openapi.json by
- * `pnpm gen:api` into ./generated/api.d.ts. This file holds the handful the
- * build must not wait on, so a fresh clone typechecks before generation runs.
- * Once a type exists in the generated file, delete it from here.
- */
+import type { components } from '@/types/generated/api';
 
-/** GET /health — the liveness probe. */
-export type Liveness = {
-  service: string;
-  status: 'up';
-};
+/** Shorthand for a named contract schema. */
+export type Schema<K extends keyof components['schemas']> = components['schemas'][K];
+
+export type PageInfo = Schema<'PageInfo'>;
+/** Keyset-paginated list: `?cursor=&limit=` in, `{ items, pageInfo }` out. */
+export type Page<T> = { items: T[]; pageInfo: PageInfo };
+
+export type Wallet = Schema<'Wallet'>;
+export type UserSummary = Schema<'UserSummary'>;
+export type Breakdown = Schema<'Breakdown'>;
+export type RewardGrant = Schema<'RewardGrant'>;
+export type Streak = Schema<'Streak'>;

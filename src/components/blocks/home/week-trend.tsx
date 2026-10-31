@@ -5,7 +5,6 @@ export interface WeekTrendProps {
   week: Home['week'];
 }
 
-/** One plotted point: the day's value plus its resolved SVG coordinates. */
 type Point = { x: number; y: number; date: string; totalKg: number };
 
 export function WeekTrend({ week }: WeekTrendProps) {
@@ -52,7 +51,7 @@ export function WeekTrend({ week }: WeekTrendProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         {hasData && (
-          <div className="w-full">
+          <div className="w-full rounded-sm border border-border bg-muted/40 p-3">
             <svg
               viewBox={`0 0 ${width} ${height}`}
               className="h-20 w-full overflow-visible"
@@ -61,15 +60,15 @@ export function WeekTrend({ week }: WeekTrendProps) {
             >
               <defs>
                 <linearGradient id="week-sparkline-gradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.25" />
-                  <stop offset="100%" stopColor="var(--primary)" stopOpacity="0.0" />
+                  <stop offset="0%" stopColor="var(--tertiary)" stopOpacity="0.35" />
+                  <stop offset="100%" stopColor="var(--tertiary)" stopOpacity="0.0" />
                 </linearGradient>
               </defs>
               <path d={areaPath} fill="url(#week-sparkline-gradient)" />
               <path
                 d={linePath}
                 fill="none"
-                stroke="var(--primary)"
+                stroke="var(--tertiary)"
                 strokeWidth="2.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -82,13 +81,12 @@ export function WeekTrend({ week }: WeekTrendProps) {
                     cx={p.x}
                     cy={p.y}
                     r={isLast ? 4 : 2.5}
-                    className={isLast ? 'fill-primary stroke-background stroke-2' : 'fill-primary'}
+                    className={isLast ? 'fill-secondary stroke-primary stroke-2' : 'fill-secondary'}
                   />
                 );
               })}
             </svg>
 
-            {/* Accessible tabular alternative for screen readers */}
             <table className="sr-only">
               <caption>Daily emissions for the past 7 days</caption>
               <thead>
@@ -109,10 +107,10 @@ export function WeekTrend({ week }: WeekTrendProps) {
           </div>
         )}
 
-        <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3 text-sm">
+        <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
           <div>
             <span className="text-muted-foreground">Daily average: </span>
-            <span className="font-semibold text-foreground">
+            <span className="tabular font-semibold text-foreground">
               {week.avgKgPerDay.toFixed(1)} kg/day
             </span>
           </div>
@@ -120,14 +118,14 @@ export function WeekTrend({ week }: WeekTrendProps) {
           <div
             className={`flex items-center gap-1 font-medium ${
               isDecreased
-                ? 'text-eco-600 dark:text-eco-400'
+                ? 'text-positive'
                 : isIncreased
                   ? 'text-destructive'
                   : 'text-muted-foreground'
             }`}
           >
             <span aria-hidden="true">{isDecreased ? '▼' : isIncreased ? '▲' : '—'}</span>
-            <span>
+            <span className="tabular">
               {isDecreased
                 ? `${formattedPct}% decrease vs last week`
                 : isIncreased
