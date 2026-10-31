@@ -66,15 +66,50 @@ function upstreamUnreachable(path: string, cause: unknown): Response {
  */
 function backendPath(segments: string[], search: string): string | null {
   if (segments.length === 0) return null;
+
+  const encoded: string[] = [];
   for (const segment of segments) {
-    if (segment === '..' || segment === '.' || segment.includes('/') || segment.includes('\\')) {
-      return null;
-    }
+    // Next has already percent-decoded these, so `%2e%2e` arrives as `..`.
+    // Reject rather than strip, then RE-ENCODE: a segment that decoded to
+    // `?` or `#` would otherwise reappear as real URL syntax once joined,
+    // turning a path segment into a query string against another endpoint.
+    if (segment === '' || segment === '.' || segment === '..') return null;
+    if (/[/\\?#]/.test(segment)) return null;
+    encoded.push(encodeURIComponent(segment));
   }
-  return `/${segments.join('/')}${search}`;
+  return `/${encoded.join('/')}${search}`;
 }
 
+/**
+ * Same-origin check for anything that changes state.
+ *
+ * The refresh cookie is SameSite=Lax, which already stops a cross-site POST
+ * carrying it — but that leans entirely on one cookie attribute and on the
+ * browser honouring it. An Origin that is present and foreign is never a
+ * legitimate call to this proxy, so reject it outright. Origin absent means
+ * no browser initiated it (curl, a server-side call), which is not CSRF.
+ */
+function isCrossSite(request: NextRequest): boolean {
+  const site = request.headers.get('sec-fetch-site');
+  if (site) return site !== 'same-origin' && site !== 'none';
+
+  const origin = request.headers.get('origin');
+  if (!origin) return false;
+  return origin !== new URL(request.url).origin;
+}
+
+const SAFE_METHODS = new Set(['GET', 'HEAD']);
+
 async function proxy(request: NextRequest, segments: string[]): Promise<Response> {
+  if (!SAFE_METHODS.has(request.method) && isCrossSite(request)) {
+    const body: ApiFailure = {
+      status: false,
+      data: null,
+      error: { code: 'GEN_403', message: 'Cross-site request rejected.', details: {} },
+    };
+    return Response.json(body, { status: 403 });
+  }
+
   const path = backendPath(segments, new URL(request.url).search);
   if (!path) {
     const body: ApiFailure = {
