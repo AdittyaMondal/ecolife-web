@@ -162,15 +162,6 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
             };
         };
         delete?: never;
@@ -237,15 +228,6 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
             };
         };
         delete?: never;
@@ -303,15 +285,6 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
             };
         };
         delete?: never;
@@ -353,8 +326,8 @@ export interface paths {
                         };
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
+                /** @description Not authenticated */
+                401: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -403,15 +376,6 @@ export interface paths {
                 };
                 /** @description Not authenticated */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
-                /** @description Not implemented yet */
-                501: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -475,15 +439,6 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
             };
         };
         delete?: never;
@@ -527,15 +482,6 @@ export interface paths {
                 };
                 /** @description Rate limited — see Retry-After */
                 429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
-                /** @description Not implemented yet */
-                501: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -600,15 +546,6 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
             };
         };
         delete?: never;
@@ -666,15 +603,6 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
             };
         };
         delete?: never;
@@ -719,15 +647,6 @@ export interface paths {
                 };
                 /** @description Not authenticated */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
-                /** @description Not implemented yet */
-                501: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -809,24 +728,6 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
-                /** @description Conflict */
-                409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
-                /** @description Not implemented yet */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
             };
         };
         trace?: never;
@@ -891,15 +792,6 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
             };
         };
         delete?: never;
@@ -948,15 +840,6 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
             };
         };
         put?: never;
@@ -993,15 +876,6 @@ export interface paths {
                 };
                 /** @description Not authenticated */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
-                /** @description Not implemented yet */
-                501: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -1062,15 +936,6 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
             };
         };
         trace?: never;
@@ -1114,15 +979,6 @@ export interface paths {
                 };
                 /** @description Not authenticated */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
-                /** @description Not implemented yet */
-                501: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -1180,15 +1036,6 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
             };
         };
         put?: never;
@@ -1234,15 +1081,6 @@ export interface paths {
                 };
                 /** @description Not found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
-                /** @description Not implemented yet */
-                501: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -1312,15 +1150,6 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
             };
         };
         put?: never;
@@ -1364,15 +1193,6 @@ export interface paths {
                 };
                 /** @description Not authenticated */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
-                /** @description Not implemented yet */
-                501: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -1448,15 +1268,6 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
-                /** @description Conflict */
-                409: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
                 /** @description Domain rule violation */
                 422: {
                     headers: {
@@ -1468,15 +1279,6 @@ export interface paths {
                 };
                 /** @description Rate limited — see Retry-After */
                 429: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
-                /** @description Not implemented yet */
-                501: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -1567,15 +1369,6 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
             };
         };
         trace?: never;
@@ -1635,15 +1428,6 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
             };
         };
         put?: never;
@@ -1690,15 +1474,6 @@ export interface paths {
                 };
                 /** @description Not authenticated */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
-                /** @description Not implemented yet */
-                501: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -1776,15 +1551,6 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
             };
         };
         delete?: never;
@@ -1843,15 +1609,6 @@ export interface paths {
                 };
                 /** @description Not found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
-                /** @description Not implemented yet */
-                501: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -1943,15 +1700,6 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
             };
         };
         trace?: never;
@@ -2000,15 +1748,6 @@ export interface paths {
                 };
                 /** @description Not found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
-                /** @description Not implemented yet */
-                501: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -2065,8 +1804,8 @@ export interface paths {
                         };
                     };
                 };
-                /** @description Not authenticated */
-                401: {
+                /** @description Validation failed */
+                400: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -2074,8 +1813,8 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
+                /** @description Not authenticated */
+                401: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -2126,15 +1865,6 @@ export interface paths {
                 };
                 /** @description Not authenticated */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
-                /** @description Not implemented yet */
-                501: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -2201,15 +1931,6 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
             };
         };
         put?: never;
@@ -2262,15 +1983,6 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
             };
         };
         put?: never;
@@ -2314,15 +2026,6 @@ export interface paths {
                 };
                 /** @description Not authenticated */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
-                /** @description Not implemented yet */
-                501: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -2404,15 +2107,6 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
             };
         };
         delete?: never;
@@ -2459,15 +2153,6 @@ export interface paths {
                 };
                 /** @description Not authenticated */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
-                /** @description Not implemented yet */
-                501: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -2522,15 +2207,6 @@ export interface paths {
                 };
                 /** @description Not found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
-                /** @description Not implemented yet */
-                501: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -2600,15 +2276,6 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
             };
         };
         delete?: never;
@@ -2656,15 +2323,6 @@ export interface paths {
                 };
                 /** @description Not authenticated */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
-                /** @description Not implemented yet */
-                501: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -2751,15 +2409,6 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
             };
         };
         delete?: never;
@@ -2819,15 +2468,6 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
             };
         };
         put?: never;
@@ -2880,15 +2520,6 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
             };
         };
         put?: never;
@@ -2931,15 +2562,6 @@ export interface paths {
                 };
                 /** @description Not authenticated */
                 401: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
-                /** @description Not implemented yet */
-                501: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -3005,15 +2627,6 @@ export interface paths {
                 };
                 /** @description Not found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
-                /** @description Not implemented yet */
-                501: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -3090,15 +2703,6 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
             };
         };
         trace?: never;
@@ -3166,15 +2770,6 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
             };
         };
         put?: never;
@@ -3226,15 +2821,6 @@ export interface paths {
                 };
                 /** @description Domain rule violation */
                 422: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
-                /** @description Not implemented yet */
-                501: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -3294,15 +2880,6 @@ export interface paths {
                 };
                 /** @description Not found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
-                /** @description Not implemented yet */
-                501: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -3421,15 +2998,6 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
             };
         };
         trace?: never;
@@ -3480,15 +3048,6 @@ export interface paths {
                 };
                 /** @description Not authorised */
                 403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
-                /** @description Not implemented yet */
-                501: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -3578,15 +3137,6 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
             };
         };
         /** Cancel own registration */
@@ -3629,15 +3179,6 @@ export interface paths {
                 };
                 /** @description Not found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
-                /** @description Not implemented yet */
-                501: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -3706,15 +3247,6 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
             };
         };
         put?: never;
@@ -3772,15 +3304,6 @@ export interface paths {
                 };
                 /** @description Not authorised */
                 403: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
-                /** @description Not implemented yet */
-                501: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -3901,15 +3424,6 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
             };
         };
         delete?: never;
@@ -3995,15 +3509,6 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
             };
         };
         delete?: never;
@@ -4078,15 +3583,6 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
             };
         };
         delete?: never;
@@ -4150,15 +3646,6 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
             };
         };
         options?: never;
@@ -4203,8 +3690,8 @@ export interface paths {
                         };
                     };
                 };
-                /** @description Not authenticated */
-                401: {
+                /** @description Validation failed */
+                400: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -4212,8 +3699,8 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
+                /** @description Not authenticated */
+                401: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -4281,15 +3768,6 @@ export interface paths {
                 };
                 /** @description Not found */
                 404: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
-                /** @description Not implemented yet */
-                501: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -4368,8 +3846,8 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
+                /** @description Uploads are not configured on this server */
+                503: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -4419,15 +3897,6 @@ export interface paths {
                         };
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
-                    };
-                };
             };
         };
         put?: never;
@@ -4473,8 +3942,8 @@ export interface paths {
                         };
                     };
                 };
-                /** @description Not implemented yet */
-                501: {
+                /** @description Validation failed */
+                400: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -4523,15 +3992,6 @@ export interface paths {
                             };
                             error: null;
                         };
-                    };
-                };
-                /** @description Not implemented yet */
-                501: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": components["schemas"]["Failure"];
                     };
                 };
             };
@@ -4626,12 +4086,36 @@ export interface components {
             wallet: components["schemas"]["Wallet"];
             /** @example 2 */
             unreadNotifications: number;
+            organization: components["schemas"]["MemberOrganization"] | null;
         };
         Wallet: {
             /** @example 1240 */
             pointsTotal: number;
             /** @example 420 */
             coinsBalance: number;
+        };
+        MemberOrganization: {
+            /** @example 12 */
+            id: number;
+            /** @example acme-industries */
+            slug: string;
+            /** @example Acme Industries */
+            name: string;
+            /**
+             * @example industry
+             * @enum {string}
+             */
+            type: "industry" | "ngo" | "seller";
+            /**
+             * @example approved
+             * @enum {string}
+             */
+            status: "pending" | "approved" | "rejected" | "suspended";
+            /**
+             * @example owner
+             * @enum {string}
+             */
+            role: "owner" | "member";
         };
         RegisterBody: {
             /** @example Yusuf */
@@ -4886,7 +4370,12 @@ export interface components {
         };
         ProfilePatchBody: {
             name?: string;
+            /** @example Asia/Kolkata */
             timezone?: string;
+            /**
+             * Format: uri
+             * @example https://cdn.ecolife.app/avatars/abc123.webp
+             */
             avatarUrl?: string | null;
             answers?: components["schemas"]["OnboardingAnswers"];
         };
@@ -5094,7 +4583,7 @@ export interface components {
             date: string;
             existingLog: {
                 id: number;
-                answers: components["schemas"]["DailyAnswers"];
+                answers: components["schemas"]["StoredDailyAnswers"];
                 editableUntil: string;
             } | null;
             /**
@@ -5102,10 +4591,9 @@ export interface components {
              * @example true
              */
             askCooling: boolean;
-            defaults: components["schemas"]["DailyAnswers"] & unknown;
+            defaults: components["schemas"]["StoredDailyAnswers"] & unknown;
         };
-        DailyAnswers: {
-            trips?: components["schemas"]["Trip"][];
+        StoredDailyAnswers: {
             /** @example 2 */
             vegMeals?: number;
             /** @example 0 */
@@ -5122,14 +4610,17 @@ export interface components {
              * @enum {string}
              */
             bathChoice?: "bucket" | "short_shower" | "long_shower";
-            wasteActions?: ("segregated" | "composted" | "refused_plastic" | "none_of_these")[];
-        };
-        Trip: {
             /**
-             * @example bus
-             * @enum {string}
+             * @example [
+             *       "segregated"
+             *     ]
              */
-            mode: "walk" | "cycle" | "bus" | "metro_train" | "two_wheeler" | "car" | "cab" | "auto_rickshaw" | "work_from_home";
+            wasteActions?: string[];
+            trips?: components["schemas"]["StoredTrip"][];
+        };
+        StoredTrip: {
+            /** @example bus */
+            mode: string;
             /** @example 14.5 */
             km: number;
         };
@@ -5208,6 +4699,35 @@ export interface components {
              */
             logDate: string;
             answers: components["schemas"]["DailyAnswers"];
+        };
+        DailyAnswers: {
+            trips?: components["schemas"]["Trip"][];
+            /** @example 2 */
+            vegMeals?: number;
+            /** @example 0 */
+            nonVegMeals?: number;
+            /** @example 1 */
+            veganMeals?: number;
+            /**
+             * @example 1_3
+             * @enum {string}
+             */
+            acHoursBucket?: "0" | "1_3" | "4_8" | "8_plus";
+            /**
+             * @example bucket
+             * @enum {string}
+             */
+            bathChoice?: "bucket" | "short_shower" | "long_shower";
+            wasteActions?: ("segregated" | "composted" | "refused_plastic" | "none_of_these")[];
+        };
+        Trip: {
+            /**
+             * @example bus
+             * @enum {string}
+             */
+            mode: "walk" | "cycle" | "bus" | "metro_train" | "two_wheeler" | "car" | "cab" | "auto_rickshaw" | "work_from_home";
+            /** @example 14.5 */
+            km: number;
         };
         HistoryPoint: {
             /** @example 2026-10-31 */

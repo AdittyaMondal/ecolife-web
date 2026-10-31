@@ -1,16 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import {
-  ArrowLeft,
-  Check,
-  Coins,
-  Leaf,
-  PackageCheck,
-  Plus,
-  ShoppingBag,
-  Sprout,
-} from 'lucide-react';
+import { ArrowLeft, Check, Coins, Leaf, PackageCheck, Plus, ShoppingBag } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
@@ -23,6 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Stepper } from '@/components/ui/stepper';
 import { cartQuery, productQuery, useAddToCart } from '@/hooks/use-marketplace';
 import { formatKg, formatPaise, titleCase } from '@/lib/format';
+import { getProductImageUrl } from '@/lib/images';
 
 export default function ProductDetailPage() {
   const params = useParams<{ slug: string }>();
@@ -100,20 +92,22 @@ export default function ProductDetailPage() {
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Concentric Product Visual Frame: Card variant="media" (rounded-lg p-2) -> inner image rounded-md */}
-        <Card variant="media" className="flex flex-col justify-between">
-          <div className="relative h-80 w-full overflow-hidden rounded-md border border-border/60 bg-accent/40 sm:h-96">
-            {p.imageUrl ? (
-              <Image src={p.imageUrl} alt={p.name} fill unoptimized className="object-cover" />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center text-positive">
-                <Sprout className="size-20" aria-hidden="true" />
-              </div>
-            )}
+        <Card variant="media" className="flex flex-col justify-between shadow-subtle">
+          <div className="relative h-80 w-full overflow-hidden rounded-md border border-border/70 bg-muted/30 sm:h-96">
+            <Image
+              src={getProductImageUrl(p)}
+              alt={p.name}
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover"
+            />
 
-            <div className="absolute left-3 top-3 flex flex-wrap gap-2">
-              <Badge tone="neutral">{titleCase(p.category)}</Badge>
+            <div className="absolute left-3 top-3 flex flex-wrap gap-2 z-10">
+              <Badge tone="neutral" className="backdrop-blur-md bg-card/90 font-medium">
+                {titleCase(p.category)}
+              </Badge>
               {p.co2SavedKg != null && p.co2SavedKg > 0 && (
-                <Badge tone="positive">
+                <Badge tone="positive" className="backdrop-blur-md bg-accent/95 font-semibold">
                   <Leaf className="size-3.5" />−{formatKg(p.co2SavedKg)} CO₂e saved
                 </Badge>
               )}

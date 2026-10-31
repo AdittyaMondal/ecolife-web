@@ -44,6 +44,7 @@ import {
   useSetCartQuantity,
 } from '@/hooks/use-marketplace';
 import { formatKg, formatNumber, formatPaise } from '@/lib/format';
+import { getProductImageUrl } from '@/lib/images';
 
 const CATEGORIES: { value: ProductCategory | 'all'; label: string }[] = [
   { value: 'all', label: 'All items' },
@@ -199,10 +200,10 @@ export default function MarketplacePage() {
 
       {/* Product Grid */}
       {products.isPending ? (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {['p-s1', 'p-s2', 'p-s3', 'p-s4', 'p-s5', 'p-s6'].map((skeletonId) => (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {['p-s1', 'p-s2', 'p-s3', 'p-s4', 'p-s5', 'p-s6', 'p-s7', 'p-s8'].map((skeletonId) => (
             <Card key={skeletonId} variant="media" className="space-y-3">
-              <Skeleton className="h-44 w-full rounded-md" />
+              <Skeleton className="aspect-[4/3] w-full rounded-md" />
               <div className="space-y-2 p-2">
                 <Skeleton className="h-5 w-2/3" />
                 <Skeleton className="h-4 w-full" />
@@ -233,51 +234,51 @@ export default function MarketplacePage() {
         />
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {allProducts.map((product) => {
               const qtyInCart = cartByProductId.get(product.id) ?? 0;
               const outOfStock = product.stock <= 0;
               const maxCoinSavingPaise = Math.floor(product.pricePaise * 0.2);
+              const imgUrl = getProductImageUrl(product);
 
               return (
                 <Card
                   key={product.id}
                   variant="media"
-                  className="flex flex-col justify-between transition hover:border-primary/60"
+                  className="flex flex-col justify-between transition-all duration-300 hover:border-primary/80 hover:shadow-hover hover:-translate-y-0.5"
                 >
                   <div>
                     {/* Concentric media frame: outer Card is rounded-lg (28px) with p-2 (8px) -> inner frame is rounded-md (20px) */}
                     <Link
                       href={`/marketplace/${product.slug}`}
-                      className="group relative block h-44 w-full overflow-hidden rounded-md border border-border/60 bg-secondary/10"
+                      className="group relative block aspect-[4/3] w-full overflow-hidden rounded-md border border-border/70 bg-muted/40 shadow-subtle"
                     >
-                      {product.imageUrl ? (
-                        <Image
-                          src={product.imageUrl}
-                          alt={product.name}
-                          fill
-                          unoptimized
-                          className="object-cover transition duration-300 group-hover:scale-105"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center bg-accent/40 text-positive">
-                          <Sprout className="size-12" aria-hidden="true" />
-                        </div>
-                      )}
+                      <Image
+                        src={imgUrl}
+                        alt={product.name}
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
 
-                      <div className="absolute left-2.5 top-2.5 flex flex-wrap gap-1.5">
-                        <Badge tone="neutral">
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60 transition-opacity group-hover:opacity-40" />
+
+                      <div className="absolute left-2.5 top-2.5 flex flex-wrap gap-1.5 z-10">
+                        <Badge tone="neutral" className="backdrop-blur-md bg-card/90 font-medium">
                           {CATEGORY_LABEL[product.category] ?? product.category}
                         </Badge>
                         {product.co2SavedKg != null && product.co2SavedKg > 0 && (
-                          <Badge tone="positive">
+                          <Badge
+                            tone="positive"
+                            className="backdrop-blur-md bg-accent/95 font-semibold"
+                          >
                             <Leaf className="size-3" />−{formatKg(product.co2SavedKg)} CO₂e
                           </Badge>
                         )}
                       </div>
 
                       {outOfStock && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-neutral-950/60 backdrop-blur-[2px]">
+                        <div className="absolute inset-0 z-20 flex items-center justify-center bg-neutral-950/65 backdrop-blur-[2px]">
                           <Badge tone="danger">Out of stock</Badge>
                         </div>
                       )}
@@ -287,12 +288,12 @@ export default function MarketplacePage() {
                     <div className="space-y-1.5 p-2 pt-3">
                       <Link
                         href={`/marketplace/${product.slug}`}
-                        className="block text-base font-bold text-foreground hover:text-positive"
+                        className="block text-base font-bold text-foreground hover:text-positive line-clamp-1 transition-colors"
                       >
                         {product.name}
                       </Link>
                       {product.description && (
-                        <p className="line-clamp-2 text-xs text-muted-foreground">
+                        <p className="line-clamp-2 text-xs text-muted-foreground leading-relaxed">
                           {product.description}
                         </p>
                       )}

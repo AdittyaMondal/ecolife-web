@@ -9,6 +9,14 @@ const nextConfig: NextConfig = {
   output: 'standalone',
   cacheComponents: true,
   partialPrefetching: true,
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+    ],
+  },
   // Route handlers that read cookies()/headers() bail out of prerendering by
   // throwing. That is expected; keep it out of the build log.
   experimental: { hideLogsAfterAbort: true },

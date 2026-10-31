@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   ArrowLeft,
   ArrowRight,
@@ -48,6 +48,7 @@ import {
   useSaveOnboardingStep,
 } from '@/hooks/use-onboarding';
 import { formatKg } from '@/lib/format';
+import { qk } from '@/lib/query-keys';
 import { cn } from '@/lib/utils';
 
 const STEP_META = [
@@ -158,6 +159,7 @@ export default function OnboardingStepPage() {
 function OnboardingStepContent() {
   const params = useParams<{ n: string }>();
   const router = useRouter();
+  const qc = useQueryClient();
   const rawStep = Number.parseInt(params.n ?? '1', 10);
   const step = Number.isFinite(rawStep) ? Math.min(ONBOARDING_STEPS, Math.max(1, rawStep)) : 1;
   const meta = STEP_META[step - 1] ?? STEP_META[0];
@@ -241,8 +243,23 @@ function OnboardingStepContent() {
     if (a.wasteHabit) setWasteHabit(a.wasteHabit);
   }, [state]);
 
+  // If already fully onboarded, redirect directly to dashboard
+  React.useEffect(() => {
+    if (state?.complete && !completedResult) {
+      qc.invalidateQueries({ queryKey: qk.me() });
+      qc.invalidateQueries({ queryKey: qk.home() });
+      router.replace('/home');
+    }
+  }, [state?.complete, completedResult, router, qc]);
+
   const handleStepSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    const onAlreadyComplete = () => {
+      qc.invalidateQueries({ queryKey: qk.me() });
+      qc.invalidateQueries({ queryKey: qk.home() });
+      router.push('/home');
+    };
 
     const bodyForStep = () => {
       if (step === 1) {
@@ -294,7 +311,25 @@ function OnboardingStepContent() {
               onSuccess: (res) => {
                 setCompletedResult(res);
               },
+              onError: (err: any) => {
+                if (
+                  err?.code === 'ONB_002' ||
+                  err?.message?.includes('already complete') ||
+                  err?.message?.includes('already set up')
+                ) {
+                  onAlreadyComplete();
+                }
+              },
             });
+          }
+        },
+        onError: (err: any) => {
+          if (
+            err?.code === 'ONB_002' ||
+            err?.message?.includes('already complete') ||
+            err?.message?.includes('already set up')
+          ) {
+            onAlreadyComplete();
           }
         },
       },

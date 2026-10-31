@@ -10,6 +10,7 @@ import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { ErrorBanner } from '@/components/ui/error-banner';
 import { Input } from '@/components/ui/input';
+import { RadialDial } from '@/components/ui/radial-dial';
 import { SegmentedControl } from '@/components/ui/segmented-control';
 import { type CreateGoalBody, useCreateGoal } from '@/hooks/use-goals';
 
@@ -176,77 +177,65 @@ export function GoalForm() {
         </div>
       </fieldset>
 
-      {/* 3. Matching Value Field */}
-      <fieldset className="rounded-lg border border-border bg-card p-4">
-        <legend className="px-1 text-base font-semibold text-foreground">3. Target Value</legend>
+      {/* 3. Matching Value Field with Rotary Radial Dial */}
+      <fieldset className="rounded-lg border border-border bg-card p-5">
+        <legend className="px-1 text-base font-semibold text-foreground">
+          3. Set Your Target with the Dial
+        </legend>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Turn the dial or select a quick preset to choose your commitment.
+        </p>
 
-        {selectedType === 'reduce_percent' ? (
-          <div className="mt-2 space-y-2">
-            <label htmlFor="reducePercent" className="block text-sm font-medium text-foreground">
-              Reduction percentage (%)
-            </label>
-            <p className="text-xs text-muted-foreground">
-              e.g. 15% reduction against your historical baseline emissions.
+        <div className="mt-6 flex flex-col items-center justify-center rounded-sm border border-border/60 bg-muted/30 p-6">
+          {selectedType === 'reduce_percent' ? (
+            <Controller
+              name="reducePercent"
+              control={control}
+              render={({ field }) => (
+                <RadialDial
+                  value={typeof field.value === 'number' ? field.value : Number(field.value) || 15}
+                  min={5}
+                  max={60}
+                  step={1}
+                  unit="%"
+                  label="Reduction"
+                  sublabel="vs baseline"
+                  presets={[5, 10, 15, 20, 25, 30, 40]}
+                  onChange={(val) => field.onChange(val)}
+                />
+              )}
+            />
+          ) : (
+            <Controller
+              name="capKgPerDay"
+              control={control}
+              render={({ field }) => (
+                <RadialDial
+                  value={typeof field.value === 'number' ? field.value : Number(field.value) || 5.0}
+                  min={1}
+                  max={20}
+                  step={0.5}
+                  unit="kg"
+                  label="Daily Cap"
+                  sublabel="max limit"
+                  presets={[2, 3.5, 5, 7.5, 10, 15]}
+                  onChange={(val) => field.onChange(val)}
+                />
+              )}
+            />
+          )}
+
+          {errors.reducePercent && (
+            <p className="mt-3 text-xs text-destructive font-medium" role="alert">
+              {errors.reducePercent.message}
             </p>
-            <div className="relative flex max-w-xs items-center">
-              <Input
-                id="reducePercent"
-                type="number"
-                min="1"
-                max="90"
-                step="1"
-                aria-invalid={Boolean(errors.reducePercent)}
-                aria-describedby={errors.reducePercent ? 'reducePercent-error' : undefined}
-                className="tabular pr-8"
-                {...register('reducePercent')}
-              />
-              <span
-                className="pointer-events-none absolute right-3 text-sm text-muted-foreground"
-                aria-hidden="true"
-              >
-                %
-              </span>
-            </div>
-            {errors.reducePercent && (
-              <p id="reducePercent-error" className="text-xs text-destructive" role="alert">
-                {errors.reducePercent.message}
-              </p>
-            )}
-          </div>
-        ) : (
-          <div className="mt-2 space-y-2">
-            <label htmlFor="capKgPerDay" className="block text-sm font-medium text-foreground">
-              Daily cap (kg CO₂e / day)
-            </label>
-            <p className="text-xs text-muted-foreground">
-              e.g. 5.0 kg/day ceiling on your total daily carbon footprint.
+          )}
+          {errors.capKgPerDay && (
+            <p className="mt-3 text-xs text-destructive font-medium" role="alert">
+              {errors.capKgPerDay.message}
             </p>
-            <div className="relative flex max-w-xs items-center">
-              <Input
-                id="capKgPerDay"
-                type="number"
-                min="0.5"
-                max="100"
-                step="0.1"
-                aria-invalid={Boolean(errors.capKgPerDay)}
-                aria-describedby={errors.capKgPerDay ? 'capKgPerDay-error' : undefined}
-                className="tabular pr-16"
-                {...register('capKgPerDay')}
-              />
-              <span
-                className="pointer-events-none absolute right-3 text-xs text-muted-foreground"
-                aria-hidden="true"
-              >
-                kg/day
-              </span>
-            </div>
-            {errors.capKgPerDay && (
-              <p id="capKgPerDay-error" className="text-xs text-destructive" role="alert">
-                {errors.capKgPerDay.message}
-              </p>
-            )}
-          </div>
-        )}
+          )}
+        </div>
       </fieldset>
 
       {/* 4. Start Date */}
