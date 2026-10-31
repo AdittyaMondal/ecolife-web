@@ -2,6 +2,7 @@
 
 import { X } from 'lucide-react';
 import * as React from 'react';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 export interface ModalDialogProps {
@@ -124,5 +125,49 @@ export function ModalDialog({
 
       <div className="flex flex-col gap-4">{children}</div>
     </dialog>
+  );
+}
+
+export interface ConfirmDialogProps {
+  open: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title: React.ReactNode;
+  description?: React.ReactNode;
+  confirmText?: string;
+  cancelText?: string;
+  confirmVariant?: 'primary' | 'destructive' | 'secondary' | 'outline';
+  loading?: boolean;
+}
+
+export function ConfirmDialog({
+  open,
+  onClose,
+  onConfirm,
+  title,
+  description,
+  confirmText = 'Confirm',
+  cancelText = 'Cancel',
+  confirmVariant = 'primary',
+  loading = false,
+}: ConfirmDialogProps) {
+  return (
+    <ModalDialog open={open} onClose={onClose} title={title} description={description} size="sm">
+      <div className="flex justify-end gap-2 pt-2">
+        <Button type="button" variant="outline" size="sm" onClick={onClose} disabled={loading}>
+          {cancelText}
+        </Button>
+        <Button
+          type="button"
+          variant={confirmVariant}
+          size="sm"
+          onClick={onConfirm}
+          disabled={loading}
+          loading={loading}
+        >
+          {confirmText}
+        </Button>
+      </div>
+    </ModalDialog>
   );
 }

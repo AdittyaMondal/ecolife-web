@@ -303,7 +303,8 @@ export function EmissionGauge({
           <span
             className={cn(
               'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold tracking-wide uppercase shadow-2xs transition-all',
-              isEco && 'bg-lime-100 text-lime-900 border border-lime-300 dark:bg-lime-950/60 dark:text-lime-200',
+              isEco &&
+                'bg-lime-100 text-lime-900 border border-lime-300 dark:bg-lime-950/60 dark:text-lime-200',
               isNormal && 'bg-accent text-accent-foreground border border-tertiary/40',
               isHigh && 'bg-danger-surface text-destructive border border-destructive/20',
             )}
@@ -333,7 +334,7 @@ export function EmissionGauge({
             </span>
           ) : delta > 0 ? (
             <span className="text-destructive font-semibold">
-              ▲ {delta.toFixed(2)} kg ({(delta / baselineKg * 100).toFixed(0)}%) above budget
+              ▲ {delta.toFixed(2)} kg ({((delta / baselineKg) * 100).toFixed(0)}%) above budget
             </span>
           ) : (
             <span>Exact match with your daily lifestyle profile</span>
@@ -343,4 +344,3 @@ export function EmissionGauge({
     </div>
   );
 }
-

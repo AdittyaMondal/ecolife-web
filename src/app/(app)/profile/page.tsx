@@ -95,7 +95,10 @@ export default function ProfilePage() {
         <div className="relative h-28 sm:h-36 w-full bg-gradient-to-r from-secondary via-forest-800 to-forest-700">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-black/20" />
           <div className="absolute top-3 right-3 flex items-center gap-2">
-            <Badge tone="positive" className="bg-forest-900/80 text-lime-300 border border-lime-400/30 backdrop-blur-xs">
+            <Badge
+              tone="positive"
+              className="bg-forest-900/80 text-lime-300 border border-lime-400/30 backdrop-blur-xs"
+            >
               ✓ Verified Member
             </Badge>
           </div>
@@ -133,7 +136,9 @@ export default function ProfilePage() {
               <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
                 {p.user.name}
               </h1>
-              <p className="text-sm font-medium text-muted-foreground">{me.data?.email ?? 'Member'}</p>
+              <p className="text-sm font-medium text-muted-foreground">
+                {me.data?.email ?? 'Member'}
+              </p>
             </div>
 
             {/* Metadata Pills Row */}

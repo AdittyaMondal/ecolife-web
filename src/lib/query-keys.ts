@@ -48,4 +48,8 @@ export const qk = {
   publicProfile: (id: number) => [...root, 'users', id] as const,
   notifications: () => [...root, 'notifications'] as const,
   methodology: () => [...root, 'methodology'] as const,
+
+  organization: () => [...root, 'organization'] as const,
+  myOrganization: () => [...root, 'organization', 'me'] as const,
+  orgMembers: (id: number) => [...root, 'organization', id, 'members'] as const,
 };

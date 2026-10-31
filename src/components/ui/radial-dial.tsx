@@ -197,7 +197,14 @@ export function RadialDial({
           ))}
 
           {/* Center Hub Display */}
-          <circle cx={cx} cy={cy} r={r - 18} fill="var(--card)" stroke="var(--border)" strokeWidth="1.5" />
+          <circle
+            cx={cx}
+            cy={cy}
+            r={r - 18}
+            fill="var(--card)"
+            stroke="var(--border)"
+            strokeWidth="1.5"
+          />
 
           {/* Draggable Knob Handle */}
           <g filter="url(#knobShadow)">
@@ -291,4 +298,3 @@ export function RadialDial({
     </div>
   );
 }
-

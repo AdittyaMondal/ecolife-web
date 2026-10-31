@@ -282,11 +282,15 @@
 }
 
 @utility shadow-subtle {
-  box-shadow: 0 1px 3px rgba(26, 33, 25, 0.04), 0 6px 16px -4px rgba(26, 33, 25, 0.04);
+  box-shadow:
+    0 1px 3px rgba(26, 33, 25, 0.04),
+    0 6px 16px -4px rgba(26, 33, 25, 0.04);
 }
 
 @utility shadow-hover {
-  box-shadow: 0 4px 12px rgba(26, 33, 25, 0.06), 0 12px 28px -6px rgba(26, 33, 25, 0.06);
+  box-shadow:
+    0 4px 12px rgba(26, 33, 25, 0.06),
+    0 12px 28px -6px rgba(26, 33, 25, 0.06);
 }
 
 @utility glass-card {

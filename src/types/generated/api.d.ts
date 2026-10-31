@@ -3653,6 +3653,794 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/organizations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Register an organization
+         * @description Creates it as `pending` and makes the caller its owner. It stays unusable until an admin approves it — anyone can claim to be a corporate partner at signup.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateOrganizationBody"];
+                };
+            };
+            responses: {
+                /** @description Created, pending review */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: components["schemas"]["Organization"];
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Validation failed */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/organizations/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The caller's own organization, if any */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Own organization, or nulls */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: components["schemas"]["MyOrganization"];
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/organizations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Edit an organization (owner only)
+         * @description `type` and `status` are deliberately not editable: a seller must not re-badge itself as an NGO after approval, and nobody approves themselves.
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["UpdateOrganizationBody"];
+                };
+            };
+            responses: {
+                /** @description Updated */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: components["schemas"]["Organization"];
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Validation failed */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/api/v1/organizations/{id}/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Roster — any member may read it */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Members */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: components["schemas"]["OrganizationMemberList"];
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /**
+         * Add a member by email (owner only)
+         * @description The person must already have an account. One organization per user.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["AddOrganizationMemberBody"];
+                };
+            };
+            responses: {
+                /** @description Members after the change */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: components["schemas"]["OrganizationMemberList"];
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Validation failed */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/organizations/{id}/members/{userId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Remove another member (owner only)
+         * @description To remove yourself, use DELETE /organizations/me/membership — the answer differs, because someone who has just left cannot read the roster they are no longer on. The last owner cannot be removed either way.
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                    userId: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Members after the change */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: components["schemas"]["OrganizationMemberList"];
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Domain rule violation */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/organizations/me/membership": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Leave your organization
+         * @description Anyone may leave, except the last owner. Members are ADDED by an owner rather than invited, so this is how someone who did not ask to be enrolled gets out — and since a person may belong to only one organization, being enrolled also blocks them from creating their own until they do.
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Left */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: components["schemas"]["LeaveOrganizationResult"];
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Domain rule violation */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/organizations/join": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Join an organization using its code or slug */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["JoinOrganizationBody"];
+                };
+            };
+            responses: {
+                /** @description Joined successfully */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: components["schemas"]["JoinOrganizationResult"];
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Validation failed */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/organizations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Review queue (admin only)
+         * @description Filter by `status=pending` for the queue. `reviewNote` is visible here only.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    status?: "pending" | "approved" | "rejected" | "suspended";
+                    /** @description Corporate · Community · Seller portal */
+                    type?: "industry" | "ngo" | "seller";
+                    cursor?: string;
+                    limit?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Organizations */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: {
+                                items: components["schemas"]["Organization"][];
+                                pageInfo: components["schemas"]["PageInfo"];
+                            };
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Validation failed */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/organizations/{id}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Approve, reject, suspend or reinstate (admin only)
+         * @description A rejection or suspension requires a note — a decision a human has to defend later should be explained while they still remember why.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ReviewOrganizationBody"];
+                };
+            };
+            responses: {
+                /** @description Reviewed */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: components["schemas"]["Organization"];
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Validation failed */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Domain rule violation */
+                422: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/notifications": {
         parameters: {
             query?: never;
@@ -5187,6 +5975,147 @@ export interface components {
         CoHostBody: {
             /** @example 9 */
             userId: number;
+        };
+        Organization: {
+            /** @example 7 */
+            id: number;
+            /** @example acme-industries */
+            slug: string;
+            /** @example Acme Industries */
+            name: string;
+            /**
+             * @description Corporate · Community · Seller portal
+             * @example industry
+             * @enum {string}
+             */
+            type: "industry" | "ngo" | "seller";
+            /**
+             * @example pending
+             * @enum {string}
+             */
+            status: "pending" | "approved" | "rejected" | "suspended";
+            /** @example Packaging, 400 staff in Pune. */
+            description: string | null;
+            logoUrl: string | null;
+            /** @example https://acme.example.com */
+            websiteUrl: string | null;
+            /** @example green@acme.example.com */
+            contactEmail: string | null;
+            /** @example +912012345678 */
+            contactPhone: string | null;
+            /** @example Pune */
+            city: string | null;
+            /** @example IN-MH */
+            regionCode: string | null;
+            /** @example 12 */
+            memberCount: number;
+            /** @example null */
+            reviewNote: string | null;
+            /** @example null */
+            reviewedAt: string | null;
+            /** @example 2026-11-01T09:00:00.000Z */
+            createdAt: string;
+        };
+        CreateOrganizationBody: {
+            /** @example Acme Industries */
+            name: string;
+            /**
+             * @description Corporate · Community · Seller portal
+             * @example industry
+             * @enum {string}
+             */
+            type: "industry" | "ngo" | "seller";
+            description?: string;
+            /** Format: uri */
+            websiteUrl?: string;
+            /** Format: email */
+            contactEmail?: string;
+            contactPhone?: string;
+            city?: string;
+            regionCode?: string;
+        };
+        MyOrganization: {
+            organization: components["schemas"]["Organization"] | null;
+            role: ("owner" | "member") | null;
+        };
+        UpdateOrganizationBody: {
+            /** @example Acme Industries */
+            name?: string;
+            description?: string;
+            /** Format: uri */
+            websiteUrl?: string;
+            /** Format: email */
+            contactEmail?: string;
+            contactPhone?: string;
+            city?: string;
+            regionCode?: string;
+            /**
+             * Format: uri
+             * @example https://cdn.ecolife.app/avatars/abc123.webp
+             */
+            logoUrl?: string | null;
+        };
+        OrganizationMemberList: {
+            organization: components["schemas"]["Organization"];
+            items: components["schemas"]["OrganizationMember"][];
+        };
+        OrganizationMember: {
+            user: components["schemas"]["UserSummary"];
+            /**
+             * @example owner
+             * @enum {string}
+             */
+            role: "owner" | "member";
+            /** @example 2026-11-01T09:00:00.000Z */
+            joinedAt: string;
+            /** @example 450 */
+            pointsTotal?: number;
+            /** @example 6.8 */
+            baselineTotalKg?: number | null;
+        };
+        AddOrganizationMemberBody: {
+            /**
+             * Format: email
+             * @description Must already have an account
+             * @example colleague@acme.example.com
+             */
+            email: string;
+            /**
+             * @default member
+             * @example owner
+             * @enum {string}
+             */
+            role: "owner" | "member";
+        };
+        LeaveOrganizationResult: {
+            /** @enum {boolean} */
+            left: true;
+        };
+        JoinOrganizationResult: {
+            /** @enum {boolean} */
+            joined: true;
+            organization: components["schemas"]["Organization"];
+            /**
+             * @example owner
+             * @enum {string}
+             */
+            role: "owner" | "member";
+        };
+        JoinOrganizationBody: {
+            /**
+             * @description Organization code or slug
+             * @example acme-industries
+             */
+            code: string;
+        };
+        ReviewOrganizationBody: {
+            /**
+             * @example approve
+             * @enum {string}
+             */
+            decision: "approve" | "reject" | "suspend" | "reinstate";
+            /** @example GST certificate checked. */
+            note?: string;
         };
         Notification: {
             /** @example 44 */

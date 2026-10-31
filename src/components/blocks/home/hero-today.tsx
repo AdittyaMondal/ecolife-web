@@ -1,4 +1,14 @@
-import { ArrowRight, Car, Droplets, Flame, Info, Sparkles, Trash2, Utensils, Zap } from 'lucide-react';
+import {
+  ArrowRight,
+  Car,
+  Droplets,
+  Flame,
+  Info,
+  Sparkles,
+  Trash2,
+  Utensils,
+  Zap,
+} from 'lucide-react';
 import Link from 'next/link';
 import { EmissionGauge } from '@/components/blocks/home/emission-gauge';
 import { Badge } from '@/components/ui/badge';
@@ -29,7 +39,10 @@ export function HeroToday({ today }: HeroTodayProps) {
                 Vehicle Emission Speedometer
               </span>
             </div>
-            <CardTitle id="hero-today-heading" className="text-xl sm:text-2xl font-bold tracking-tight">
+            <CardTitle
+              id="hero-today-heading"
+              className="text-xl sm:text-2xl font-bold tracking-tight"
+            >
               Live Carbon Tachometer
             </CardTitle>
           </div>
@@ -136,8 +149,8 @@ export function HeroToday({ today }: HeroTodayProps) {
           <div className="flex items-center gap-2 rounded-xs border border-tertiary/40 bg-accent/40 px-3.5 py-2 text-xs text-accent-foreground">
             <Info className="size-4 shrink-0 text-positive" />
             <span>
-              Values currently estimated from your baseline lifestyle answers. Fill today’s 5 questions
-              to calibrate with exact daily habits.
+              Values currently estimated from your baseline lifestyle answers. Fill today’s 5
+              questions to calibrate with exact daily habits.
             </span>
           </div>
         )}

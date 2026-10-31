@@ -249,9 +249,7 @@ export default function TrackPage() {
                     <span className="flex size-5 items-center justify-center rounded-full bg-primary text-primary-foreground text-[11px] font-bold">
                       {activeStep + 1}
                     </span>
-                    <span className="text-foreground text-sm font-bold">
-                      {currentStep.title}
-                    </span>
+                    <span className="text-foreground text-sm font-bold">{currentStep.title}</span>
                   </div>
                   <span className="tabular">
                     Question {activeStep + 1} of {totalSteps}

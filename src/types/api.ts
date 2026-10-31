@@ -12,3 +12,13 @@ export type UserSummary = Schema<'UserSummary'>;
 export type Breakdown = Schema<'Breakdown'>;
 export type RewardGrant = Schema<'RewardGrant'>;
 export type Streak = Schema<'Streak'>;
+
+export type Organization = Schema<'Organization'>;
+export type MyOrganization = Schema<'MyOrganization'>;
+export type CreateOrganizationBody = Schema<'CreateOrganizationBody'>;
+export type UpdateOrganizationBody = Schema<'UpdateOrganizationBody'>;
+export type OrganizationMemberList = Schema<'OrganizationMemberList'>;
+export type OrganizationMember = Schema<'OrganizationMember'>;
+export type AddOrganizationMemberBody = Schema<'AddOrganizationMemberBody'>;
+export type JoinOrganizationBody = Schema<'JoinOrganizationBody'>;
+export type JoinOrganizationResult = Schema<'JoinOrganizationResult'>;
