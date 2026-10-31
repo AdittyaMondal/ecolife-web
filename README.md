@@ -107,6 +107,15 @@ grep -rho 'NEXT_PUBLIC_[A-Z_]*' src/ | sort -u    # every name here needs a Dock
 read server-side at runtime by `src/lib/api.ts`, so they belong in Environment and a
 restart picks them up.
 
+### Builds locally, fails on the build host
+
+`public/` must stay tracked in git — that is all `public/.gitkeep` is for. Git cannot store
+an empty directory, so while `public/` held no assets it existed on every developer's disk
+but not in a fresh clone, and `COPY --from=builder /app/public ./public` failed with
+`"/app/public": not found` on Dokploy while building fine locally. Any local build is a
+weak test of the Dockerfile for exactly this reason; `git clone` to a temp directory and
+build *that* if a COPY is in question.
+
 ### Dokploy settings
 
 Create an **Application** (not a Compose service) and set Build Type to **Dockerfile**:

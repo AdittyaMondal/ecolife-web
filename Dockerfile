@@ -52,6 +52,12 @@ RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001 -G nodejs
 # `output: 'standalone'` in next.config.ts emits a self-contained server.js plus
 # only the node_modules it actually traced, so this stage carries no pnpm store
 # and no devDependencies.
+
+# `public/` must stay TRACKED IN GIT, which is what `public/.gitkeep` is for.
+# Git cannot store an empty directory, so while `public/` held no assets it
+# existed on developer machines but not in a fresh clone — this COPY then failed
+# with `"/app/public": not found`, but only on the build host, never locally.
+# Delete .gitkeep once there are real assets beside it; not while it is alone.
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
