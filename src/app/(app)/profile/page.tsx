@@ -3,16 +3,19 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import {
   Award,
+  Check,
   Coins,
   Download,
   Edit3,
   Flame,
   Leaf,
   LogOut,
+  MapPin,
   RefreshCw,
   ShieldAlert,
   Sparkles,
   Trash2,
+  User,
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -25,7 +28,7 @@ import { ModalDialog } from '@/components/ui/dialog';
 import { ErrorBanner } from '@/components/ui/error-banner';
 import { Input, Select } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useLogout } from '@/hooks/use-auth';
+import { meQuery, useLogout } from '@/hooks/use-auth';
 import {
   downloadExport,
   type OwnProfile,
@@ -40,6 +43,7 @@ import { formatDateLong, formatKg, formatNumber, initials, titleCase } from '@/l
 export default function ProfilePage() {
   const router = useRouter();
   const profile = useQuery(profileQuery());
+  const me = useQuery(meQuery());
   const rewards = useInfiniteQuery(rewardsInfiniteQuery());
   const logout = useLogout();
 
@@ -85,97 +89,163 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-6">
-      {/* Profile Hero Card */}
-      <Card className="p-6">
-        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-          <div className="flex items-center gap-4">
-            <div className="flex size-16 shrink-0 items-center justify-center rounded-sm bg-primary text-xl font-extrabold text-primary-foreground">
+      {/* Typical Social/Dashboard Profile Hero Card with Centered PFP */}
+      <Card className="overflow-hidden border-border/80 shadow-sm">
+        {/* Top Decorative Canopy Banner */}
+        <div className="relative h-28 sm:h-36 w-full bg-gradient-to-r from-secondary via-forest-800 to-forest-700">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-black/20" />
+          <div className="absolute top-3 right-3 flex items-center gap-2">
+            <Badge tone="positive" className="bg-forest-900/80 text-lime-300 border border-lime-400/30 backdrop-blur-xs">
+              ✓ Verified Member
+            </Badge>
+          </div>
+        </div>
+
+        {/* Centered Avatar and Profile Details */}
+        <div className="px-6 pb-6 pt-0">
+          <div className="flex flex-col items-center text-center">
+            {/* Centered PFP with Concentric Ring */}
+            <div className="relative -mt-14 sm:-mt-16 flex size-24 sm:size-28 items-center justify-center rounded-full bg-primary text-2xl sm:text-3xl font-black text-primary-foreground shadow-md ring-4 ring-card select-none">
               {p.user.avatarUrl ? (
                 <Image
                   src={p.user.avatarUrl}
                   alt={p.user.name}
-                  width={64}
-                  height={64}
+                  width={112}
+                  height={112}
                   unoptimized
-                  className="size-full rounded-sm object-cover"
+                  className="size-full rounded-full object-cover"
                 />
               ) : (
                 initials(p.user.name)
               )}
+
+              {/* Verified Badge Icon Overlapping Avatar Bottom Right */}
+              <div
+                className="absolute bottom-0 right-0 flex size-7 items-center justify-center rounded-full bg-secondary text-primary shadow-xs ring-2 ring-card"
+                title="Verified EcoLife Account"
+              >
+                <Check className="size-4 stroke-[3]" aria-hidden="true" />
+              </div>
             </div>
 
-            <div className="space-y-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-2xl font-bold tracking-tight text-foreground">{p.user.name}</h1>
-                <Badge tone="positive">Member since {formatDateLong(p.memberSince)}</Badge>
+            {/* User Title & Handle */}
+            <div className="mt-3 space-y-1">
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+                {p.user.name}
+              </h1>
+              <p className="text-sm font-medium text-muted-foreground">{me.data?.email ?? 'Member'}</p>
+            </div>
+
+            {/* Metadata Pills Row */}
+            <div className="mt-2.5 flex flex-wrap items-center justify-center gap-2 text-xs text-muted-foreground">
+              <span className="inline-flex items-center gap-1 rounded-full border border-border/80 bg-muted/40 px-2.5 py-1">
+                <MapPin className="size-3 text-positive" />
+                <span>
+                  {p.user.city ?? p.answers.city ?? 'Mumbai'}, {p.answers.regionCode ?? 'IN-MH'}
+                </span>
+              </span>
+
+              <span className="inline-flex items-center gap-1 rounded-full border border-border/80 bg-muted/40 px-2.5 py-1">
+                <Leaf className="size-3 text-positive" />
+                <span>Member since {formatDateLong(p.memberSince)}</span>
+              </span>
+
+              <span className="inline-flex items-center gap-1 rounded-full border border-border/80 bg-muted/40 px-2.5 py-1">
+                <User className="size-3 text-positive" />
+                <span className="capitalize">{me.data?.role ?? 'User'} Account</span>
+              </span>
+            </div>
+
+            {/* Centered Profile Action Buttons */}
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => setEditOpen(true)}
+                className="shadow-2xs active:scale-[0.98]"
+              >
+                <Edit3 className="size-3.5" />
+                <span>Edit Profile &amp; Lifestyle</span>
+              </Button>
+
+              <Link href="/step/1">
+                <Button variant="outline" size="sm" className="active:scale-[0.98]">
+                  <RefreshCw className="size-3.5" />
+                  <span>Retake 15-Q Survey</span>
+                </Button>
+              </Link>
+
+              <Button
+                variant="outline"
+                size="sm"
+                loading={exporting}
+                onClick={handleExport}
+                className="active:scale-[0.98]"
+              >
+                <Download className="size-3.5" />
+                <span>Export Data (JSON)</span>
+              </Button>
+
+              <Button
+                variant="secondary"
+                size="sm"
+                loading={logout.isPending}
+                onClick={handleLogout}
+                className="active:scale-[0.98]"
+              >
+                <LogOut className="size-3.5" />
+                <span>Sign Out</span>
+              </Button>
+            </div>
+          </div>
+
+          {/* Concentric 4-Metric Grid */}
+          <div className="mt-8 grid gap-3 sm:grid-cols-4">
+            <div className="rounded-sm border border-border bg-muted/30 p-4 text-center shadow-2xs transition hover:border-tertiary/50">
+              <div className="flex items-center justify-center gap-1.5 text-xs font-semibold text-muted-foreground">
+                <Sparkles className="size-3.5 text-positive" />
+                <span>Total EcoPoints</span>
               </div>
-              <p className="text-xs text-muted-foreground">
-                {p.user.city ?? p.answers.city ?? 'Community member'} · Grid region{' '}
-                {p.answers.regionCode ?? 'IN-MH'} · Timezone {p.timezone}
+              <p className="mt-1 text-2xl font-extrabold tabular-nums text-foreground">
+                {formatNumber(p.wallet.pointsTotal)}
+              </p>
+              <p className="text-[11px] text-muted-foreground">Determines leaderboard rank</p>
+            </div>
+
+            <div className="rounded-sm border border-border bg-muted/30 p-4 text-center shadow-2xs transition hover:border-tertiary/50">
+              <div className="flex items-center justify-center gap-1.5 text-xs font-semibold text-muted-foreground">
+                <Coins className="size-3.5 text-positive" />
+                <span>EcoCoins Balance</span>
+              </div>
+              <p className="mt-1 text-2xl font-extrabold tabular-nums text-foreground">
+                {formatNumber(p.wallet.coinsBalance)}
+              </p>
+              <p className="text-[11px] text-muted-foreground">
+                Worth ₹{(p.wallet.coinsBalance / 10).toFixed(0)} in marketplace
               </p>
             </div>
-          </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
-              <Edit3 className="size-3.5" />
-              Edit Profile & Lifestyle
-            </Button>
-            <Link href="/step/1">
-              <Button variant="secondary" size="sm">
-                <RefreshCw className="size-3.5" />
-                Retake 15-Q Survey
-              </Button>
-            </Link>
-          </div>
-        </div>
-
-        {/* Concentric Wallet & Baseline Summary Grid */}
-        <div className="mt-5 grid gap-3 sm:grid-cols-4">
-          <div className="rounded-sm border border-border bg-muted/30 p-3.5">
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
-              <Sparkles className="size-3.5 text-positive" />
-              <span>Total EcoPoints</span>
+            <div className="rounded-sm border border-border bg-muted/30 p-4 text-center shadow-2xs transition hover:border-tertiary/50">
+              <div className="flex items-center justify-center gap-1.5 text-xs font-semibold text-muted-foreground">
+                <Leaf className="size-3.5 text-positive" />
+                <span>Daily Baseline</span>
+              </div>
+              <p className="mt-1 text-2xl font-extrabold tabular-nums text-foreground">
+                {formatKg(baseline.totalKg)} kg
+              </p>
+              <p className="text-[11px] text-muted-foreground">CO₂e / day benchmark</p>
             </div>
-            <p className="mt-1 text-2xl font-extrabold tabular-nums text-foreground">
-              {formatNumber(p.wallet.pointsTotal)}
-            </p>
-            <p className="text-[11px] text-muted-foreground">Determines leaderboard rank</p>
-          </div>
 
-          <div className="rounded-sm border border-border bg-muted/30 p-3.5">
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
-              <Coins className="size-3.5 text-positive" />
-              <span>EcoCoins Balance</span>
+            <div className="rounded-sm border border-border bg-muted/30 p-4 text-center shadow-2xs transition hover:border-tertiary/50">
+              <div className="flex items-center justify-center gap-1.5 text-xs font-semibold text-muted-foreground">
+                <Flame className="size-3.5 text-positive" />
+                <span>Annual Footprint</span>
+              </div>
+              <p className="mt-1 text-2xl font-extrabold tabular-nums text-foreground">
+                {annualTonnes.toFixed(2)} t
+              </p>
+              <p className="text-[11px] text-muted-foreground">Tonnes CO₂e / year</p>
             </div>
-            <p className="mt-1 text-2xl font-extrabold tabular-nums text-foreground">
-              {formatNumber(p.wallet.coinsBalance)}
-            </p>
-            <p className="text-[11px] text-muted-foreground">
-              Worth ₹{(p.wallet.coinsBalance / 10).toFixed(0)} in discounts
-            </p>
-          </div>
-
-          <div className="rounded-sm border border-border bg-muted/30 p-3.5">
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
-              <Leaf className="size-3.5 text-positive" />
-              <span>Daily Baseline</span>
-            </div>
-            <p className="mt-1 text-2xl font-extrabold tabular-nums text-foreground">
-              {formatKg(baseline.totalKg)} kg
-            </p>
-            <p className="text-[11px] text-muted-foreground">CO₂e / day benchmark</p>
-          </div>
-
-          <div className="rounded-sm border border-border bg-muted/30 p-3.5">
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
-              <Flame className="size-3.5 text-positive" />
-              <span>Annual Footprint</span>
-            </div>
-            <p className="mt-1 text-2xl font-extrabold tabular-nums text-foreground">
-              {annualTonnes.toFixed(2)} t
-            </p>
-            <p className="text-[11px] text-muted-foreground">Tonnes CO₂e / year</p>
           </div>
         </div>
       </Card>

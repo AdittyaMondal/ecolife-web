@@ -31,6 +31,7 @@ import {
   eventsInfiniteQuery,
 } from '@/hooks/use-events';
 import { formatDateTimeRange, initials } from '@/lib/format';
+import { getEventCoverUrl } from '@/lib/images';
 
 const FILTER_TABS: { value: EventFilter; label: string }[] = [
   { value: 'upcoming', label: 'Upcoming' },
@@ -170,47 +171,41 @@ export default function EventsPage() {
         />
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {allEvents.map((ev) => {
               const capacityPct =
                 ev.capacity > 0
                   ? Math.min(100, Math.round((ev.registeredCount / ev.capacity) * 100))
                   : 0;
               const isCheckedIn = ev.viewer.passStatus === 'checked_in';
+              const coverImg = getEventCoverUrl(ev);
 
               return (
                 <Card
                   key={ev.id}
                   variant="media"
-                  className="flex flex-col justify-between transition hover:border-primary/60"
+                  className="flex flex-col justify-between transition-all duration-300 hover:border-primary/80 hover:shadow-hover hover:-translate-y-0.5"
                 >
                   <div>
                     {/* Concentric Cover Image: outer Card rounded-lg (28px) + p-2 (8px) -> inner rounded-md (20px) */}
                     <Link
                       href={`/events/${ev.slug}`}
-                      className="group relative block h-44 w-full overflow-hidden rounded-md border border-border/60 bg-secondary"
+                      className="group relative block aspect-[16/10] w-full overflow-hidden rounded-md border border-border/70 bg-muted/40 shadow-subtle"
                     >
-                      {ev.coverUrl ? (
-                        <Image
-                          src={ev.coverUrl}
-                          alt={ev.title}
-                          fill
-                          unoptimized
-                          className="object-cover transition duration-300 group-hover:scale-105"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full flex-col justify-between bg-secondary p-4 text-secondary-foreground">
-                          <div className="flex justify-end">
-                            <Trees className="size-10 text-primary/40" aria-hidden="true" />
-                          </div>
-                          <p className="text-xs font-semibold uppercase tracking-wider text-primary">
-                            {EVENT_TYPE_LABEL[ev.type] ?? ev.type}
-                          </p>
-                        </div>
-                      )}
+                      <Image
+                        src={coverImg}
+                        alt={ev.title}
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
 
-                      <div className="absolute left-2.5 top-2.5 flex flex-wrap gap-1.5">
-                        <Badge tone="primary">{EVENT_TYPE_LABEL[ev.type] ?? ev.type}</Badge>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-70 transition-opacity group-hover:opacity-50" />
+
+                      <div className="absolute left-2.5 top-2.5 flex flex-wrap gap-1.5 z-10">
+                        <Badge tone="primary" className="font-semibold shadow-subtle">
+                          {EVENT_TYPE_LABEL[ev.type] ?? ev.type}
+                        </Badge>
                         {ev.viewer.isHost && <Badge tone="positive">Hosting</Badge>}
                         {!ev.viewer.isHost && ev.viewer.isCoHost && (
                           <Badge tone="positive">Co-host</Badge>
@@ -222,7 +217,7 @@ export default function EventsPage() {
                           </Badge>
                         ) : (
                           ev.viewer.registered && (
-                            <Badge tone="neutral">
+                            <Badge tone="neutral" className="backdrop-blur-md bg-card/90">
                               <QrCode className="size-3" />
                               Pass ready
                             </Badge>

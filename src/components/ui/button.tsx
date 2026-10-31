@@ -10,17 +10,17 @@ import { cn } from '@/lib/utils';
  * use `rounded-xs` (8px = 12 − 4).
  */
 export const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 font-semibold transition active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50',
+  'inline-flex items-center justify-center gap-2 font-semibold transition-all duration-200 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer',
   {
     variants: {
       variant: {
-        primary: 'bg-primary text-primary-foreground hover:bg-tertiary',
-        secondary: 'bg-secondary text-secondary-foreground hover:bg-forest-600',
-        tertiary: 'bg-tertiary text-tertiary-foreground hover:bg-primary',
+        primary: 'bg-primary text-primary-foreground hover:bg-tertiary shadow-subtle hover:shadow',
+        secondary: 'bg-secondary text-secondary-foreground hover:bg-forest-600 shadow-subtle',
+        tertiary: 'bg-tertiary text-tertiary-foreground hover:bg-primary shadow-subtle',
         outline:
-          'border border-input bg-card text-foreground hover:border-tertiary hover:bg-accent/50',
+          'border border-border bg-card text-foreground hover:border-primary/60 hover:bg-accent/40 shadow-subtle',
         ghost: 'text-foreground hover:bg-muted',
-        destructive: 'bg-destructive text-destructive-foreground hover:opacity-90',
+        destructive: 'bg-destructive text-destructive-foreground hover:opacity-90 shadow-subtle',
       },
       size: {
         default: 'min-h-11 rounded-sm px-4 py-2.5 text-sm',

@@ -22,6 +22,7 @@ import {
   Users,
   XCircle,
 } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import * as React from 'react';
@@ -50,6 +51,7 @@ import {
   useUpdateEvent,
 } from '@/hooks/use-events';
 import { formatDateTimeRange, formatTime, initials, titleCase } from '@/lib/format';
+import { getEventCoverUrl } from '@/lib/images';
 
 export default function EventDetailPage() {
   const params = useParams<{ slug: string }>();
@@ -141,15 +143,32 @@ function EventOverviewCard({ event: ev }: { event: EventItem }) {
     ev.capacity > 0 ? Math.min(100, Math.round((ev.registeredCount / ev.capacity) * 100)) : 0;
 
   return (
-    <Card className="p-6 space-y-5">
+    <Card className="p-6 space-y-6 shadow-subtle overflow-hidden">
+      {/* Cover Image Banner */}
+      <div className="relative -mx-6 -mt-6 h-64 sm:h-80 w-[calc(100%+3rem)] overflow-hidden bg-muted/40">
+        <Image
+          src={getEventCoverUrl(ev)}
+          alt={ev.title}
+          fill
+          priority
+          sizes="(max-width: 1024px) 100vw, 1200px"
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
+        <div className="absolute bottom-4 left-6 right-6 flex flex-wrap items-end justify-between gap-4">
+          <div className="space-y-1.5 text-white">
+            <span className="inline-flex rounded-full bg-white/20 backdrop-blur-md px-3 py-1 text-xs font-bold uppercase tracking-wider text-white">
+              {EVENT_TYPE_LABEL[ev.type] ?? ev.type}
+            </span>
+            <h1 className="text-2xl font-extrabold tracking-tight text-white sm:text-4xl drop-shadow-sm">
+              {ev.title}
+            </h1>
+          </div>
+        </div>
+      </div>
+
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="space-y-2 max-w-2xl">
-          <p className="text-xs font-semibold uppercase tracking-wider text-positive">
-            {EVENT_TYPE_LABEL[ev.type] ?? ev.type}
-          </p>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-            {ev.title}
-          </h1>
+        <div className="space-y-2 max-w-3xl">
           <p className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
             {ev.description}
           </p>

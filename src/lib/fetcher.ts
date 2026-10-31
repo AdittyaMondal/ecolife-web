@@ -9,15 +9,18 @@
 import { CLIENT_ERROR_CODES, httpStatusMessage, readEnvelope } from './response-envelope';
 import { clearSession, getAccessToken, hasSessionHint, type Session, setSession } from './session';
 
-/** Trailing slashes trimmed so `${base}${path}` never doubles up. */
-export const API_BASE = (process.env.NEXT_PUBLIC_API_URL || '/api').replace(/\/+$/, '');
+/** Trailing slashes trimmed so `${base}${path}` never doubles up. Defaults to local ecolife-server (:4000). */
+export const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api/v1').replace(
+  /\/+$/,
+  '',
+);
 
 /**
  * Fallback bearer token used ONLY while pointing at the local Prism mock
- * (`localhost:40xx`), so any screen can be browsed directly in development
- * even before signing in. Anchored to loopback only.
+ * (`localhost:4010`), so any screen can be browsed directly in development
+ * even before signing in. Real `ecolife-server` on `:4000` uses real JWTs.
  */
-const LOOPBACK_MOCK_URL = /^https?:\/\/(?:localhost|127\.0\.0\.1)(?::40\d{2})(?:[/?#]|$)/;
+const LOOPBACK_MOCK_URL = /^https?:\/\/(?:localhost|127\.0\.0\.1):4010(?:[/?#]|$)/;
 
 const MOCK_BEARER =
   process.env.NODE_ENV !== 'production' &&

@@ -15,10 +15,10 @@ export function WeekTrend({ week }: WeekTrendProps) {
   const maxKg = hasData ? Math.max(...sparkline.map((d) => d.totalKg)) : 1;
   const range = maxKg === minKg ? 1 : maxKg - minKg;
 
-  const width = 280;
-  const height = 64;
-  const padX = 12;
-  const padY = 10;
+  const width = 600;
+  const height = 100;
+  const padX = 20;
+  const padY = 16;
   const plotWidth = width - padX * 2;
   const plotHeight = height - padY * 2;
 
@@ -51,10 +51,10 @@ export function WeekTrend({ week }: WeekTrendProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         {hasData && (
-          <div className="w-full rounded-sm border border-border bg-muted/40 p-3">
+          <div className="w-full rounded-sm border border-border/80 bg-muted/30 p-4 shadow-subtle">
             <svg
               viewBox={`0 0 ${width} ${height}`}
-              className="h-20 w-full overflow-visible"
+              className="h-28 sm:h-32 w-full overflow-visible"
               role="img"
               aria-label={`Emissions sparkline for the past 7 days, ranging from ${minKg.toFixed(1)} kg to ${maxKg.toFixed(1)} kg CO2e`}
             >

@@ -8,10 +8,10 @@ The source of truth is [`src/app/globals.css`](src/app/globals.css). Tailwind 4 
 
 | Role | Hex | Token | Typical Use |
 | --- | --- | --- | --- |
-| **Primary** | `#A8DB36` | `--primary` / `--color-lime-400` | Primary actions, active segments, progress fills, highlights |
-| **Secondary** | `#244D36` | `--secondary` / `--color-forest-700` | Deep forest feature surfaces, secondary buttons, structural accents |
-| **Tertiary** | `#83C43C` | `--tertiary` / `--color-lime-500` | Hover states, chart series, supporting active accents |
-| **Neutral** | `#202820` | `--foreground` / `--color-neutral-900` | Primary typography, high-contrast ink on `#A8DB36`, dark surfaces |
+| **Primary** | `#7EBF52` | `--primary` / `--color-lime-500` | Primary actions, active segments, progress fills, highlights |
+| **Secondary** | `#1E4732` | `--secondary` / `--color-forest-700` | Deep forest feature surfaces, secondary buttons, structural accents |
+| **Tertiary** | `#9FD475` | `--tertiary` / `--color-lime-400` | Hover states, chart series, supporting active accents |
+| **Neutral** | `#1A2119` | `--foreground` / `--color-neutral-900` | Primary typography, high-contrast ink on light surfaces |
 
 Supporting scales (`--color-lime-50..900`, `--color-forest-50..950`, `--color-neutral-50..950`) are derived directly from these four anchors.
 
@@ -39,15 +39,15 @@ All spacing and padding insets use a unified `4px` (`0.25rem`) grid:
 
 | Token | Light | Dark | Meaning |
 | --- | --- | --- | --- |
-| `--background` | `#F6F8F3` | `#141A14` | Page canvas |
-| `--foreground` | `#202820` | `#F1F5EE` | Primary ink (`Neutral #202820` in light mode) |
-| `--card` | `#FFFFFF` | `#202820` | Card surface |
-| `--primary` | `#A8DB36` | `#A8DB36` | Primary lime (`#A8DB36`) |
-| `--primary-foreground` | `#202820` | `#202820` | High-contrast neutral ink on `#A8DB36` |
-| `--secondary` | `#244D36` | `#244D36` | Deep forest (`#244D36`) |
-| `--secondary-foreground` | `#F6F8F3` | `#F6F8F3` | Crisp light text on `#244D36` |
-| `--tertiary` | `#83C43C` | `#83C43C` | Tertiary leaf green (`#83C43C`) |
-| `--positive` | `#244D36` | `#A8DB36` | Accessible positive text/icon token on light/dark cards |
-| `--border` | `#DCE3D6` | `#2E3D31` | Hairline structural border |
-| `--input` | `#637362` | `#5E7866` | WCAG 3:1 control boundary |
-| `--ring` | `#244D36` | `#A8DB36` | Focus ring |
+| `--background` | `#F8FAF6` | `#0F1511` | Page canvas |
+| `--foreground` | `#1A2119` | `#EDF3EA` | Primary ink (`Neutral #1A2119` in light mode) |
+| `--card` | `#FFFFFF` | `#162018` | Card surface |
+| `--primary` | `#7EBF52` | `#8ED464` | Pastel meadow leaf |
+| `--primary-foreground` | `#0F261A` | `#0F1E13` | High-contrast neutral ink on primary |
+| `--secondary` | `#1E4732` | `#1E4732` | Deep British pine |
+| `--secondary-foreground` | `#F2F7F4` | `#EDF7E2` | Crisp light text on secondary |
+| `--tertiary` | `#9FD475` | `#A5DC7C` | Warm pastel lime |
+| `--positive` | `#26693D` | `#8ED464` | Accessible positive text/icon token on light/dark cards |
+| `--border` | `#E2E9DE` | `#2A3C2F` | Hairline structural border |
+| `--input` | `#71826D` | `#5C7764` | WCAG 3:1 control boundary |
+| `--ring` | `#7EBF52` | `#8ED464` | Focus ring |

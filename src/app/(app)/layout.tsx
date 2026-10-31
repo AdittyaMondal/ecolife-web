@@ -90,7 +90,7 @@ function AppLayoutShell({ children }: { children: React.ReactNode }) {
           Inner items: rounded-sm (12px = 28 − 16). */}
       <aside
         aria-label="Primary navigation"
-        className="fixed top-4 bottom-4 left-4 z-30 hidden w-64 flex-col justify-between rounded-lg border border-border bg-card p-4 md:flex"
+        className="fixed top-4 bottom-4 left-4 z-30 hidden w-64 lg:w-72 flex-col justify-between rounded-lg border border-border bg-card/95 shadow-subtle backdrop-blur-md p-4 lg:p-5 md:flex"
       >
         <div className="flex flex-col gap-6">
           {/* Brand Header */}
@@ -334,11 +334,11 @@ function AppLayoutShell({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* Main Content Area */}
-      <div className="pb-28 md:pl-72 md:pb-10">
+      <div className="pb-28 md:pl-72 lg:pl-80 md:pb-12">
         {/* Email Verification Banner (AUTH_004: browsing allowed, earning blocked until verified) */}
         {me && !me.emailVerified && (
-          <div className="mx-auto mt-4 max-w-3xl px-4">
-            <div className="flex flex-col gap-3 rounded-lg border border-warning/40 bg-warning-surface p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mx-auto mt-4 max-w-5xl px-4 sm:px-8">
+            <div className="flex flex-col gap-3 rounded-lg border border-warning/40 bg-warning-surface p-4 sm:flex-row sm:items-center sm:justify-between shadow-subtle">
               <div className="flex items-start gap-3">
                 <span className="flex size-9 shrink-0 items-center justify-center rounded-sm bg-card text-warning">
                   <MailWarning className="size-5" aria-hidden="true" />
@@ -370,7 +370,7 @@ function AppLayoutShell({ children }: { children: React.ReactNode }) {
           </div>
         )}
 
-        <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6">
+        <div className="mx-auto max-w-7xl 2xl:max-w-[1536px] px-4 sm:px-8 lg:px-10 py-6 sm:py-8">
           <React.Suspense fallback={null}>{children}</React.Suspense>
         </div>
       </div>

@@ -21,14 +21,14 @@ export const Card = React.forwardRef<HTMLElement, CardProps>(
       <Component
         ref={ref as React.Ref<HTMLDivElement>}
         className={cn(
-          'border border-border text-card-foreground transition-colors',
-          variant === 'default' && 'rounded-lg bg-card p-4',
-          variant === 'media' && 'rounded-lg bg-card p-2',
-          variant === 'feature' && 'rounded-xl bg-card p-6',
+          'border border-border text-card-foreground shadow-subtle transition-all duration-200',
+          variant === 'default' && 'rounded-lg bg-card p-4 sm:p-5',
+          variant === 'media' && 'rounded-lg bg-card p-2.5',
+          variant === 'feature' && 'rounded-xl bg-card p-6 sm:p-7 shadow-hover border-border/80',
           variant === 'secondary' &&
-            'rounded-lg border-secondary/30 bg-secondary p-4 text-secondary-foreground',
+            'rounded-lg border-secondary/40 bg-secondary p-5 text-secondary-foreground shadow-hover',
           variant === 'accent' &&
-            'rounded-lg border-tertiary/30 bg-accent p-4 text-accent-foreground',
+            'rounded-lg border-tertiary/40 bg-accent p-5 text-accent-foreground',
           className,
         )}
         {...props}
