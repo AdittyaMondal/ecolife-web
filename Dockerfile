@@ -17,11 +17,23 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # NEXT_PUBLIC_* values are INLINED INTO THE CLIENT BUNDLE AT BUILD TIME. Setting
-# this in the platform's runtime environment has no effect whatsoever — the
-# browser would get whatever was baked in here. It must be a build arg, and the
-# image must be rebuilt to point at a different API.
+# them in the platform's runtime environment has no effect whatsoever — the
+# browser gets whatever was baked in here. They must be build args, and the
+# image must be rebuilt to change one.
+#
+# EVERY NEXT_PUBLIC_* the code reads needs a line below, or it is frozen at its
+# in-code default with no way to configure it. To check nothing has drifted:
+#   grep -rho 'NEXT_PUBLIC_[A-Z_]*' src/ | sort -u
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
+# Must match SESSION_COOKIE_NAME in ecolife-server. Read by src/middleware.ts,
+# which is compiled for the edge runtime — so it is baked in like any other
+# NEXT_PUBLIC_*, not read from the environment at runtime. Left unset it falls
+# back to `ecolife_refresh`, which is also the server's default.
+ARG NEXT_PUBLIC_SESSION_COOKIE_NAME
+ENV NEXT_PUBLIC_SESSION_COOKIE_NAME=$NEXT_PUBLIC_SESSION_COOKIE_NAME
+
 ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN pnpm build
@@ -35,7 +47,7 @@ ENV NODE_ENV=production \
     HOSTNAME=0.0.0.0 \
     NEXT_TELEMETRY_DISABLED=1
 
-RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
+RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001 -G nodejs
 
 # `output: 'standalone'` in next.config.ts emits a self-contained server.js plus
 # only the node_modules it actually traced, so this stage carries no pnpm store

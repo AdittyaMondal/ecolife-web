@@ -79,24 +79,105 @@ response body is never shown to a user.
 
 ## Docker / Dokploy
 
-Verified by building and running the image locally (31/10/2026): all routes
-answer 200, the landing page renders, it runs as non-root `nextjs` (uid 1001),
-and it is 294 MB. Requires `output: 'standalone'` in `next.config.ts`.
+Multi-stage build on `node:22-alpine`, 297 MB, runs as non-root `nextjs` (uid 1001).
+Requires `output: 'standalone'` in `next.config.ts` — without it there is no `server.js`
+for the runner stage to copy and the image will not start.
 
 ```bash
-docker build -t ecolife-web --build-arg NEXT_PUBLIC_API_URL=https://api.example.com/api/v1 .
-docker run -p 3000:3000 ecolife-web
+docker build -t ecolife-web \
+  --build-arg NEXT_PUBLIC_API_URL=https://api.example.com/api/v1 .
+docker run -p 3000:3000 -e API_URL_INTERNAL=http://ecolife-server:4000/api/v1 ecolife-web
 ```
 
 ### The one that will definitely catch you
 
 **`NEXT_PUBLIC_*` is baked into the client bundle at BUILD time.** Setting
-`NEXT_PUBLIC_API_URL` as a *runtime* environment variable in Dokploy has no
-effect at all — the browser gets whatever was compiled in. It must be passed as
-a **build argument**, and changing it requires a rebuild, not a restart.
+`NEXT_PUBLIC_API_URL` as a *runtime* environment variable has no effect at all — the browser
+gets whatever was compiled in. It must be passed as a **build argument**, and changing it
+takes a rebuild, not a restart. If the deployed app calls `localhost:4010`, this is why.
 
-In Dokploy: put it under **Build Args**, not Environment. If the deployed app
-tries to call `localhost:4010`, this is why.
+Each one needs its own `ARG`/`ENV` pair in the Dockerfile's builder stage or it is stuck at
+the in-code default. After adding a `NEXT_PUBLIC_*` anywhere in `src/`, check:
 
-`API_URL_INTERNAL` is different — it is read server-side at runtime by
-`src/lib/api.ts`, so that one does belong in Environment.
+```bash
+grep -rho 'NEXT_PUBLIC_[A-Z_]*' src/ | sort -u    # every name here needs a Dockerfile ARG
+```
+
+`API_URL_INTERNAL`, `INTERNAL_PROXY_TOKEN` and `TRUSTED_PROXY_HOPS` are the opposite —
+read server-side at runtime by `src/lib/api.ts`, so they belong in Environment and a
+restart picks them up.
+
+### Dokploy settings
+
+Create an **Application** (not a Compose service) and set Build Type to **Dockerfile**:
+
+| Field | Value |
+| --- | --- |
+| Dockerfile Path | `Dockerfile` |
+| Docker Context Path | `.` |
+| Docker Build Stage | **leave empty** |
+
+**Leaving Build Stage empty is not optional.** Filling in `builder` stops the build at the
+stage that only holds `next build` output — no `server.js`, no entrypoint, and the container
+exits immediately.
+
+Then, on the **Environment** tab, which holds two separate fields:
+
+*Build Time Arguments* — baked in, rebuild to change:
+
+```
+NEXT_PUBLIC_API_URL=https://api.yourdomain.com/api/v1
+NEXT_PUBLIC_SESSION_COOKIE_NAME=ecolife_refresh
+```
+
+*Environment* — read at runtime, restart to change:
+
+```
+API_URL_INTERNAL=http://ecolife-server:4000/api/v1
+INTERNAL_PROXY_TOKEN=<must equal INTERNAL_PROXY_TOKEN in ecolife-server>
+TRUSTED_PROXY_HOPS=1
+```
+
+`TRUSTED_PROXY_HOPS=1` because Traefik is the one proxy Dokploy puts in front of this
+container. Turning on Cloudflare proxying adds a hop before Traefik and makes it `2`.
+Getting it wrong is not a crash: too low and the backend records a proxy's address as the
+user's, too high and it silently records nothing. See `.env.example`.
+
+`PORT` and `HOSTNAME` are already set in the image (`3000`, `0.0.0.0`). Do not override
+`HOSTNAME` — binding to `localhost` makes the container unreachable from Traefik while
+still looking healthy from inside.
+
+**Domain:** set Container Port to `3000`. Leave *Advanced → Ports* alone; a host port
+mapping there fights the domain routing and is only for direct `IP:port` access.
+
+`INTERNAL_PROXY_TOKEN` is a shared secret, so prefer Dokploy's **Build-time Secrets** /
+environment over Build Args — build args persist in the image and its history.
+
+### Health check
+
+`HEALTHCHECK` probes `/` with `node -e`, in **exec form**. Two deliberate choices:
+
+- **Not `/api/health`.** That route proxies to ecolife-server, so a backend outage would
+  mark this container unhealthy and get it restarted into an outage it cannot fix. `/` is
+  liveness: it answers from this process alone.
+- **Exec form, no shell.** The shell form runs through `sh -c`, which reads backticks as
+  command substitution and rejects `??` as a bad substitution — the probe then fails every
+  run, the task never goes healthy, and the orchestrator reschedules it forever while
+  Traefik reports 502. Same bug, same fix, as `ecolife-server` (commit `bc4a7e6`).
+
+### Verified 31/10/2026
+
+Built and run locally against this commit, on Docker 29.5.2:
+
+- Image builds clean from a cold cache; corepack fetches the pinned pnpm 12.5.1.
+- Healthy in ~7s (`start-period` is 25s, so there is room).
+- `/`, `/about`, `/methodology`, `/login`, `/register`, `/home`, `/track`, `/marketplace`,
+  `/events`, `/leaderboard`, `/profile`, `/step/1` all answer 200.
+- `/api/health` answers **502** with a well-formed `UPSTREAM_UNREACHABLE` envelope when the
+  backend is unreachable — correct behaviour, and the reason it is not the health probe.
+- `id` inside the container is `uid=1001(nextjs) gid=1001(nodejs)`.
+- `NEXT_PUBLIC_API_URL` confirmed present in `.next/static/chunks/` after the build, which
+  is what "baked in" means in practice.
+
+Not verified here: an actual Dokploy deployment. The settings above come from Dokploy's
+Build Type docs, not from a deploy on this project.
