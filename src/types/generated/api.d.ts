@@ -2677,6 +2677,520 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/seller/products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List own products */
+        get: {
+            parameters: {
+                query?: {
+                    category?: "plants" | "household" | "personal_care" | "kitchen" | "stationery";
+                    status?: "all" | "active" | "inactive";
+                    q?: string;
+                    cursor?: string;
+                    limit?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Seller products */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: {
+                                items: components["schemas"]["Product"][];
+                                pageInfo: components["schemas"]["PageInfo"];
+                            };
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /** Create a product */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateSellerProductBody"];
+                };
+            };
+            responses: {
+                /** @description Product created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: components["schemas"]["Product"];
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Validation failed */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/seller/products/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get seller product detail */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Product detail */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: components["schemas"]["Product"];
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        /** Delete or deactivate product */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Deleted */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: {
+                                /** @enum {boolean} */
+                                deleted: true;
+                            };
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        /** Update seller product */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UpdateSellerProductBody"];
+                };
+            };
+            responses: {
+                /** @description Product updated */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: components["schemas"]["Product"];
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/api/v1/seller/orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List orders containing seller items */
+        get: {
+            parameters: {
+                query?: {
+                    status?: "placed" | "confirmed" | "shipped" | "delivered" | "cancelled";
+                    onlyRedemptions?: boolean | null;
+                    cursor?: string;
+                    limit?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Seller orders */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: {
+                                items: components["schemas"]["SellerOrder"][];
+                                pageInfo: components["schemas"]["PageInfo"];
+                            };
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/seller/orders/{id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update fulfillment status of an order */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UpdateSellerOrderStatusBody"];
+                };
+            };
+            responses: {
+                /** @description Status updated */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: {
+                                /** @enum {boolean} */
+                                success: true;
+                                /** @enum {string} */
+                                status: "placed" | "confirmed" | "shipped" | "delivered" | "cancelled";
+                            };
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/api/v1/seller/analytics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Seller sales and earnings reports */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Seller analytics */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: components["schemas"]["SellerAnalytics"];
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/addresses": {
         parameters: {
             query?: never;
@@ -6814,8 +7328,15 @@ export interface components {
              * @example 24000
              */
             pricePaise: number;
+            /**
+             * @description Integer paise. Never a float. 24000 = ₹240.00
+             * @example 24000
+             */
+            effectivePricePaise?: number;
             /** @example https://images.unsplash.com/photo-1592150621744-aca64f48394a?auto=format&fit=crop&w=800&q=80 */
             imageUrl: string | null;
+            /** @default [] */
+            images: string[];
             /** @example 34 */
             stock: number;
             /**
@@ -6823,6 +7344,24 @@ export interface components {
              * @example 21.9
              */
             co2SavedKg: number | null;
+            sellerOrgId?: number | null;
+            sellerName?: string | null;
+            /**
+             * @default none
+             * @example percentage
+             * @enum {string}
+             */
+            discountType: "none" | "percentage" | "fixed";
+            /** @default 0 */
+            discountValue: number;
+            discountStartDate?: string | null;
+            discountEndDate?: string | null;
+            /** @default true */
+            allowCoinRedemption: boolean;
+            /** @default 20 */
+            maxCoinRedemptionPercent: number;
+            /** @default true */
+            isActive: boolean;
         };
         CartQuote: {
             items: components["schemas"]["CartItem"][];
@@ -6936,7 +7475,7 @@ export interface components {
             /** @example 12 Hill Road */
             line1: string;
             /** @example null */
-            line2: string | null;
+            line2?: string | null;
             /** @example Mumbai */
             city: string;
             /** @example Maharashtra */
@@ -6957,6 +7496,224 @@ export interface components {
              */
             idempotencyKey: string;
         };
+        CreateSellerProductBody: {
+            /** @example Eco Bamboo Toothbrush */
+            name: string;
+            /** @example eco-bamboo-toothbrush */
+            slug?: string;
+            /** @example 100% biodegradable handle with charcoal bristles. */
+            description?: string;
+            /**
+             * @example plants
+             * @enum {string}
+             */
+            category: "plants" | "household" | "personal_care" | "kitchen" | "stationery";
+            /**
+             * @description Base price in paise
+             * @example 19900
+             */
+            pricePaise: number;
+            /**
+             * Format: uri
+             * @example https://images.unsplash.com/photo-1592150621744
+             */
+            imageUrl?: string | null;
+            /** @default [] */
+            images: string[];
+            /**
+             * @default 0
+             * @example 50
+             */
+            stock: number;
+            /** @example 0.5 */
+            co2SavedKg?: number | null;
+            /**
+             * @example percentage
+             * @enum {string}
+             */
+            discountType?: "none" | "percentage" | "fixed";
+            discountValue?: number;
+            /** @example 2026-11-01T00:00:00.000Z */
+            discountStartDate?: string | null;
+            /** @example 2026-11-30T23:59:59.000Z */
+            discountEndDate?: string | null;
+            allowCoinRedemption?: boolean;
+            maxCoinRedemptionPercent?: number;
+            isActive?: boolean;
+        };
+        UpdateSellerProductBody: {
+            /** @example Eco Bamboo Toothbrush */
+            name?: string;
+            /** @example eco-bamboo-toothbrush */
+            slug?: string;
+            /** @example 100% biodegradable handle with charcoal bristles. */
+            description?: string;
+            /**
+             * @example plants
+             * @enum {string}
+             */
+            category?: "plants" | "household" | "personal_care" | "kitchen" | "stationery";
+            /**
+             * @description Base price in paise
+             * @example 19900
+             */
+            pricePaise?: number;
+            /**
+             * Format: uri
+             * @example https://images.unsplash.com/photo-1592150621744
+             */
+            imageUrl?: string | null;
+            /** @default [] */
+            images: string[];
+            /**
+             * @default 0
+             * @example 50
+             */
+            stock: number;
+            /** @example 0.5 */
+            co2SavedKg?: number | null;
+            /**
+             * @example percentage
+             * @enum {string}
+             */
+            discountType?: "none" | "percentage" | "fixed";
+            discountValue?: number;
+            /** @example 2026-11-01T00:00:00.000Z */
+            discountStartDate?: string | null;
+            /** @example 2026-11-30T23:59:59.000Z */
+            discountEndDate?: string | null;
+            allowCoinRedemption?: boolean;
+            maxCoinRedemptionPercent?: number;
+            isActive?: boolean;
+        };
+        SellerOrder: {
+            /** @example 101 */
+            id: number;
+            /** @example ECO-2026-00042 */
+            orderNumber: string;
+            /** @example 2026-11-01T10:00:00.000Z */
+            createdAt: string;
+            /**
+             * @example placed
+             * @enum {string}
+             */
+            status: "placed" | "confirmed" | "shipped" | "delivered" | "cancelled";
+            customer: {
+                /** @example 4 */
+                id: number;
+                /** @example Priya Sharma */
+                name: string;
+                /** @example priya@example.com */
+                email: string | null;
+            };
+            address: components["schemas"]["Address"] | null;
+            items: components["schemas"]["SellerOrderItem"][];
+            /**
+             * @description Integer paise. Never a float. 24000 = ₹240.00
+             * @example 24000
+             */
+            sellerSubtotalPaise: number;
+            /** @example 100 */
+            sellerCoinsSpent: number;
+            /**
+             * @description Integer paise. Never a float. 24000 = ₹240.00
+             * @example 24000
+             */
+            sellerDiscountPaise: number;
+            /**
+             * @description Integer paise. Never a float. 24000 = ₹240.00
+             * @example 24000
+             */
+            sellerTotalPaise: number;
+        };
+        SellerOrderItem: {
+            /** @example 1 */
+            id: number;
+            /** @example 12 */
+            productId: number;
+            /** @example Bamboo Toothbrush */
+            productName: string;
+            /**
+             * @description Integer paise. Never a float. 24000 = ₹240.00
+             * @example 24000
+             */
+            unitPaise: number;
+            /** @example 2 */
+            quantity: number;
+            /**
+             * @description Integer paise. Never a float. 24000 = ₹240.00
+             * @example 24000
+             */
+            totalPaise: number;
+            /**
+             * @example placed
+             * @enum {string}
+             */
+            status: "placed" | "confirmed" | "shipped" | "delivered" | "cancelled";
+        };
+        UpdateSellerOrderStatusBody: {
+            /**
+             * @example placed
+             * @enum {string}
+             */
+            status: "placed" | "confirmed" | "shipped" | "delivered" | "cancelled";
+        };
+        SellerAnalytics: {
+            /**
+             * @description Integer paise. Never a float. 24000 = ₹240.00
+             * @example 24000
+             */
+            totalSalesVolumePaise: number;
+            /**
+             * @description Integer paise. Never a float. 24000 = ₹240.00
+             * @example 24000
+             */
+            cashRevenuePaise: number;
+            /**
+             * @description Integer paise. Never a float. 24000 = ₹240.00
+             * @example 24000
+             */
+            coinsRedeemedDiscountPaise: number;
+            /** @example 1250 */
+            totalCoinsRedeemed: number;
+            /** @example 45 */
+            totalOrdersCount: number;
+            /** @example 88 */
+            totalUnitsSoldCount: number;
+            /** @example 12 */
+            activeProductsCount: number;
+            topProducts: {
+                /** @example 12 */
+                productId: number;
+                /** @example Bamboo Toothbrush */
+                productName: string;
+                /** @example 34 */
+                unitsSold: number;
+                /**
+                 * @description Integer paise. Never a float. 24000 = ₹240.00
+                 * @example 24000
+                 */
+                revenuePaise: number;
+            }[];
+            monthlySales: {
+                /** @example 2026-10 */
+                month: string;
+                /**
+                 * @description Integer paise. Never a float. 24000 = ₹240.00
+                 * @example 24000
+                 */
+                salesPaise: number;
+                /**
+                 * @description Integer paise. Never a float. 24000 = ₹240.00
+                 * @example 24000
+                 */
+                cashPaise: number;
+                /** @example 400 */
+                coinsSpent: number;
+                /** @example 18 */
+                ordersCount: number;
+            }[];
+        };
         AddressBody: {
             /** @example Adittya */
             name: string;
@@ -6965,7 +7722,7 @@ export interface components {
             /** @example 12 Hill Road */
             line1: string;
             /** @example null */
-            line2: string | null;
+            line2?: string | null;
             /** @example Mumbai */
             city: string;
             /** @example Maharashtra */
@@ -7190,6 +7947,8 @@ export interface components {
             city: string | null;
             /** @example IN-MH */
             regionCode: string | null;
+            /** @example Plot 42, MIDC, Pune */
+            address?: string | null;
             /** @example 12 */
             memberCount: number;
             /** @example null */
@@ -7219,6 +7978,7 @@ export interface components {
             contactPhone?: string;
             city?: string;
             regionCode?: string;
+            address?: string;
             verificationDetails?: {
                 [key: string]: unknown;
             };
@@ -7238,6 +7998,7 @@ export interface components {
             contactPhone?: string;
             city?: string;
             regionCode?: string;
+            address?: string;
             verificationDetails?: {
                 [key: string]: unknown;
             };

@@ -50,3 +50,11 @@ export type {
   Tree,
   TreeRarity,
 } from './trees';
+
+export type Product = Schema<'Product'>;
+export type CreateSellerProductBody = Schema<'CreateSellerProductBody'>;
+export type UpdateSellerProductBody = Partial<Schema<'UpdateSellerProductBody'>>;
+export type SellerOrderItem = Schema<'SellerOrderItem'>;
+export type SellerOrder = Schema<'SellerOrder'>;
+export type UpdateSellerOrderStatusBody = Schema<'UpdateSellerOrderStatusBody'>;
+export type SellerAnalytics = Schema<'SellerAnalytics'>;

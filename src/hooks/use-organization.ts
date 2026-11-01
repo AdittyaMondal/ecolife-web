@@ -92,6 +92,30 @@ export function useUpdateOrganization(orgId: number) {
   });
 }
 
+export function useUpdateMyOrg(orgId?: number) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (body: UpdateOrganizationBody & { orgId?: number }) => {
+      let targetId = orgId ?? body.orgId;
+      if (!targetId) {
+        const myOrg = await qc.fetchQuery(myOrganizationQuery());
+        if (!myOrg?.organization?.id) {
+          throw new Error('No active organization found');
+        }
+        targetId = myOrg.organization.id;
+      }
+      const { orgId: _, ...payload } = body;
+      return api.patch<Organization>(`/organizations/${targetId}`, payload);
+    },
+    onSuccess: (data) => {
+      qc.invalidateQueries({ queryKey: qk.myOrganization() });
+      if (data?.id) {
+        qc.invalidateQueries({ queryKey: qk.orgMembers(data.id) });
+      }
+    },
+  });
+}
+
 export function useAddOrgMember(orgId: number) {
   const qc = useQueryClient();
   return useMutation({
