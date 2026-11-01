@@ -97,12 +97,12 @@ export function ModalDialog({
         onClose();
       }}
       className={cn(
-        'm-auto w-[calc(100%-32px)] rounded-xl border border-border bg-card p-6 text-card-foreground shadow-xl open:flex open:flex-col open:gap-4',
+        'm-auto w-[calc(100%-32px)] max-h-[calc(100dvh-48px)] rounded-xl border border-border bg-card p-6 text-card-foreground shadow-xl open:flex open:flex-col open:gap-4 overflow-hidden',
         SIZE_CLASSES[size],
         className,
       )}
     >
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex shrink-0 items-start justify-between gap-4">
         <div className="space-y-1">
           <h2 id={titleId} className="text-lg font-semibold tracking-tight text-foreground">
             {title}
@@ -123,7 +123,7 @@ export function ModalDialog({
         </button>
       </div>
 
-      <div className="flex flex-col gap-4">{children}</div>
+      <div className="flex flex-1 min-h-0 flex-col gap-4 overflow-hidden">{children}</div>
     </dialog>
   );
 }

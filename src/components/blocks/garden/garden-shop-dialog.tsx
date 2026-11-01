@@ -76,20 +76,21 @@ export function GardenShopDialog({
       onClose={onClose}
       title="Botanical Garden Shop & Sanctuary"
       description="Spend your earned EcoCoins to unlock stylish gardener skins, garden biomes, and free-roaming animal companions."
-      className="sm:max-w-2xl max-h-[85vh] flex flex-col"
+      className="sm:max-w-2xl max-h-[85vh] h-[85vh] flex flex-col overflow-hidden"
     >
-      <div className="space-y-4 pt-2 flex-1 overflow-y-auto pr-1">
+      {/* Top Controls: EcoCoin Balance & Tab Switcher (pinned) */}
+      <div className="shrink-0 space-y-3 pt-1">
         {/* EcoCoin Balance Banner */}
-        <div className="flex items-center justify-between rounded-lg border border-border bg-card p-3.5 shadow-2xs">
+        <div className="flex items-center justify-between rounded-lg border border-border bg-card p-3 shadow-subtle">
           <div className="flex items-center gap-2.5">
-            <span className="flex size-9 items-center justify-center rounded-full bg-amber-500/10 text-amber-500">
-              <Coins className="size-5" />
+            <span className="flex size-8 items-center justify-center rounded-full bg-amber-500/10 text-amber-500">
+              <Coins className="size-4" />
             </span>
             <div>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
                 EcoCoins Balance
               </p>
-              <p className="font-mono text-xl font-extrabold text-foreground">
+              <p className="font-mono text-lg font-extrabold text-foreground">
                 {formatNumber(userCoins)}{' '}
                 <span className="text-xs font-medium text-muted-foreground">coins</span>
               </p>
@@ -108,9 +109,9 @@ export function GardenShopDialog({
             type="button"
             onClick={() => setActiveTab('skins')}
             className={cn(
-              'flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-md transition-all',
+              'flex items-center gap-2 px-3.5 py-1.5 text-xs font-bold rounded-md transition-all',
               activeTab === 'skins'
-                ? 'bg-primary text-primary-foreground shadow-2xs'
+                ? 'bg-primary text-primary-foreground shadow-subtle'
                 : 'text-muted-foreground hover:bg-muted hover:text-foreground',
             )}
           >
@@ -122,9 +123,9 @@ export function GardenShopDialog({
             type="button"
             onClick={() => setActiveTab('biomes')}
             className={cn(
-              'flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-md transition-all',
+              'flex items-center gap-2 px-3.5 py-1.5 text-xs font-bold rounded-md transition-all',
               activeTab === 'biomes'
-                ? 'bg-primary text-primary-foreground shadow-2xs'
+                ? 'bg-primary text-primary-foreground shadow-subtle'
                 : 'text-muted-foreground hover:bg-muted hover:text-foreground',
             )}
           >
@@ -136,9 +137,9 @@ export function GardenShopDialog({
             type="button"
             onClick={() => setActiveTab('pets')}
             className={cn(
-              'flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-md transition-all',
+              'flex items-center gap-2 px-3.5 py-1.5 text-xs font-bold rounded-md transition-all',
               activeTab === 'pets'
-                ? 'bg-primary text-primary-foreground shadow-2xs'
+                ? 'bg-primary text-primary-foreground shadow-subtle'
                 : 'text-muted-foreground hover:bg-muted hover:text-foreground',
             )}
           >
@@ -146,6 +147,10 @@ export function GardenShopDialog({
             <span>Companions ({PET_ITEMS.length})</span>
           </button>
         </div>
+      </div>
+
+      {/* Scrollable Items Container */}
+      <div className="flex-1 min-h-0 overflow-y-auto pr-1 pb-2">
 
         {/* TAB 1: Character Skins */}
         {activeTab === 'skins' && (
@@ -478,7 +483,8 @@ export function GardenShopDialog({
         )}
       </div>
 
-      <div className="mt-4 pt-3 border-t border-border flex items-center justify-between">
+      {/* Pinned Bottom Footer */}
+      <div className="shrink-0 pt-3 border-t border-border flex items-center justify-between">
         <span className="text-xs text-muted-foreground">
           Tip: You can adopt pets and choose which ones roam freely in your garden!
         </span>
