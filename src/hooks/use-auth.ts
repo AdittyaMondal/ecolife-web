@@ -16,6 +16,17 @@ export const meQuery = () =>
     queryKey: qk.me(),
     queryFn: () => api.get<Me>('/auth/me'),
     staleTime: 30_000,
+    /**
+     * A 4xx will not become a 2xx by asking again. The fetcher has already
+     * tried a refresh-and-retry by the time an error reaches here, so a 401
+     * means the session is genuinely gone — retrying three times only delays
+     * the redirect to /login. Server and network errors still get retries.
+     */
+    retry: (attempt: number, error: unknown) => {
+      const status = (error as { httpStatus?: number } | null)?.httpStatus ?? 0;
+      if (status >= 400 && status < 500) return false;
+      return attempt < 2;
+    },
   });
 
 export { landingPathFor } from '@/lib/routing';

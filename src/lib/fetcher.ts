@@ -125,9 +125,27 @@ export function refreshSession(): Promise<boolean> {
   if (!refreshing) {
     refreshing = (async () => {
       try {
-        const res = await rawFetch('POST', '/auth/refresh', { body: {} }, null);
-        const result = await readEnvelope<Session>(res);
+        let res = await rawFetch('POST', '/auth/refresh', { body: {} }, null);
+        let result = await readEnvelope<Session>(res);
+
+        /**
+         * AUTH_009 is NOT a sign-out. Another context rotated the same cookie
+         * moments ago — a second tab, or React StrictMode double-invoking in
+         * dev. The session is alive and the winner's cookie is already set, so
+         * retry once; this attempt will present the new token.
+         *
+         * Clearing the session here is what used to log people out for having
+         * two tabs open. The server distinguishes the cases now (409 raced vs
+         * 401 reused), and this branch is the client half of that contract.
+         */
+        if (!result.ok && result.error.code === 'AUTH_009') {
+          await new Promise((r) => setTimeout(r, 250));
+          res = await rawFetch('POST', '/auth/refresh', { body: {} }, null);
+          result = await readEnvelope<Session>(res);
+        }
+
         if (!result.ok) {
+          // Still a genuine failure: expired, revoked, or no cookie at all.
           clearSession();
           return false;
         }

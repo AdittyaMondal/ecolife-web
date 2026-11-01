@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { landingPathFor } from './routing.ts';
+import { landingPathFor, safeNextPath } from './routing.ts';
 
 describe('landingPathFor (Part 1 Role-Based Routing)', () => {
   it('routes platform admin to /admin', () => {
@@ -60,5 +60,35 @@ describe('landingPathFor (Part 1 Role-Based Routing)', () => {
       organization: null,
     });
     assert.equal(path, '/step/3');
+  });
+});
+
+describe('safeNextPath (open-redirect guard on ?next=)', () => {
+  it('accepts a same-site path, with query and hash', () => {
+    assert.equal(safeNextPath('/track'), '/track');
+    assert.equal(safeNextPath('/marketplace/orders?page=2'), '/marketplace/orders?page=2');
+    assert.equal(safeNextPath('/step/3#top'), '/step/3#top');
+  });
+
+  it('rejects an absolute URL — the phishing case', () => {
+    assert.equal(safeNextPath('https://evil.example'), null);
+    assert.equal(safeNextPath('http://evil.example/home'), null);
+  });
+
+  it('rejects a protocol-relative URL, which also leaves the site', () => {
+    assert.equal(safeNextPath('//evil.example'), null);
+    assert.equal(safeNextPath('//evil.example/home'), null);
+  });
+
+  it('rejects a backslash form, which some agents normalise to //', () => {
+    assert.equal(safeNextPath('/\\evil.example'), null);
+  });
+
+  it('rejects anything that is not a path, and absent values', () => {
+    assert.equal(safeNextPath('evil.example'), null);
+    assert.equal(safeNextPath('javascript:alert(1)'), null);
+    assert.equal(safeNextPath(''), null);
+    assert.equal(safeNextPath(null), null);
+    assert.equal(safeNextPath(undefined), null);
   });
 });

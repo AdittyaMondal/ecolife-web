@@ -20,19 +20,20 @@ import {
   Trophy,
   User,
 } from 'lucide-react';
-import Link from 'next/link';
 import Image from 'next/image';
+import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import * as React from 'react';
 import { toast } from 'sonner';
+import { FloatingChat } from '@/components/blocks/ai-chat/floating-chat';
 import { Button } from '@/components/ui/button';
 import { ModalDialog } from '@/components/ui/dialog';
-import { FloatingChat } from '@/components/blocks/ai-chat/floating-chat';
 import { meQuery, useLogout, useResendVerification } from '@/hooks/use-auth';
 import { cartQuery } from '@/hooks/use-marketplace';
 import { notificationsQuery, useMarkNotificationRead } from '@/hooks/use-profile';
 import { formatNumber, formatRelative, initials } from '@/lib/format';
+import { clearSession } from '@/lib/session';
 import { cn } from '@/lib/utils';
 
 const PRIMARY_NAV = [
@@ -73,7 +74,23 @@ function AppLayoutShell({ children }: { children: React.ReactNode }) {
     setMounted(true);
   }, []);
 
-  const { data: me } = useQuery(meQuery());
+  const { data: me, error: meError } = useQuery(meQuery());
+
+  /**
+   * The client half of the auth guard.
+   *
+   * The middleware already turns away anyone without a session cookie, but a
+   * cookie can be present and the session still dead — an expired or revoked
+   * refresh token. That case reaches this shell, so when /auth/me comes back
+   * 401 (after the fetcher has already tried a refresh), clear the hint and
+   * leave. Without this the user sat on a fully-rendered but empty dashboard.
+   */
+  React.useEffect(() => {
+    const status = (meError as { httpStatus?: number } | null)?.httpStatus;
+    if (status !== 401) return;
+    clearSession();
+    router.replace(`/login?next=${encodeURIComponent(pathname)}`);
+  }, [meError, router, pathname]);
   const { data: cart } = useQuery(cartQuery());
   const { data: notificationsData } = useQuery({
     ...notificationsQuery(),

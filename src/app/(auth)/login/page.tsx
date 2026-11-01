@@ -9,6 +9,28 @@ import { ErrorBanner } from '@/components/ui/error-banner';
 import { Field, Input } from '@/components/ui/input';
 import { landingPathFor, useLogin } from '@/hooks/use-auth';
 import { fieldErrors } from '@/lib/errors';
+import { safeNextPath } from '@/lib/routing';
+
+/**
+ * Where to land after signing in, from `?next=`.
+ *
+ * The middleware sends a signed-out visitor to /login?next=<where they were
+ * going>; honouring it means a bookmarked /track does not dump them on /home
+ * to navigate again.
+ *
+ * Read from `window.location` at SUBMIT time rather than with
+ * `useSearchParams()`. That hook marks the component dynamic
+ * (CLIENT_HOOK_DYNAMIC) and broke the production build's prerender of /login,
+ * and the value is not needed to render anything — only to navigate once the
+ * form succeeds.
+ *
+ * `safeNextPath` is the open-redirect guard, and lives in lib/routing.ts so it
+ * can be unit tested without a DOM.
+ */
+function safeNextParam(): string | null {
+  if (typeof window === 'undefined') return null;
+  return safeNextPath(new URLSearchParams(window.location.search).get('next'));
+}
 
 export default function LoginPage() {
   const router = useRouter();
@@ -25,7 +47,7 @@ export default function LoginPage() {
       { email: email.trim(), password },
       {
         onSuccess: (res) => {
-          router.push(landingPathFor(res.user));
+          router.push(safeNextParam() ?? landingPathFor(res.user));
         },
       },
     );
