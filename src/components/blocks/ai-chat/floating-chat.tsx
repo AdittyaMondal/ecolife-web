@@ -152,11 +152,11 @@ export function FloatingChat() {
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
-  // Live queries for complete user context
+  // Live queries for complete user context (only fetched when chat is actually opened)
   const { data: me } = useQuery(meQuery());
-  const { data: onboarding } = useQuery(onboardingQuery());
-  const { data: trackToday } = useQuery(trackTodayQuery());
-  const { data: home } = useQuery(homeQuery());
+  const { data: onboarding } = useQuery({ ...onboardingQuery(), enabled: isOpen });
+  const { data: trackToday } = useQuery({ ...trackTodayQuery(), enabled: isOpen });
+  const { data: home } = useQuery({ ...homeQuery(), enabled: isOpen });
 
   // Load chat history from localStorage
   React.useEffect(() => {

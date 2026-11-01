@@ -108,6 +108,7 @@ async function rawFetch(
 }
 
 let refreshing: Promise<boolean> | null = null;
+let lastRefreshedAt = 0;
 
 /**
  * Rotate the refresh token for a fresh access token. Single-flight: ten
@@ -115,6 +116,12 @@ let refreshing: Promise<boolean> | null = null;
  * the whole family server-side (AUTH_003).
  */
 export function refreshSession(): Promise<boolean> {
+  // Cooldown: if we successfully refreshed within the last 2 seconds and have an active token,
+  // reuse it immediately rather than firing duplicate refresh calls.
+  if (Date.now() - lastRefreshedAt < 2000 && getAccessToken()) {
+    return Promise.resolve(true);
+  }
+
   if (!refreshing) {
     refreshing = (async () => {
       try {
@@ -125,14 +132,15 @@ export function refreshSession(): Promise<boolean> {
           return false;
         }
         setSession(result.data);
+        lastRefreshedAt = Date.now();
         return true;
       } catch {
         return false;
       } finally {
-        // Let the next 401 start a new refresh.
+        // Keep the resolved promise briefly so near-simultaneous callers still latch onto it
         setTimeout(() => {
           refreshing = null;
-        }, 0);
+        }, 150);
       }
     })();
   }
@@ -147,17 +155,39 @@ export async function ensureSession(): Promise<boolean> {
 }
 
 async function request<T>(method: string, path: string, options: RequestOptions = {}): Promise<T> {
-  const token = options.anonymous ? null : (getAccessToken() ?? MOCK_BEARER ?? null);
+  // If we don't have an access token in memory yet, but we know the user has a session hint,
+  // ensure the session first before firing the request.
+  // This prevents page refreshes from sending doomed unauthenticated requests that trigger parallel 401 stampedes.
+  if (!options.anonymous && !getAccessToken() && hasSessionHint()) {
+    await ensureSession();
+  }
+
+  let token = options.anonymous ? null : (getAccessToken() ?? MOCK_BEARER ?? null);
   let res = await rawFetch(method, path, options, token);
 
   if (res.status === 401 && !options.anonymous) {
-    const ok = await refreshSession();
-    if (ok) res = await rawFetch(method, path, options, getAccessToken());
+    // If the token changed while our request was in flight, retry with the updated token first
+    const freshToken = getAccessToken();
+    if (freshToken && freshToken !== token) {
+      token = freshToken;
+      res = await rawFetch(method, path, options, token);
+    }
+
+    // If still 401, perform a single-flight session refresh
+    if (res.status === 401) {
+      const ok = await refreshSession();
+      if (ok) {
+        token = getAccessToken();
+        res = await rawFetch(method, path, options, token);
+      }
+    }
   }
 
   const result = await readEnvelope<T>(res);
   if (!result.ok) {
-    if (res.status === 401 && !options.anonymous) clearSession();
+    if (res.status === 401 && !options.anonymous && !getAccessToken()) {
+      clearSession();
+    }
     throw new ApiError(result.error.code, result.error.message, res.status, result.error.details);
   }
   return result.data;
