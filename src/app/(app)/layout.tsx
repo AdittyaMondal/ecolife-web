@@ -27,6 +27,7 @@ import * as React from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { ModalDialog } from '@/components/ui/dialog';
+import { FloatingChat } from '@/components/blocks/ai-chat/floating-chat';
 import { meQuery, useLogout, useResendVerification } from '@/hooks/use-auth';
 import { cartQuery } from '@/hooks/use-marketplace';
 import { notificationsQuery, useMarkNotificationRead } from '@/hooks/use-profile';
@@ -567,6 +568,9 @@ function AppLayoutShell({ children }: { children: React.ReactNode }) {
           )}
         </div>
       </ModalDialog>
+
+      {/* Floating AI Advisor Chatbot */}
+      <FloatingChat />
     </div>
   );
 }
