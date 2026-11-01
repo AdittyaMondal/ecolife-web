@@ -1,6 +1,5 @@
 'use client';
 
-import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   AlertCircle,
@@ -18,6 +17,7 @@ import {
   Tag,
   X,
 } from 'lucide-react';
+import * as React from 'react';
 import { toast } from 'sonner';
 
 import { Badge } from '@/components/ui/badge';
@@ -225,8 +225,7 @@ function CommissionOverrideDialog({
 
       if (isOverridden) {
         const val =
-          currentOverride.commissionPercent ??
-          bpsToPercent(currentOverride.commissionRateBps);
+          currentOverride.commissionPercent ?? bpsToPercent(currentOverride.commissionRateBps);
         setPercentInput(val.toString());
       } else {
         setPercentInput(defaultPercent.toString());
@@ -287,15 +286,12 @@ function CommissionOverrideDialog({
         );
       } else {
         const pct = bpsToPercent(targetBps);
-        toast.success(
-          `Updated commission for "${seller.name}" to ${pct}% (${targetBps} bps).`,
-        );
+        toast.success(`Updated commission for "${seller.name}" to ${pct}% (${targetBps} bps).`);
       }
 
       onClose();
     } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : 'Failed to update commission override';
+      const message = err instanceof Error ? err.message : 'Failed to update commission override';
       toast.error(message);
     }
   };
@@ -377,8 +373,8 @@ function CommissionOverrideDialog({
                   Use Platform Default ({defaultPercent}%)
                 </span>
                 <p className="text-xs text-muted-foreground">
-                  Inherits system-wide commission rate ({defaultRateBps} bps). Clears any
-                  custom override on this seller.
+                  Inherits system-wide commission rate ({defaultRateBps} bps). Clears any custom
+                  override on this seller.
                 </p>
               </div>
             </label>
@@ -459,7 +455,8 @@ function CommissionOverrideDialog({
           {/* Audit Reason Note */}
           <div className="space-y-1.5 pt-1">
             <label htmlFor="override-reason" className="text-xs font-semibold text-foreground">
-              Audit Note / Reason <span className="text-xs text-muted-foreground font-normal">(optional)</span>
+              Audit Note / Reason{' '}
+              <span className="text-xs text-muted-foreground font-normal">(optional)</span>
             </label>
             <Textarea
               id="override-reason"
@@ -520,7 +517,9 @@ export function AdminSellerCommissions({ className }: AdminSellerCommissionsProp
 
   // Filter states
   const [search, setSearch] = React.useState<string>('');
-  const [statusFilter, setStatusFilter] = React.useState<'approved' | 'all' | 'pending' | 'suspended'>('approved');
+  const [statusFilter, setStatusFilter] = React.useState<
+    'approved' | 'all' | 'pending' | 'suspended'
+  >('approved');
   const [typeFilter, setTypeFilter] = React.useState<'sellers' | 'all'>('sellers');
 
   // Modal dialog state
@@ -605,7 +604,8 @@ export function AdminSellerCommissions({ className }: AdminSellerCommissionsProp
             </div>
             <p className="text-xs text-muted-foreground sm:text-sm">
               Global baseline commission applies to all marketplace vendors by default. Configure
-              per-seller overrides between 0.00% and 50.00% for strategic partners or promotional tiers.
+              per-seller overrides between 0.00% and 50.00% for strategic partners or promotional
+              tiers.
             </p>
           </div>
 
@@ -820,7 +820,8 @@ export function AdminSellerCommissions({ className }: AdminSellerCommissionsProp
             <AlertCircle className="size-8 text-destructive mx-auto" aria-hidden="true" />
             <h3 className="font-semibold text-foreground">Failed to load seller commission data</h3>
             <p className="text-xs text-muted-foreground max-w-md mx-auto">
-              Could not retrieve system settings or organizations. Check network connection or permissions.
+              Could not retrieve system settings or organizations. Check network connection or
+              permissions.
             </p>
             <Button
               type="button"
@@ -839,7 +840,8 @@ export function AdminSellerCommissions({ className }: AdminSellerCommissionsProp
             <Store className="size-10 text-muted-foreground/60 mx-auto" aria-hidden="true" />
             <h3 className="font-semibold text-foreground">No sellers found</h3>
             <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-              No marketplace organizations match your active search filters. Try adjusting the search query or status filter.
+              No marketplace organizations match your active search filters. Try adjusting the
+              search query or status filter.
             </p>
             {(search || statusFilter !== 'all' || typeFilter !== 'all') && (
               <Button

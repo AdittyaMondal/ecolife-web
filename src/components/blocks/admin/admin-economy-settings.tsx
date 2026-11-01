@@ -202,7 +202,8 @@ export function AdminEconomySettings() {
             </h1>
           </div>
           <p className="mt-1 text-xs sm:text-sm text-muted-foreground">
-            Configure global marketplace commission rates, coin pegging valuations, and payout holding constraints.
+            Configure global marketplace commission rates, coin pegging valuations, and payout
+            holding constraints.
           </p>
         </div>
         <div className="flex items-center gap-2 self-start sm:self-auto">
@@ -298,7 +299,8 @@ export function AdminEconomySettings() {
               >
                 <span>Fixed Coin-to-Rupee Rate</span>
                 <Badge variant="accent" className="font-mono text-[10px]">
-                  1 Coin = {coinValuePaise} paise (₹{(parseInt(coinValuePaise, 10) / 100 || 0).toFixed(2)})
+                  1 Coin = {coinValuePaise} paise (₹
+                  {(parseInt(coinValuePaise, 10) / 100 || 0).toFixed(2)})
                 </Badge>
               </label>
               <div className="grid grid-cols-2 gap-2">
@@ -346,7 +348,8 @@ export function AdminEconomySettings() {
                 </div>
               </div>
               <p className="text-[11px] text-muted-foreground">
-                Standard peg: 10 coins = ₹1 (10 paise per coin). Editing auto-synchronizes equivalent paise.
+                Standard peg: 10 coins = ₹1 (10 paise per coin). Editing auto-synchronizes
+                equivalent paise.
               </p>
             </div>
 
@@ -357,9 +360,7 @@ export function AdminEconomySettings() {
                 className="text-xs font-semibold text-foreground flex items-center justify-between"
               >
                 <span>Max Coin Redemption Discount (%)</span>
-                <span className="font-mono text-[11px] text-muted-foreground">
-                  Default ceiling
-                </span>
+                <span className="font-mono text-[11px] text-muted-foreground">Default ceiling</span>
               </label>
               <div className="relative">
                 <Input
@@ -412,7 +413,8 @@ export function AdminEconomySettings() {
                 </span>
               </div>
               <p className="text-[11px] text-muted-foreground">
-                Required waiting period after order completion before merchant settlement batches unlock for payout disbursement.
+                Required waiting period after order completion before merchant settlement batches
+                unlock for payout disbursement.
               </p>
             </div>
           </div>
@@ -421,11 +423,11 @@ export function AdminEconomySettings() {
           <div className="rounded-md border border-amber-500/30 bg-amber-500/5 p-4 sm:p-5 flex items-start gap-3.5">
             <ShieldCheck className="size-5 shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
             <div className="space-y-1 text-xs">
-              <h4 className="font-bold text-foreground">
-                Platform Loss Prevention Invariant
-              </h4>
+              <h4 className="font-bold text-foreground">Platform Loss Prevention Invariant</h4>
               <p className="text-muted-foreground leading-relaxed">
-                Seller payout = (Cash + Coin value) - Commission. Coin redemption value is covered by platform liability and commission is calculated post-discount so the platform never operates at a deficit.
+                Seller payout = (Cash + Coin value) - Commission. Coin redemption value is covered
+                by platform liability and commission is calculated post-discount so the platform
+                never operates at a deficit.
               </p>
             </div>
           </div>

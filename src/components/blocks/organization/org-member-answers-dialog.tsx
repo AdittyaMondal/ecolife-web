@@ -38,11 +38,7 @@ export function OrgMemberAnswersDialog({
       aria-labelledby="member-answers-title"
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-fade-in"
     >
-      <div
-        className="fixed inset-0"
-        onClick={onClose}
-        aria-hidden="true"
-      />
+      <div className="fixed inset-0" onClick={onClose} aria-hidden="true" />
 
       <Card className="relative z-10 w-full max-w-lg p-6 border-border bg-card shadow-xl max-h-[85vh] flex flex-col space-y-5">
         {/* Header */}
@@ -84,7 +80,8 @@ export function OrgMemberAnswersDialog({
               <HelpCircle className="size-8 mx-auto text-muted-foreground/60" />
               <p className="text-sm font-medium text-foreground">No custom answers submitted yet</p>
               <p className="text-xs text-muted-foreground">
-                This member has not yet answered your organization&apos;s custom onboarding questions.
+                This member has not yet answered your organization&apos;s custom onboarding
+                questions.
               </p>
             </div>
           ) : (
@@ -102,7 +99,10 @@ export function OrgMemberAnswersDialog({
                       <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-muted text-muted-foreground border border-border">
                         {item.questionType.replace('_', ' ')}
                       </span>
-                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20" title={`Question schema version ${item.questionVersion}`}>
+                      <span
+                        className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20"
+                        title={`Question schema version ${item.questionVersion}`}
+                      >
                         v{item.questionVersion}
                       </span>
                     </div>

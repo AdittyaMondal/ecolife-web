@@ -280,7 +280,6 @@ export function useSubmitOrgOnboardingAnswers() {
 export const orgMemberAnswersQuery = (orgId: number, userId: number) =>
   queryOptions({
     queryKey: qk.orgMemberAnswers(orgId, userId),
-    queryFn: () =>
-      api.get<OrgEmployeeAnswers>(`/organizations/${orgId}/members/${userId}/answers`),
+    queryFn: () => api.get<OrgEmployeeAnswers>(`/organizations/${orgId}/members/${userId}/answers`),
     enabled: Boolean(orgId) && Boolean(userId),
   });

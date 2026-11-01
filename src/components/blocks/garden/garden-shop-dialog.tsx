@@ -6,11 +6,19 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ModalDialog } from '@/components/ui/dialog';
+import { formatNumber } from '@/lib/format';
 import { BIOME_ITEMS, SKIN_ITEMS } from '@/lib/garden-shop-catalogue';
 import { PET_ITEMS } from '@/lib/pet-catalogue';
-import { formatNumber } from '@/lib/format';
 import { cn } from '@/lib/utils';
-import type { CharacterSkinId, GardenBiomeId, GardenState, PetId, ShopItemBiome, ShopItemPet, ShopItemSkin } from '@/types/trees';
+import type {
+  CharacterSkinId,
+  GardenBiomeId,
+  GardenState,
+  PetId,
+  ShopItemBiome,
+  ShopItemPet,
+  ShopItemSkin,
+} from '@/types/trees';
 
 export interface GardenShopDialogProps {
   open: boolean;
@@ -161,9 +169,7 @@ export function GardenShopDialog({
                     {/* Header info */}
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2.5">
-                        <div
-                          className="size-11 rounded-lg flex items-center justify-center border border-border bg-muted/40 shadow-xs p-1"
-                        >
+                        <div className="size-11 rounded-lg flex items-center justify-center border border-border bg-muted/40 shadow-xs p-1">
                           <img
                             src={`/sprites/${skin.id}_down_0.png`}
                             alt={skin.name}
@@ -182,7 +188,10 @@ export function GardenShopDialog({
                       </div>
 
                       {isEquipped ? (
-                        <Badge variant="positive" className="text-[10px] uppercase font-bold py-0.5">
+                        <Badge
+                          variant="positive"
+                          className="text-[10px] uppercase font-bold py-0.5"
+                        >
                           Active
                         </Badge>
                       ) : isUnlocked ? (
@@ -273,13 +282,18 @@ export function GardenShopDialog({
                             {biome.name}
                           </h4>
                           <span className="text-[11px] font-mono text-muted-foreground">
-                            {biome.priceCoins === 0 ? 'Default Biome' : `${biome.priceCoins} EcoCoins`}
+                            {biome.priceCoins === 0
+                              ? 'Default Biome'
+                              : `${biome.priceCoins} EcoCoins`}
                           </span>
                         </div>
                       </div>
 
                       {isEquipped ? (
-                        <Badge variant="positive" className="text-[10px] uppercase font-bold py-0.5">
+                        <Badge
+                          variant="positive"
+                          className="text-[10px] uppercase font-bold py-0.5"
+                        >
                           Active
                         </Badge>
                       ) : isUnlocked ? (

@@ -74,9 +74,7 @@ export function SellerOrdersManager({
     };
   }, [statusFilter, onlyRedemptions]);
 
-  const { data, isPending, isError, error, refetch } = useQuery(
-    sellerOrdersQuery(queryFilters),
-  );
+  const { data, isPending, isError, error, refetch } = useQuery(sellerOrdersQuery(queryFilters));
 
   const updateStatusMutation = useUpdateSellerOrderStatus();
 
@@ -249,13 +247,9 @@ export function SellerOrdersManager({
                       <MapPin className="size-3.5 text-positive" />
                       <span>Delivery Address</span>
                     </div>
-                    <p className="text-foreground leading-relaxed">
-                      {formatAddress(ord.address)}
-                    </p>
+                    <p className="text-foreground leading-relaxed">{formatAddress(ord.address)}</p>
                     {ord.address?.phone && (
-                      <p className="text-muted-foreground font-mono">
-                        Phone: {ord.address.phone}
-                      </p>
+                      <p className="text-muted-foreground font-mono">Phone: {ord.address.phone}</p>
                     )}
                   </div>
 
@@ -321,9 +315,7 @@ export function SellerOrdersManager({
                 <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border/60 pt-3">
                   <div className="text-xs text-muted-foreground">
                     Current Status:{' '}
-                    <span className="font-semibold text-foreground capitalize">
-                      {ord.status}
-                    </span>
+                    <span className="font-semibold text-foreground capitalize">{ord.status}</span>
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2">

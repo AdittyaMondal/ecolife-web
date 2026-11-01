@@ -136,7 +136,8 @@ export default function OrganizationOnboardingPage() {
           Partner Onboarding
         </h1>
         <p className="text-sm text-muted-foreground max-w-md mx-auto">
-          {org.name} has prepared these questions to help personalize your team impact, benchmarks, and community initiatives.
+          {org.name} has prepared these questions to help personalize your team impact, benchmarks,
+          and community initiatives.
         </p>
       </div>
 
@@ -158,13 +159,9 @@ export default function OrganizationOnboardingPage() {
                       htmlFor={`question-${q.id}`}
                       className="text-sm font-semibold text-foreground leading-snug cursor-pointer"
                     >
-                      <span className="text-muted-foreground font-mono mr-1.5">
-                        {idx + 1}.
-                      </span>
+                      <span className="text-muted-foreground font-mono mr-1.5">{idx + 1}.</span>
                       {q.prompt}
-                      {q.required && (
-                        <span className="text-destructive font-bold ml-1">*</span>
-                      )}
+                      {q.required && <span className="text-destructive font-bold ml-1">*</span>}
                     </label>
 
                     {q.required ? (
@@ -179,9 +176,7 @@ export default function OrganizationOnboardingPage() {
                   </div>
 
                   {q.description && (
-                    <p className="text-xs text-muted-foreground italic pl-4">
-                      {q.description}
-                    </p>
+                    <p className="text-xs text-muted-foreground italic pl-4">{q.description}</p>
                   )}
                 </div>
 

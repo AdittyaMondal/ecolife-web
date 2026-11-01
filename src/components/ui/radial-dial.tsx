@@ -241,12 +241,7 @@ export function RadialDial({
               strokeWidth="3.5"
               className="transition-transform duration-75 group-hover:scale-110"
             />
-            <circle
-              cx={knobPos.x.toFixed(2)}
-              cy={knobPos.y.toFixed(2)}
-              r="3.5"
-              fill="#7ebf52"
-            />
+            <circle cx={knobPos.x.toFixed(2)} cy={knobPos.y.toFixed(2)} r="3.5" fill="#7ebf52" />
           </g>
         </svg>
 

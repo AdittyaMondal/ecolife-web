@@ -1,4 +1,4 @@
-import type { GardenBiomeId, CharacterSkinId, ShopItemBiome, ShopItemSkin } from '@/types/trees';
+import type { CharacterSkinId, GardenBiomeId, ShopItemBiome, ShopItemSkin } from '@/types/trees';
 
 export const SKIN_ITEMS: ShopItemSkin[] = [
   {
@@ -13,7 +13,8 @@ export const SKIN_ITEMS: ShopItemSkin[] = [
   {
     id: 'forest_ranger',
     name: 'Forest Ranger',
-    description: 'Wide-brim ranger hat, khaki safari jacket, brass buckle, and wilderness hiking boots.',
+    description:
+      'Wide-brim ranger hat, khaki safari jacket, brass buckle, and wilderness hiking boots.',
     priceCoins: 150,
     previewColor: '#854d0e',
     accentColor: '#ca8a04',
@@ -21,7 +22,8 @@ export const SKIN_ITEMS: ShopItemSkin[] = [
   {
     id: 'solar_scout',
     name: 'Solar Tech Scout',
-    description: 'Clean high-tech cyber suit with solar fabric trim, aqua HUD visor, and ionic runners.',
+    description:
+      'Clean high-tech cyber suit with solar fabric trim, aqua HUD visor, and ionic runners.',
     priceCoins: 300,
     previewColor: '#0284c7',
     accentColor: '#38bdf8',
@@ -29,7 +31,8 @@ export const SKIN_ITEMS: ShopItemSkin[] = [
   {
     id: 'monsoon_botanist',
     name: 'Monsoon Botanist',
-    description: 'Canary-yellow waterproof raincoat, deep forest wellington boots, and rain satchel.',
+    description:
+      'Canary-yellow waterproof raincoat, deep forest wellington boots, and rain satchel.',
     priceCoins: 200,
     previewColor: '#eab308',
     accentColor: '#15803d',
@@ -37,7 +40,8 @@ export const SKIN_ITEMS: ShopItemSkin[] = [
   {
     id: 'zen_hermit',
     name: 'Zen Hermit',
-    description: 'Conical bamboo woven sugegasa hat, sage green silk meditation robes, and geta sandals.',
+    description:
+      'Conical bamboo woven sugegasa hat, sage green silk meditation robes, and geta sandals.',
     priceCoins: 250,
     previewColor: '#4d7c0f',
     accentColor: '#d97706',
@@ -48,7 +52,8 @@ export const BIOME_ITEMS: ShopItemBiome[] = [
   {
     id: 'meadow',
     name: 'Pastel Meadow',
-    description: 'Lush green countryside grasses dotted with tiny blooming daisies and river stone walkways.',
+    description:
+      'Lush green countryside grasses dotted with tiny blooming daisies and river stone walkways.',
     priceCoins: 0,
     palette: {
       grassBase: '#7ec050',
@@ -63,7 +68,8 @@ export const BIOME_ITEMS: ShopItemBiome[] = [
   {
     id: 'zen_bamboo',
     name: 'Zen Bamboo Grove',
-    description: 'Fine raked zen garden sands, mossy jade stepping stones, and peaceful ornamental koi ponds.',
+    description:
+      'Fine raked zen garden sands, mossy jade stepping stones, and peaceful ornamental koi ponds.',
     priceCoins: 250,
     palette: {
       grassBase: '#588157',
@@ -77,7 +83,8 @@ export const BIOME_ITEMS: ShopItemBiome[] = [
   {
     id: 'autumn_orchard',
     name: 'Autumn Orchard',
-    description: 'Cozy golden foliage carpet, warm terracotta brick pathways, and amber harvest waters.',
+    description:
+      'Cozy golden foliage carpet, warm terracotta brick pathways, and amber harvest waters.',
     priceCoins: 200,
     palette: {
       grassBase: '#c27d38',
@@ -91,7 +98,8 @@ export const BIOME_ITEMS: ShopItemBiome[] = [
   {
     id: 'sacred_grove',
     name: 'Sacred Grove Sanctuary',
-    description: 'Deep mystical forest loam with ancient runic flagstones and glowing crystalline sacred waters.',
+    description:
+      'Deep mystical forest loam with ancient runic flagstones and glowing crystalline sacred waters.',
     priceCoins: 350,
     palette: {
       grassBase: '#1b4332',
@@ -105,7 +113,8 @@ export const BIOME_ITEMS: ShopItemBiome[] = [
   {
     id: 'desert_oasis',
     name: 'Sunlit Desert Oasis',
-    description: 'Golden sun-drenched sands, pale sandstone walkways, and a sparkling azure oasis pool with date-reed fencing.',
+    description:
+      'Golden sun-drenched sands, pale sandstone walkways, and a sparkling azure oasis pool with date-reed fencing.',
     priceCoins: 280,
     palette: {
       grassBase: '#e0a96d',
@@ -119,7 +128,8 @@ export const BIOME_ITEMS: ShopItemBiome[] = [
   {
     id: 'crystal_glade',
     name: 'Moonlit Crystal Glade',
-    description: 'Ethereal twilight violet loam, luminous amethyst crystal paths, and a tranquil moonlit spring with glowing reeds.',
+    description:
+      'Ethereal twilight violet loam, luminous amethyst crystal paths, and a tranquil moonlit spring with glowing reeds.',
     priceCoins: 350,
     palette: {
       grassBase: '#3b2064',

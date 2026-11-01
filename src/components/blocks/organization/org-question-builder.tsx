@@ -210,7 +210,8 @@ export function OrgQuestionBuilder({ organization, isOwner }: OrgQuestionBuilder
             </h3>
           </div>
           <p className="text-xs text-muted-foreground">
-            Members joining with your code answer these questions after completing standard EcoLife onboarding.
+            Members joining with your code answer these questions after completing standard EcoLife
+            onboarding.
           </p>
         </div>
 
@@ -239,11 +240,17 @@ export function OrgQuestionBuilder({ organization, isOwner }: OrgQuestionBuilder
           <div className="space-y-1">
             <p className="text-sm font-semibold text-foreground">No custom questions configured</p>
             <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-              Add custom questions to gather organization-specific data such as department, commute modes, or remote work habits.
+              Add custom questions to gather organization-specific data such as department, commute
+              modes, or remote work habits.
             </p>
           </div>
           {isOwner && (
-            <Button variant="outline" size="sm" onClick={openCreateModal} className="gap-1.5 text-xs">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={openCreateModal}
+              className="gap-1.5 text-xs"
+            >
               <Plus className="size-3.5" />
               <span>Create First Question</span>
             </Button>
@@ -262,9 +269,7 @@ export function OrgQuestionBuilder({ organization, isOwner }: OrgQuestionBuilder
                   <span className="text-xs font-mono font-bold text-muted-foreground">
                     #{idx + 1}
                   </span>
-                  <span className="text-sm font-semibold text-foreground truncate">
-                    {q.prompt}
-                  </span>
+                  <span className="text-sm font-semibold text-foreground truncate">{q.prompt}</span>
                   <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-muted text-muted-foreground border border-border">
                     {q.type.replace('_', ' ')}
                   </span>
@@ -286,9 +291,7 @@ export function OrgQuestionBuilder({ organization, isOwner }: OrgQuestionBuilder
                 </div>
 
                 {q.description && (
-                  <p className="text-xs text-muted-foreground italic pl-5">
-                    {q.description}
-                  </p>
+                  <p className="text-xs text-muted-foreground italic pl-5">{q.description}</p>
                 )}
 
                 {q.options && q.options.length > 0 && (
@@ -417,7 +420,11 @@ export function OrgQuestionBuilder({ organization, isOwner }: OrgQuestionBuilder
 
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Prompt */}
-              <Field id="question-prompt-input" label="Question Prompt *" hint="Clear question statement for employees">
+              <Field
+                id="question-prompt-input"
+                label="Question Prompt *"
+                hint="Clear question statement for employees"
+              >
                 <Input
                   id="question-prompt-input"
                   value={prompt}
@@ -429,7 +436,11 @@ export function OrgQuestionBuilder({ organization, isOwner }: OrgQuestionBuilder
               </Field>
 
               {/* Description */}
-              <Field id="question-desc-input" label="Description (optional)" hint="Helper note or context displayed under the question">
+              <Field
+                id="question-desc-input"
+                label="Description (optional)"
+                hint="Helper note or context displayed under the question"
+              >
                 <Input
                   id="question-desc-input"
                   value={description}

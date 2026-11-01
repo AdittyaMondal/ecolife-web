@@ -4,8 +4,8 @@
  * Supports customizable biomes, character skins, and smooth 16-bit retro aesthetics.
  */
 
-import type { CharacterSkinId, GardenBiomeId } from '@/types/trees';
 import { getBiomeById } from '@/lib/garden-shop-catalogue';
+import type { CharacterSkinId, GardenBiomeId } from '@/types/trees';
 
 export const TILE_SIZE = 48; // Screen pixels per tile
 

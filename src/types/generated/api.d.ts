@@ -5176,6 +5176,15 @@ export interface paths {
                         "application/json": components["schemas"]["Failure"];
                     };
                 };
+                /** @description Rate limited — see Retry-After */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
             };
         };
         put?: never;

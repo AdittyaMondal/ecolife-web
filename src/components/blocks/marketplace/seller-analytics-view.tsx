@@ -91,9 +91,7 @@ export function SellerAnalyticsView() {
           <p className="tabular font-mono text-2xl sm:text-3xl font-extrabold text-foreground">
             {formatPaise(data.totalSalesVolumePaise)}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Total merchandise catalog value
-          </p>
+          <p className="mt-1 text-xs text-muted-foreground">Total merchandise catalog value</p>
         </Card>
 
         {/* 2. Net Cash Revenue */}
@@ -109,9 +107,7 @@ export function SellerAnalyticsView() {
           <p className="tabular font-mono text-2xl sm:text-3xl font-extrabold text-foreground">
             {formatPaise(data.cashRevenuePaise)}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Rupee customer payments received
-          </p>
+          <p className="mt-1 text-xs text-muted-foreground">Rupee customer payments received</p>
         </Card>
 
         {/* 3. Coin Redemptions Value */}
@@ -146,9 +142,7 @@ export function SellerAnalyticsView() {
           <p className="tabular font-mono text-2xl sm:text-3xl font-extrabold text-foreground">
             {formatNumber(data.totalOrdersCount)}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Customer transactions fulfilled
-          </p>
+          <p className="mt-1 text-xs text-muted-foreground">Customer transactions fulfilled</p>
         </Card>
 
         {/* 5. Total Units Sold */}
@@ -164,9 +158,7 @@ export function SellerAnalyticsView() {
           <p className="tabular font-mono text-2xl sm:text-3xl font-extrabold text-foreground">
             {formatNumber(data.totalUnitsSoldCount)}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Sustainable items dispatched
-          </p>
+          <p className="mt-1 text-xs text-muted-foreground">Sustainable items dispatched</p>
         </Card>
 
         {/* 6. Active Catalog Products */}
@@ -182,9 +174,7 @@ export function SellerAnalyticsView() {
           <p className="tabular font-mono text-2xl sm:text-3xl font-extrabold text-foreground">
             {formatNumber(data.activeProductsCount)}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Live in EcoLife marketplace
-          </p>
+          <p className="mt-1 text-xs text-muted-foreground">Live in EcoLife marketplace</p>
         </Card>
       </div>
 
@@ -199,14 +189,13 @@ export function SellerAnalyticsView() {
                 Top Selling Sustainable Products
               </h3>
             </div>
-            <span className="text-xs text-muted-foreground">
-              By units &amp; revenue
-            </span>
+            <span className="text-xs text-muted-foreground">By units &amp; revenue</span>
           </div>
 
           {data.topProducts.length === 0 ? (
             <div className="py-8 text-center text-xs text-muted-foreground">
-              No product sales recorded yet. Once customers order items, your bestsellers will appear here.
+              No product sales recorded yet. Once customers order items, your bestsellers will
+              appear here.
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -265,9 +254,7 @@ export function SellerAnalyticsView() {
                 Monthly Sales Trend (Past 6 Months)
               </h3>
             </div>
-            <span className="text-xs text-muted-foreground">
-              Volume &amp; Redemptions
-            </span>
+            <span className="text-xs text-muted-foreground">Volume &amp; Redemptions</span>
           </div>
 
           {data.monthlySales.length === 0 ? (
@@ -280,9 +267,7 @@ export function SellerAnalyticsView() {
               <div className="grid grid-cols-6 gap-2 pt-1 items-end h-28 border-b border-border/60 pb-3">
                 {data.monthlySales.map((m) => {
                   const heightPercent =
-                    maxMonthlySales > 0
-                      ? Math.max((m.salesPaise / maxMonthlySales) * 100, 10)
-                      : 10;
+                    maxMonthlySales > 0 ? Math.max((m.salesPaise / maxMonthlySales) * 100, 10) : 10;
                   return (
                     <div
                       key={m.month}

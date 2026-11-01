@@ -15,7 +15,12 @@ export interface GardenHeaderProps {
   onOpenShop?: () => void;
 }
 
-export function GardenHeader({ state, userCoins = 0, onClaimRewardSeed, onOpenShop }: GardenHeaderProps) {
+export function GardenHeader({
+  state,
+  userCoins = 0,
+  onClaimRewardSeed,
+  onOpenShop,
+}: GardenHeaderProps) {
   const [helpOpen, setHelpOpen] = React.useState(false);
 
   const plantedCount = state.plantedTrees.length;

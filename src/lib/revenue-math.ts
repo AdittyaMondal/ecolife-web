@@ -57,13 +57,7 @@ export function paiseToCoins(paise: number, coinsPerRupee: number): number {
  * 4. Zero loss: sellerPayoutPaise >= 0
  */
 export function computeSettlementMath(input: SettlementMathInput): SettlementMathResult {
-  const {
-    saleAmountPaise,
-    coinsUsed,
-    coinsPerRupee,
-    commissionRateBps,
-    coinFeeRateBps,
-  } = input;
+  const { saleAmountPaise, coinsUsed, coinsPerRupee, commissionRateBps, coinFeeRateBps } = input;
 
   const rawCoinValue = coinsToPaise(coinsUsed, coinsPerRupee);
   const coinValuePaise = Math.min(rawCoinValue, saleAmountPaise);
@@ -73,17 +67,18 @@ export function computeSettlementMath(input: SettlementMathInput): SettlementMat
   const coinFeePaise = Math.round((coinValuePaise * coinFeeRateBps) / 10_000);
   const platformCommissionPaise = salesCommissionPaise + coinFeePaise;
 
-  const sellerPayoutPaise = (cashPaidPaise + coinValuePaise) - platformCommissionPaise;
+  const sellerPayoutPaise = cashPaidPaise + coinValuePaise - platformCommissionPaise;
 
   const conservation = cashPaidPaise + coinValuePaise === saleAmountPaise;
-  const payoutCheck = (sellerPayoutPaise + platformCommissionPaise) === saleAmountPaise;
+  const payoutCheck = sellerPayoutPaise + platformCommissionPaise === saleAmountPaise;
   const nonNegative = sellerPayoutPaise >= 0 && platformCommissionPaise >= 0;
 
   const isZeroLossSatisfied = conservation && payoutCheck && nonNegative;
 
-  const effectiveCommissionRatePercent = saleAmountPaise > 0
-    ? Number(((platformCommissionPaise / saleAmountPaise) * 100).toFixed(2))
-    : 0;
+  const effectiveCommissionRatePercent =
+    saleAmountPaise > 0
+      ? Number(((platformCommissionPaise / saleAmountPaise) * 100).toFixed(2))
+      : 0;
 
   return {
     saleAmountPaise,

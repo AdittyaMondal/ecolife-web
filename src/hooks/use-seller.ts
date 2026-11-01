@@ -1,8 +1,4 @@
-import {
-  queryOptions,
-  useMutation,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { queryOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api, qs } from '@/lib/fetcher';
 import type {
   CreateSellerProductBody,
@@ -32,8 +28,7 @@ export type SellerOrderFilters = {
 export const sellerProductsQuery = (filters?: SellerProductFilters) =>
   queryOptions({
     queryKey: ['seller', 'products', filters],
-    queryFn: () =>
-      api.get<Page<Product>>(`/seller/products${qs(filters ?? {})}`),
+    queryFn: () => api.get<Page<Product>>(`/seller/products${qs(filters ?? {})}`),
     staleTime: 15_000,
   });
 
@@ -47,8 +42,7 @@ export const sellerProductQuery = (id: number) =>
 export const sellerOrdersQuery = (filters?: SellerOrderFilters) =>
   queryOptions({
     queryKey: ['seller', 'orders', filters],
-    queryFn: () =>
-      api.get<Page<SellerOrder>>(`/seller/orders${qs(filters ?? {})}`),
+    queryFn: () => api.get<Page<SellerOrder>>(`/seller/orders${qs(filters ?? {})}`),
     staleTime: 15_000,
   });
 
@@ -62,8 +56,7 @@ export const sellerAnalyticsQuery = () =>
 export function useCreateSellerProduct() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: CreateSellerProductBody) =>
-      api.post<Product>('/seller/products', body),
+    mutationFn: (body: CreateSellerProductBody) => api.post<Product>('/seller/products', body),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['seller', 'products'] });
       qc.invalidateQueries({ queryKey: ['seller', 'analytics'] });
@@ -89,8 +82,7 @@ export function useUpdateSellerProduct() {
 export function useDeleteSellerProduct() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (id: number) =>
-      api.delete<{ deleted: true }>(`/seller/products/${id}`),
+    mutationFn: (id: number) => api.delete<{ deleted: true }>(`/seller/products/${id}`),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['seller', 'products'] });
       qc.invalidateQueries({ queryKey: ['seller', 'analytics'] });

@@ -543,13 +543,7 @@ export function GardenCanvas({
               ctx.scale(-1, 1);
             }
 
-            ctx.drawImage(
-              charImg,
-              -spriteSize / 2,
-              -spriteSize / 2,
-              spriteSize,
-              spriteSize,
-            );
+            ctx.drawImage(charImg, -spriteSize / 2, -spriteSize / 2, spriteSize, spriteSize);
             ctx.restore();
           } else {
             drawGardener(
@@ -589,13 +583,7 @@ export function GardenCanvas({
             const drawW = 68 * scale;
             const drawH = 68 * scale;
 
-            ctx.drawImage(
-              img,
-              cx - drawW / 2 + sway,
-              bottomY - drawH + 2,
-              drawW,
-              drawH,
-            );
+            ctx.drawImage(img, cx - drawW / 2 + sway, bottomY - drawH + 2, drawW, drawH);
           } else {
             drawTreeSprite(ctx, tileX, tileY, pt.treeSlug, pt.growthStage, tick);
           }
@@ -720,9 +708,7 @@ export function GardenCanvas({
 
         {/* Hover Inspector Pill Popup */}
         {inspectedTree && inspectedTreeDef && (
-          <div
-            className="pointer-events-none absolute bottom-3 left-3 flex items-center gap-2.5 rounded-lg border border-border/80 bg-background/95 px-3 py-2 shadow-lg backdrop-blur-md animate-fade-in"
-          >
+          <div className="pointer-events-none absolute bottom-3 left-3 flex items-center gap-2.5 rounded-lg border border-border/80 bg-background/95 px-3 py-2 shadow-lg backdrop-blur-md animate-fade-in">
             <div className="size-7 rounded-sm overflow-hidden bg-primary/10 flex items-center justify-center p-0.5">
               <img
                 src={`/trees/${inspectedTreeDef.slug}.png`}
@@ -735,16 +721,16 @@ export function GardenCanvas({
             </div>
             <div className="space-y-0.5">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-foreground">
-                  {inspectedTreeDef.name}
-                </span>
+                <span className="text-xs font-bold text-foreground">{inspectedTreeDef.name}</span>
                 <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-xs bg-muted text-muted-foreground uppercase font-bold">
                   {inspectedTreeDef.rarity.name}
                 </span>
               </div>
               <p className="text-[11px] text-positive font-medium">
                 Offsets {inspectedTreeDef.co2OffsetKgPerYear} kg CO₂/yr •{' '}
-                {inspectedTree.growthStage === 4 ? '🌸 Mature Bloom' : `Stage ${inspectedTree.growthStage}/4`}
+                {inspectedTree.growthStage === 4
+                  ? '🌸 Mature Bloom'
+                  : `Stage ${inspectedTree.growthStage}/4`}
               </p>
             </div>
           </div>
@@ -755,13 +741,27 @@ export function GardenCanvas({
       <div className="mt-2.5 flex flex-wrap items-center justify-between w-full px-2 text-[11px] text-muted-foreground">
         <div className="flex items-center gap-3">
           <span>
-            Move: <kbd className="rounded-xs bg-muted px-1.5 py-0.5 font-mono text-[10px] text-foreground">WASD</kbd> or <kbd className="rounded-xs bg-muted px-1.5 py-0.5 font-mono text-[10px] text-foreground">Arrows</kbd>
+            Move:{' '}
+            <kbd className="rounded-xs bg-muted px-1.5 py-0.5 font-mono text-[10px] text-foreground">
+              WASD
+            </kbd>{' '}
+            or{' '}
+            <kbd className="rounded-xs bg-muted px-1.5 py-0.5 font-mono text-[10px] text-foreground">
+              Arrows
+            </kbd>
           </span>
           <span>
-            Action: <kbd className="rounded-xs bg-muted px-1.5 py-0.5 font-mono text-[10px] text-foreground">Space</kbd> / Click
+            Action:{' '}
+            <kbd className="rounded-xs bg-muted px-1.5 py-0.5 font-mono text-[10px] text-foreground">
+              Space
+            </kbd>{' '}
+            / Click
           </span>
           <span>
-            Hotbar: <kbd className="rounded-xs bg-muted px-1.5 py-0.5 font-mono text-[10px] text-foreground">1-6</kbd>
+            Hotbar:{' '}
+            <kbd className="rounded-xs bg-muted px-1.5 py-0.5 font-mono text-[10px] text-foreground">
+              1-6
+            </kbd>
           </span>
         </div>
         <div className="flex items-center gap-2 text-positive font-medium">

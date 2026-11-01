@@ -102,7 +102,8 @@ export function SellerPricingView({
             Pricing, Promotions &amp; Coin Discounts
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Monitor promotional price cuts, flash sales, and EcoCoin redemption caps across your catalog.
+            Monitor promotional price cuts, flash sales, and EcoCoin redemption caps across your
+            catalog.
           </p>
         </div>
 
@@ -131,9 +132,7 @@ export function SellerPricingView({
           <p className="tabular font-mono text-2xl font-extrabold text-foreground">
             {formatNumber(allProducts.length)}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Priced in Indian Rupees (INR)
-          </p>
+          <p className="mt-1 text-xs text-muted-foreground">Priced in Indian Rupees (INR)</p>
         </Card>
 
         <Card className="p-4 border-border bg-card shadow-subtle">
@@ -146,9 +145,7 @@ export function SellerPricingView({
           <p className="tabular font-mono text-2xl font-extrabold text-positive">
             {formatNumber(activeDiscountsCount)}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Currently discounted promotions
-          </p>
+          <p className="mt-1 text-xs text-muted-foreground">Currently discounted promotions</p>
         </Card>
 
         <Card className="p-4 border-border bg-card shadow-subtle">
@@ -172,11 +169,11 @@ export function SellerPricingView({
         <div className="flex items-start gap-3">
           <ShieldCheck className="size-5 shrink-0 text-primary mt-0.5" />
           <div className="text-xs space-y-1">
-            <p className="font-semibold text-foreground text-sm">
-              Platform Coin Subsidy Guarantee
-            </p>
+            <p className="font-semibold text-foreground text-sm">Platform Coin Subsidy Guarantee</p>
             <p className="text-muted-foreground leading-relaxed">
-              When buyers redeem EcoCoins on your products, the discount is fully absorbed and subsidized by the EcoLife Platform liability fund. Your seller net payout is calculated on the full merchandise subtotal minus standard platform commission.
+              When buyers redeem EcoCoins on your products, the discount is fully absorbed and
+              subsidized by the EcoLife Platform liability fund. Your seller net payout is
+              calculated on the full merchandise subtotal minus standard platform commission.
             </p>
           </div>
         </div>
@@ -185,11 +182,7 @@ export function SellerPricingView({
       {/* Filter and Search Bar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="overflow-x-auto pb-1 sm:pb-0">
-          <SegmentedControl
-            value={filterMode}
-            onChange={setFilterMode}
-            options={FILTER_OPTIONS}
-          />
+          <SegmentedControl value={filterMode} onChange={setFilterMode} options={FILTER_OPTIONS} />
         </div>
 
         <div className="relative w-full sm:w-64">
@@ -255,10 +248,7 @@ export function SellerPricingView({
               discountStartDate: product.discountStartDate,
               discountEndDate: product.discountEndDate,
             });
-            const discountLabel = formatDiscountLabel(
-              product.discountType,
-              product.discountValue,
-            );
+            const discountLabel = formatDiscountLabel(product.discountType, product.discountValue);
             const maxCoins = computeMaxCoinsAllowed({
               effectivePricePaise: effectivePrice,
               allowCoinRedemption: product.allowCoinRedemption,
@@ -273,9 +263,7 @@ export function SellerPricingView({
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="font-bold text-foreground text-sm">
-                        {product.name}
-                      </h3>
+                      <h3 className="font-bold text-foreground text-sm">{product.name}</h3>
                       <Badge tone="neutral" className="text-[10px] capitalize">
                         {product.category.replace('_', ' ')}
                       </Badge>

@@ -49,10 +49,10 @@ import {
   useRemoveFromCart,
   useSetCartQuantity,
 } from '@/hooks/use-marketplace';
-import { BIOME_ITEMS, SKIN_ITEMS } from '@/lib/garden-shop-catalogue';
-import { PET_ITEMS } from '@/lib/pet-catalogue';
 import { formatKg, formatNumber, formatPaise } from '@/lib/format';
+import { BIOME_ITEMS, SKIN_ITEMS } from '@/lib/garden-shop-catalogue';
 import { getProductImageUrl } from '@/lib/images';
+import { PET_ITEMS } from '@/lib/pet-catalogue';
 import { cn } from '@/lib/utils';
 
 const CATEGORIES: { value: ProductCategory | 'all'; label: string }[] = [
@@ -226,7 +226,8 @@ export default function MarketplacePage() {
                 Character Outfits & Garden Biomes
               </h2>
               <p className="text-xs text-muted-foreground max-w-xl">
-                Unlock exclusive retro pixel skins and environmental biomes for your 2D botanical garden. All purchases persist to your account.
+                Unlock exclusive retro pixel skins and environmental biomes for your 2D botanical
+                garden. All purchases persist to your account.
               </p>
             </div>
 
@@ -289,7 +290,9 @@ export default function MarketplacePage() {
           {gardenTab === 'skins' && (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {SKIN_ITEMS.map((skin) => {
-                const isUnlocked = (gardenState.unlockedSkins || ['gardener_default']).includes(skin.id);
+                const isUnlocked = (gardenState.unlockedSkins || ['gardener_default']).includes(
+                  skin.id,
+                );
                 const isEquipped = (gardenState.activeSkinId || 'gardener_default') === skin.id;
                 const canAfford = coinsBalance >= skin.priceCoins;
 
@@ -317,17 +320,25 @@ export default function MarketplacePage() {
                           <div>
                             <h3 className="text-base font-bold text-foreground">{skin.name}</h3>
                             <span className="text-xs font-mono font-semibold text-muted-foreground">
-                              {skin.priceCoins === 0 ? 'Starter Skin (Free)' : `${skin.priceCoins} EcoCoins`}
+                              {skin.priceCoins === 0
+                                ? 'Starter Skin (Free)'
+                                : `${skin.priceCoins} EcoCoins`}
                             </span>
                           </div>
                         </div>
 
                         {isEquipped ? (
-                          <Badge variant="positive" className="text-[10px] uppercase font-bold py-0.5">
+                          <Badge
+                            variant="positive"
+                            className="text-[10px] uppercase font-bold py-0.5"
+                          >
                             Equipped
                           </Badge>
                         ) : isUnlocked ? (
-                          <Badge variant="neutral" className="text-[10px] uppercase font-bold py-0.5">
+                          <Badge
+                            variant="neutral"
+                            className="text-[10px] uppercase font-bold py-0.5"
+                          >
                             Owned
                           </Badge>
                         ) : (
@@ -410,17 +421,25 @@ export default function MarketplacePage() {
                           <div>
                             <h3 className="text-base font-bold text-foreground">{biome.name}</h3>
                             <span className="text-xs font-mono font-semibold text-muted-foreground">
-                              {biome.priceCoins === 0 ? 'Default Biome (Free)' : `${biome.priceCoins} EcoCoins`}
+                              {biome.priceCoins === 0
+                                ? 'Default Biome (Free)'
+                                : `${biome.priceCoins} EcoCoins`}
                             </span>
                           </div>
                         </div>
 
                         {isEquipped ? (
-                          <Badge variant="positive" className="text-[10px] uppercase font-bold py-0.5">
+                          <Badge
+                            variant="positive"
+                            className="text-[10px] uppercase font-bold py-0.5"
+                          >
                             Active
                           </Badge>
                         ) : isUnlocked ? (
-                          <Badge variant="neutral" className="text-[10px] uppercase font-bold py-0.5">
+                          <Badge
+                            variant="neutral"
+                            className="text-[10px] uppercase font-bold py-0.5"
+                          >
                             Owned
                           </Badge>
                         ) : (
@@ -593,217 +612,222 @@ export default function MarketplacePage() {
       ) : (
         <>
           {/* Filter & Search Bar: Card p-4 (16px) -> inner controls rounded-sm (12px) */}
-      <Card className="space-y-4 p-4">
-        <div className="grid gap-3 sm:grid-cols-3">
-          <div className="relative sm:col-span-2">
-            <Search
-              className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-              aria-hidden="true"
-            />
-            <input
-              type="search"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Search indoor plants, bamboo essentials, composters…"
-              aria-label="Search marketplace products"
-              className="h-11 w-full rounded-sm border border-input bg-card pl-10 pr-3.5 text-sm text-foreground placeholder:text-muted-foreground/70 focus-visible:border-ring focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-            />
-          </div>
-
-          <Select
-            aria-label="Sort products"
-            value={sort}
-            onChange={(e) => setSort(e.target.value as ProductSort)}
-          >
-            {SORT_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </Select>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          {CATEGORIES.map((cat) => (
-            <Chip
-              key={cat.value}
-              selected={category === cat.value}
-              onToggle={() => setCategory(cat.value)}
-            >
-              {cat.label}
-            </Chip>
-          ))}
-        </div>
-      </Card>
-
-      {/* Product Grid */}
-      {products.isPending ? (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {['p-s1', 'p-s2', 'p-s3', 'p-s4', 'p-s5', 'p-s6', 'p-s7', 'p-s8'].map((skeletonId) => (
-            <Card key={skeletonId} variant="media" className="space-y-3">
-              <Skeleton className="aspect-[4/3] w-full rounded-md" />
-              <div className="space-y-2 p-2">
-                <Skeleton className="h-5 w-2/3" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-10 w-full rounded-sm" />
+          <Card className="space-y-4 p-4">
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div className="relative sm:col-span-2">
+                <Search
+                  className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                  aria-hidden="true"
+                />
+                <input
+                  type="search"
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  placeholder="Search indoor plants, bamboo essentials, composters…"
+                  aria-label="Search marketplace products"
+                  className="h-11 w-full rounded-sm border border-input bg-card pl-10 pr-3.5 text-sm text-foreground placeholder:text-muted-foreground/70 focus-visible:border-ring focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                />
               </div>
-            </Card>
-          ))}
-        </div>
-      ) : products.isError ? (
-        <ErrorBanner error={products.error} onRetry={() => products.refetch()} />
-      ) : allProducts.length === 0 ? (
-        <EmptyState
-          icon={<Sprout className="size-5" />}
-          title="No matching eco products"
-          description="Try clearing your search query or switching to another category."
-          action={
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setCategory('all');
-                setSearchInput('');
-              }}
-            >
-              Reset filters
-            </Button>
-          }
-        />
-      ) : (
-        <>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {allProducts.map((product) => {
-              const qtyInCart = cartByProductId.get(product.id) ?? 0;
-              const outOfStock = product.stock <= 0;
-              const maxCoinSavingPaise = Math.floor(product.pricePaise * 0.2);
-              const imgUrl = getProductImageUrl(product);
 
-              return (
-                <Card
-                  key={product.id}
-                  variant="media"
-                  className="flex flex-col justify-between transition-all duration-300 hover:border-primary/80 hover:shadow-hover hover:-translate-y-0.5"
+              <Select
+                aria-label="Sort products"
+                value={sort}
+                onChange={(e) => setSort(e.target.value as ProductSort)}
+              >
+                {SORT_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </Select>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              {CATEGORIES.map((cat) => (
+                <Chip
+                  key={cat.value}
+                  selected={category === cat.value}
+                  onToggle={() => setCategory(cat.value)}
                 >
-                  <div>
-                    {/* Concentric media frame: outer Card is rounded-lg (28px) with p-2 (8px) -> inner frame is rounded-md (20px) */}
-                    <Link
-                      href={`/marketplace/${product.slug}`}
-                      className="group relative block aspect-[4/3] w-full overflow-hidden rounded-md border border-border/70 bg-muted/40 shadow-subtle"
+                  {cat.label}
+                </Chip>
+              ))}
+            </div>
+          </Card>
+
+          {/* Product Grid */}
+          {products.isPending ? (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {['p-s1', 'p-s2', 'p-s3', 'p-s4', 'p-s5', 'p-s6', 'p-s7', 'p-s8'].map(
+                (skeletonId) => (
+                  <Card key={skeletonId} variant="media" className="space-y-3">
+                    <Skeleton className="aspect-[4/3] w-full rounded-md" />
+                    <div className="space-y-2 p-2">
+                      <Skeleton className="h-5 w-2/3" />
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-10 w-full rounded-sm" />
+                    </div>
+                  </Card>
+                ),
+              )}
+            </div>
+          ) : products.isError ? (
+            <ErrorBanner error={products.error} onRetry={() => products.refetch()} />
+          ) : allProducts.length === 0 ? (
+            <EmptyState
+              icon={<Sprout className="size-5" />}
+              title="No matching eco products"
+              description="Try clearing your search query or switching to another category."
+              action={
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setCategory('all');
+                    setSearchInput('');
+                  }}
+                >
+                  Reset filters
+                </Button>
+              }
+            />
+          ) : (
+            <>
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {allProducts.map((product) => {
+                  const qtyInCart = cartByProductId.get(product.id) ?? 0;
+                  const outOfStock = product.stock <= 0;
+                  const maxCoinSavingPaise = Math.floor(product.pricePaise * 0.2);
+                  const imgUrl = getProductImageUrl(product);
+
+                  return (
+                    <Card
+                      key={product.id}
+                      variant="media"
+                      className="flex flex-col justify-between transition-all duration-300 hover:border-primary/80 hover:shadow-hover hover:-translate-y-0.5"
                     >
-                      <Image
-                        src={imgUrl}
-                        alt={product.name}
-                        fill
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
+                      <div>
+                        {/* Concentric media frame: outer Card is rounded-lg (28px) with p-2 (8px) -> inner frame is rounded-md (20px) */}
+                        <Link
+                          href={`/marketplace/${product.slug}`}
+                          className="group relative block aspect-[4/3] w-full overflow-hidden rounded-md border border-border/70 bg-muted/40 shadow-subtle"
+                        >
+                          <Image
+                            src={imgUrl}
+                            alt={product.name}
+                            fill
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                            className="object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
 
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60 transition-opacity group-hover:opacity-40" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60 transition-opacity group-hover:opacity-40" />
 
-                      <div className="absolute left-2.5 top-2.5 flex flex-wrap gap-1.5 z-10">
-                        <Badge tone="neutral" className="backdrop-blur-md bg-card/90 font-medium">
-                          {CATEGORY_LABEL[product.category] ?? product.category}
-                        </Badge>
-                        {product.co2SavedKg != null && product.co2SavedKg > 0 && (
-                          <Badge
-                            tone="positive"
-                            className="backdrop-blur-md bg-accent/95 font-semibold"
+                          <div className="absolute left-2.5 top-2.5 flex flex-wrap gap-1.5 z-10">
+                            <Badge
+                              tone="neutral"
+                              className="backdrop-blur-md bg-card/90 font-medium"
+                            >
+                              {CATEGORY_LABEL[product.category] ?? product.category}
+                            </Badge>
+                            {product.co2SavedKg != null && product.co2SavedKg > 0 && (
+                              <Badge
+                                tone="positive"
+                                className="backdrop-blur-md bg-accent/95 font-semibold"
+                              >
+                                <Leaf className="size-3" />−{formatKg(product.co2SavedKg)} CO₂e
+                              </Badge>
+                            )}
+                          </div>
+
+                          {outOfStock && (
+                            <div className="absolute inset-0 z-20 flex items-center justify-center bg-neutral-950/65 backdrop-blur-[2px]">
+                              <Badge tone="danger">Out of stock</Badge>
+                            </div>
+                          )}
+                        </Link>
+
+                        {/* Body inside p-2 */}
+                        <div className="space-y-1.5 p-2 pt-3">
+                          <Link
+                            href={`/marketplace/${product.slug}`}
+                            className="block text-base font-bold text-foreground hover:text-positive line-clamp-1 transition-colors"
                           >
-                            <Leaf className="size-3" />−{formatKg(product.co2SavedKg)} CO₂e
-                          </Badge>
+                            {product.name}
+                          </Link>
+                          {product.description && (
+                            <p className="line-clamp-2 text-xs text-muted-foreground leading-relaxed">
+                              {product.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Price & Concentric Action Footer */}
+                      <div className="space-y-3 p-2 pt-1">
+                        <div className="flex items-baseline justify-between gap-2">
+                          <div>
+                            <span className="text-lg font-extrabold tabular-nums text-foreground">
+                              {formatPaise(product.pricePaise)}
+                            </span>
+                            <span className="ml-1.5 text-[11px] font-medium text-positive">
+                              Save up to {formatPaise(maxCoinSavingPaise)} w/ coins
+                            </span>
+                          </div>
+                          <span className="text-[11px] text-muted-foreground tabular-nums">
+                            {product.stock} in stock
+                          </span>
+                        </div>
+
+                        {qtyInCart > 0 ? (
+                          <div className="flex items-center justify-between gap-2">
+                            <Stepper
+                              value={qtyInCart}
+                              min={0}
+                              max={Math.min(10, product.stock)}
+                              label={`Quantity for ${product.name}`}
+                              onChange={(next) => {
+                                if (next <= 0) {
+                                  removeFromCart.mutate(product.id);
+                                } else {
+                                  setCartQty.mutate({ productId: product.id, quantity: next });
+                                }
+                              }}
+                            />
+                            <Button variant="secondary" size="sm" onClick={() => setCartOpen(true)}>
+                              In cart ({qtyInCart})
+                            </Button>
+                          </div>
+                        ) : (
+                          <Button
+                            variant="primary"
+                            size="md"
+                            className="w-full"
+                            disabled={outOfStock || addToCart.isPending}
+                            onClick={() => addToCart.mutate({ productId: product.id, quantity: 1 })}
+                          >
+                            <Plus className="size-4" />
+                            {outOfStock ? 'Out of stock' : 'Add to cart'}
+                          </Button>
                         )}
                       </div>
+                    </Card>
+                  );
+                })}
+              </div>
 
-                      {outOfStock && (
-                        <div className="absolute inset-0 z-20 flex items-center justify-center bg-neutral-950/65 backdrop-blur-[2px]">
-                          <Badge tone="danger">Out of stock</Badge>
-                        </div>
-                      )}
-                    </Link>
-
-                    {/* Body inside p-2 */}
-                    <div className="space-y-1.5 p-2 pt-3">
-                      <Link
-                        href={`/marketplace/${product.slug}`}
-                        className="block text-base font-bold text-foreground hover:text-positive line-clamp-1 transition-colors"
-                      >
-                        {product.name}
-                      </Link>
-                      {product.description && (
-                        <p className="line-clamp-2 text-xs text-muted-foreground leading-relaxed">
-                          {product.description}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Price & Concentric Action Footer */}
-                  <div className="space-y-3 p-2 pt-1">
-                    <div className="flex items-baseline justify-between gap-2">
-                      <div>
-                        <span className="text-lg font-extrabold tabular-nums text-foreground">
-                          {formatPaise(product.pricePaise)}
-                        </span>
-                        <span className="ml-1.5 text-[11px] font-medium text-positive">
-                          Save up to {formatPaise(maxCoinSavingPaise)} w/ coins
-                        </span>
-                      </div>
-                      <span className="text-[11px] text-muted-foreground tabular-nums">
-                        {product.stock} in stock
-                      </span>
-                    </div>
-
-                    {qtyInCart > 0 ? (
-                      <div className="flex items-center justify-between gap-2">
-                        <Stepper
-                          value={qtyInCart}
-                          min={0}
-                          max={Math.min(10, product.stock)}
-                          label={`Quantity for ${product.name}`}
-                          onChange={(next) => {
-                            if (next <= 0) {
-                              removeFromCart.mutate(product.id);
-                            } else {
-                              setCartQty.mutate({ productId: product.id, quantity: next });
-                            }
-                          }}
-                        />
-                        <Button variant="secondary" size="sm" onClick={() => setCartOpen(true)}>
-                          In cart ({qtyInCart})
-                        </Button>
-                      </div>
-                    ) : (
-                      <Button
-                        variant="primary"
-                        size="md"
-                        className="w-full"
-                        disabled={outOfStock || addToCart.isPending}
-                        onClick={() => addToCart.mutate({ productId: product.id, quantity: 1 })}
-                      >
-                        <Plus className="size-4" />
-                        {outOfStock ? 'Out of stock' : 'Add to cart'}
-                      </Button>
-                    )}
-                  </div>
-                </Card>
-              );
-            })}
-          </div>
-
-          {products.hasNextPage && (
-            <div className="flex justify-center pt-2">
-              <Button
-                variant="outline"
-                loading={products.isFetchingNextPage}
-                onClick={() => products.fetchNextPage()}
-              >
-                Load more products
-              </Button>
-            </div>
+              {products.hasNextPage && (
+                <div className="flex justify-center pt-2">
+                  <Button
+                    variant="outline"
+                    loading={products.isFetchingNextPage}
+                    onClick={() => products.fetchNextPage()}
+                  >
+                    Load more products
+                  </Button>
+                </div>
+              )}
+            </>
           )}
-        </>
-      )}
 
           {/* EcoLife 2D Garden Highlight Card */}
           <Card variant="secondary" className="p-6">
@@ -817,9 +841,9 @@ export default function MarketplacePage() {
                   Spend your EcoCoins on 2D trees, biomes & character skins
                 </h2>
                 <p className="text-sm text-secondary-foreground/80">
-                  Alongside real-world eco products, your EcoCoins wallet powers your
-                  own Cozy 2D Botanical Garden—plant native trees, unlock zen bamboo or autumn biomes,
-                  and dress your gardener in stylish outfits as you hit daily carbon goals.
+                  Alongside real-world eco products, your EcoCoins wallet powers your own Cozy 2D
+                  Botanical Garden—plant native trees, unlock zen bamboo or autumn biomes, and dress
+                  your gardener in stylish outfits as you hit daily carbon goals.
                 </p>
               </div>
 

@@ -82,9 +82,7 @@ export function AdminRevenueAnalytics() {
     0,
   );
 
-  const activeMonthData = selectedMonth
-    ? monthlyList.find((m) => m.month === selectedMonth)
-    : null;
+  const activeMonthData = selectedMonth ? monthlyList.find((m) => m.month === selectedMonth) : null;
 
   return (
     <div className="space-y-8">
@@ -333,9 +331,7 @@ export function AdminRevenueAnalytics() {
                         setSelectedMonth((prev) => (prev === m.month ? null : m.month))
                       }
                       className={`group flex flex-col items-center justify-end h-full gap-1 p-1 rounded-xs transition cursor-pointer focus-visible:outline-2 focus-visible:outline-ring ${
-                        isSelected
-                          ? 'bg-primary/10 ring-1 ring-primary'
-                          : 'hover:bg-muted/40'
+                        isSelected ? 'bg-primary/10 ring-1 ring-primary' : 'hover:bg-muted/40'
                       }`}
                       aria-label={`Month ${formatMonth(m.month)}: GMV ${formatPaise(m.grossPaise)}`}
                       title={`${formatMonth(m.month)}: ${formatPaise(m.grossPaise)} (${m.orderCount} orders)`}
@@ -450,9 +446,7 @@ export function AdminRevenueAnalytics() {
                           setSelectedMonth((prev) => (prev === m.month ? null : m.month))
                         }
                         className={`transition cursor-pointer ${
-                          isSelected
-                            ? 'bg-primary/10 font-medium'
-                            : 'hover:bg-muted/30'
+                          isSelected ? 'bg-primary/10 font-medium' : 'hover:bg-muted/30'
                         }`}
                       >
                         <td className="py-2.5 px-3 font-semibold text-foreground whitespace-nowrap">

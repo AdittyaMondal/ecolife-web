@@ -3,7 +3,17 @@
 import * as React from 'react';
 import { toast } from 'sonner';
 import { getTreeBySlug, rollTreeReward, TREE_CATALOGUE } from '@/lib/tree-catalogue';
-import type { CharacterSkinId, GardenBiomeId, GardenState, PetId, PlantedTree, ShopItemBiome, ShopItemPet, ShopItemSkin, Tree } from '@/types/trees';
+import type {
+  CharacterSkinId,
+  GardenBiomeId,
+  GardenState,
+  PetId,
+  PlantedTree,
+  ShopItemBiome,
+  ShopItemPet,
+  ShopItemSkin,
+  Tree,
+} from '@/types/trees';
 
 const STORAGE_KEY = 'ecolife_garden_v2';
 
@@ -412,7 +422,9 @@ export function useGarden() {
         toast.error(`Not enough EcoCoins! You have ${userCoins} and need ${skin.priceCoins}.`);
         return false;
       }
-      const unlocked = Array.from(new Set([...(state.unlockedSkins || ['gardener_default']), skin.id]));
+      const unlocked = Array.from(
+        new Set([...(state.unlockedSkins || ['gardener_default']), skin.id]),
+      );
       saveState({
         ...state,
         unlockedSkins: unlocked,

@@ -1,8 +1,4 @@
-import {
-  queryOptions,
-  useMutation,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { queryOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api, qs } from '@/lib/fetcher';
 import type {
   CreatePayoutBody,
@@ -88,24 +84,21 @@ export const revenueAnalyticsQuery = () =>
 export const orderSettlementsQuery = (filters?: SettlementFilters) =>
   queryOptions({
     queryKey: ['admin', 'revenue', 'settlements', filters],
-    queryFn: () =>
-      api.get<Page<OrderSettlement>>(`/admin/revenue/settlements${qs(filters ?? {})}`),
+    queryFn: () => api.get<Page<OrderSettlement>>(`/admin/revenue/settlements${qs(filters ?? {})}`),
     staleTime: 15_000,
   });
 
 export const sellerPayoutsQuery = (filters?: PayoutFilters) =>
   queryOptions({
     queryKey: ['admin', 'revenue', 'payouts', filters],
-    queryFn: () =>
-      api.get<Page<SellerPayout>>(`/admin/revenue/payouts${qs(filters ?? {})}`),
+    queryFn: () => api.get<Page<SellerPayout>>(`/admin/revenue/payouts${qs(filters ?? {})}`),
     staleTime: 15_000,
   });
 
 export function useCreateSellerPayout() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (body: CreatePayoutBody) =>
-      api.post<SellerPayout>('/admin/revenue/payouts', body),
+    mutationFn: (body: CreatePayoutBody) => api.post<SellerPayout>('/admin/revenue/payouts', body),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['admin', 'revenue'] });
       qc.invalidateQueries({ queryKey: ['seller', 'orders'] });
