@@ -1,6 +1,19 @@
 'use client';
 
-import { Cloud, CloudOff, CloudUpload, Coins, Gift, HelpCircle, Leaf, Loader2, Palette, Sparkles, Sprout, Trees } from 'lucide-react';
+import {
+  Cloud,
+  CloudOff,
+  CloudUpload,
+  Coins,
+  Gift,
+  HelpCircle,
+  Leaf,
+  Loader2,
+  Palette,
+  Sparkles,
+  Sprout,
+  Trees,
+} from 'lucide-react';
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -170,7 +183,9 @@ export function GardenHeader({
             {/* Micro RPG Progress Bar */}
             <div className="space-y-1.5 pt-3 mt-1 border-t border-border/60">
               <div className="flex items-center justify-between text-[10px] font-mono text-muted-foreground">
-                <span className="font-semibold text-foreground/80">Grove Rank {Math.floor(plantedCount / 4) + 1}</span>
+                <span className="font-semibold text-foreground/80">
+                  Grove Rank {Math.floor(plantedCount / 4) + 1}
+                </span>
                 <span>{plantedCount} planted</span>
               </div>
               <div className="w-full bg-muted/80 rounded-full h-1.5 overflow-hidden">
@@ -199,9 +214,7 @@ export function GardenHeader({
                   <span className="font-mono text-3xl font-black text-teal-600 dark:text-teal-400 tracking-tight">
                     {formatKg(totalOffset, 1)}
                   </span>
-                  <span className="text-xs font-bold text-muted-foreground uppercase">
-                    / yr
-                  </span>
+                  <span className="text-xs font-bold text-muted-foreground uppercase">/ yr</span>
                 </div>
               </div>
 

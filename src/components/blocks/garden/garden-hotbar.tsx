@@ -127,7 +127,7 @@ export function GardenHotbar({
         <div className="hidden lg:block h-9 w-px bg-border/80 shrink-0" aria-hidden="true" />
 
         {/* Group 2: Center 6 Hotbar Tree Slots with Fade Edges on Mobile */}
-        <div className="relative flex min-w-0 flex-1 items-center justify-center">
+        <div className="relative flex min-w-0 flex-1 items-center justify-center rounded-full border border-border/70 bg-muted/40 dark:bg-muted/25 px-2 shadow-inner">
           {/* Left subtle fade mask on mobile */}
           <div
             className="pointer-events-none absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-card to-transparent z-10 lg:hidden"
@@ -143,7 +143,14 @@ export function GardenHotbar({
              Sacred) and made the start unreachable. w-max sizes the track to
              its content so the parent centres it when it fits, max-w-full caps
              it so it scrolls from slot 1 when it does not. */
-            className="flex w-max max-w-full items-center justify-start gap-2 overflow-x-auto scroll-px-1 px-1 py-1 snap-x scrollbar-none"
+            /*
+             * `py-2.5 px-1.5` is clearance, not decoration: the selected slot
+             * draws `ring-2 ring-offset-2`, which a tight scroll container
+             * clips. The mask fades only the horizontal ends, so a slot
+             * scrolling out from under the pill's curve dissolves into it
+             * instead of being sliced by it.
+             */
+            className="flex w-max max-w-full items-center justify-start gap-2 overflow-x-auto scroll-px-2 px-1.5 py-2.5 snap-x scrollbar-none [mask-image:linear-gradient(to_right,transparent,black_14px,black_calc(100%_-_14px),transparent)]"
           >
             {state.hotbar.map((slug, idx) => {
               const isSelected = state.activeHotbarIndex === idx;

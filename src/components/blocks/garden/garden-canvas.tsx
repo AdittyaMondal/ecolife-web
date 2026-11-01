@@ -357,11 +357,7 @@ export function GardenCanvas({
       // 3. Draw Selected / Hovered Tile Cursor Indicator
       if (hoveredTile) {
         const { x, y } = hoveredTile;
-        const isHoverInBounds =
-          x > 0 &&
-          x < state.gridCols - 1 &&
-          y > 0 &&
-          y < state.gridRows - 1;
+        const isHoverInBounds = x > 0 && x < state.gridCols - 1 && y > 0 && y < state.gridRows - 1;
 
         ctx.strokeStyle = isHoverInBounds ? '#7EBF52' : '#ef4444';
         ctx.lineWidth = 2;

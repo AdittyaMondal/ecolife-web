@@ -82,9 +82,19 @@ export function GardenShopDialog({
       onClose={onClose}
       title="Botanical Garden Shop & Sanctuary"
       description="Spend your earned EcoCoins to unlock stylish gardener skins, garden biomes, and free-roaming animal companions."
-      /* max-w-5xl matches the garden page wrapper, so the shop shares the
-         toolbar's left and right edges instead of sitting narrower and offset. */
-      className="sm:max-w-5xl max-h-[88vh] h-[88vh] flex flex-col overflow-hidden"
+      /*
+       * max-w-5xl matches the garden page wrapper so the shop is the same width
+       * as the toolbar, and the translate re-centres it on the CONTENT column.
+       *
+       * ModalDialog uses `m-auto` on a native <dialog>, which centres on the
+       * VIEWPORT — but the page content sits in a column offset by the fixed
+       * sidebar (`md:pl-72 lg:pl-80` in the app layout). Viewport-centred
+       * therefore reads as shifted left of the toolbar above it. Shifting right
+       * by HALF the sidebar offset puts the dialog's centre on the column's
+       * centre, so both cards share a left and right edge. No transform below
+       * `md`, where there is no sidebar.
+       */
+      className="sm:max-w-5xl max-h-[88vh] h-[88vh] flex flex-col overflow-hidden md:translate-x-[9rem] lg:translate-x-[10rem]"
     >
       <div className="shrink-0 space-y-4 pt-1">
         {/* EcoCoins HUD */}
