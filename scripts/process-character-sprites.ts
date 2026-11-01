@@ -72,3 +72,4 @@ for (const name of spriteNames) {
 
   console.log(`Processed & saved: ${name}.png`);
 }
+

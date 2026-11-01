@@ -288,11 +288,13 @@ export default function MarketplacePage() {
                     <div className="space-y-3">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-center gap-3">
-                          <div
-                            className="size-12 rounded-lg flex items-center justify-center border border-black/10 shadow-inner text-xl font-bold"
-                            style={{ backgroundColor: skin.previewColor, color: skin.accentColor }}
-                          >
-                            🧑‍🌾
+                          <div className="size-12 rounded-lg flex items-center justify-center border border-border bg-muted/40 shadow-xs p-1">
+                            <img
+                              src={`/sprites/${skin.id}_down_0.png`}
+                              alt={skin.name}
+                              className="size-full object-contain"
+                              style={{ imageRendering: 'pixelated' }}
+                            />
                           </div>
                           <div>
                             <h3 className="text-base font-bold text-foreground">{skin.name}</h3>
@@ -378,11 +380,31 @@ export default function MarketplacePage() {
                     <div className="space-y-3">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-center gap-3">
-                          <div className="size-12 rounded-lg overflow-hidden grid grid-cols-2 grid-rows-2 border border-border shadow-xs">
-                            <div style={{ backgroundColor: biome.palette.grassBase }} />
-                            <div style={{ backgroundColor: biome.palette.pathBase }} />
-                            <div style={{ backgroundColor: biome.palette.waterBase }} />
-                            <div style={{ backgroundColor: biome.palette.fenceBase }} />
+                          <div className="size-12 rounded-lg overflow-hidden grid grid-cols-2 grid-rows-2 border border-border shadow-xs bg-muted">
+                            <img
+                              src={`/tiles/${biome.id}_grass.png`}
+                              alt="Grass"
+                              className="size-full object-cover"
+                              style={{ imageRendering: 'pixelated' }}
+                            />
+                            <img
+                              src={`/tiles/${biome.id}_path.png`}
+                              alt="Path"
+                              className="size-full object-cover"
+                              style={{ imageRendering: 'pixelated' }}
+                            />
+                            <img
+                              src={`/tiles/${biome.id}_water.png`}
+                              alt="Water"
+                              className="size-full object-cover"
+                              style={{ imageRendering: 'pixelated' }}
+                            />
+                            <img
+                              src={`/tiles/${biome.id}_fence.png`}
+                              alt="Fence"
+                              className="size-full object-cover"
+                              style={{ imageRendering: 'pixelated' }}
+                            />
                           </div>
                           <div>
                             <h3 className="text-base font-bold text-foreground">{biome.name}</h3>

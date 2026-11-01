@@ -133,10 +133,14 @@ export function GardenShopDialog({
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2.5">
                         <div
-                          className="size-10 rounded-lg flex items-center justify-center border border-black/10 shadow-inner font-bold text-lg"
-                          style={{ backgroundColor: skin.previewColor, color: skin.accentColor }}
+                          className="size-11 rounded-lg flex items-center justify-center border border-border bg-muted/40 shadow-xs p-1"
                         >
-                          🧑‍🌾
+                          <img
+                            src={`/sprites/${skin.id}_down_0.png`}
+                            alt={skin.name}
+                            className="size-full object-contain"
+                            style={{ imageRendering: 'pixelated' }}
+                          />
                         </div>
                         <div>
                           <h4 className="text-sm font-bold text-foreground leading-tight">
@@ -226,12 +230,32 @@ export function GardenShopDialog({
                     {/* Header info */}
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2.5">
-                        {/* Swatch palette preview */}
-                        <div className="size-10 rounded-lg overflow-hidden grid grid-cols-2 grid-rows-2 border border-border shadow-xs">
-                          <div style={{ backgroundColor: biome.palette.grassBase }} />
-                          <div style={{ backgroundColor: biome.palette.pathBase }} />
-                          <div style={{ backgroundColor: biome.palette.waterBase }} />
-                          <div style={{ backgroundColor: biome.palette.fenceBase }} />
+                        {/* Real tile images preview */}
+                        <div className="size-11 rounded-lg overflow-hidden grid grid-cols-2 grid-rows-2 border border-border shadow-xs bg-muted">
+                          <img
+                            src={`/tiles/${biome.id}_grass.png`}
+                            alt="Grass"
+                            className="size-full object-cover"
+                            style={{ imageRendering: 'pixelated' }}
+                          />
+                          <img
+                            src={`/tiles/${biome.id}_path.png`}
+                            alt="Path"
+                            className="size-full object-cover"
+                            style={{ imageRendering: 'pixelated' }}
+                          />
+                          <img
+                            src={`/tiles/${biome.id}_water.png`}
+                            alt="Water"
+                            className="size-full object-cover"
+                            style={{ imageRendering: 'pixelated' }}
+                          />
+                          <img
+                            src={`/tiles/${biome.id}_fence.png`}
+                            alt="Fence"
+                            className="size-full object-cover"
+                            style={{ imageRendering: 'pixelated' }}
+                          />
                         </div>
                         <div>
                           <h4 className="text-sm font-bold text-foreground leading-tight">

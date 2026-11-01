@@ -26,21 +26,6 @@ export interface GardenCanvasProps {
   activeTool: 'plant' | 'water' | 'remove' | 'move';
 }
 
-interface Particle {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  size: number;
-  rotation: number;
-  rotationSpeed: number;
-  swayOffset: number;
-  swaySpeed: number;
-  color: string;
-  shape: 'leaf' | 'petal' | 'spore';
-  opacity: number;
-}
-
 export function GardenCanvas({
   state,
   movingTreeFrom,
@@ -62,13 +47,16 @@ export function GardenCanvas({
   const totalHeight = state.gridRows * TILE_SIZE;
 
   // Cache for loaded tree sprite PNG images
-  const imageCacheRef = React.useRef<Map<string, HTMLImageElement>>(new Map());
-  // Cache for loaded character sprite PNG images
+  const treeImageCacheRef = React.useRef<Map<string, HTMLImageElement>>(new Map());
+  // Cache for loaded character sprite PNG images (multi-frame)
   const characterImageCacheRef = React.useRef<Map<string, HTMLImageElement>>(new Map());
+  // Cache for loaded biome tile PNG images
+  const tileImageCacheRef = React.useRef<Map<string, HTMLImageElement>>(new Map());
 
-  // Preload tree sprites & character sprites
+  // Preload tree sprites, multi-frame character sprites & biome tiles
   React.useEffect(() => {
-    const slugs = [
+    // 1. Tree catalogue sprites
+    const treeSlugs = [
       'neem',
       'mango',
       'amaltas',
@@ -93,28 +81,50 @@ export function GardenCanvas({
       'hibiscus',
     ];
 
-    for (const slug of slugs) {
-      if (!imageCacheRef.current.has(slug)) {
+    for (const slug of treeSlugs) {
+      if (!treeImageCacheRef.current.has(slug)) {
         const img = new Image();
         img.src = `/trees/${slug}.png`;
-        imageCacheRef.current.set(slug, img);
+        treeImageCacheRef.current.set(slug, img);
       }
     }
 
-    const charSprites = [
-      'gardener_front',
-      'gardener_back',
-      'gardener_walk',
+    // 2. Character multi-frame sprites for all 5 skins
+    const skins = [
+      'gardener_default',
       'forest_ranger',
       'solar_scout',
       'monsoon_botanist',
       'zen_hermit',
     ];
-    for (const name of charSprites) {
-      if (!characterImageCacheRef.current.has(name)) {
-        const img = new Image();
-        img.src = `/sprites/${name}.png`;
-        characterImageCacheRef.current.set(name, img);
+    const dirs = ['down', 'up', 'side'];
+    const frames = [0, 1, 2];
+
+    for (const skin of skins) {
+      for (const dir of dirs) {
+        for (const frame of frames) {
+          const key = `${skin}_${dir}_${frame}`;
+          if (!characterImageCacheRef.current.has(key)) {
+            const img = new Image();
+            img.src = `/sprites/${key}.png`;
+            characterImageCacheRef.current.set(key, img);
+          }
+        }
+      }
+    }
+
+    // 3. Biome tilesets (16 tiles)
+    const biomes = ['meadow', 'zen_bamboo', 'autumn_orchard', 'sacred_grove'];
+    const tileTypes = ['grass', 'path', 'water', 'fence'];
+
+    for (const biome of biomes) {
+      for (const t of tileTypes) {
+        const key = `${biome}_${t}`;
+        if (!tileImageCacheRef.current.has(key)) {
+          const img = new Image();
+          img.src = `/tiles/${key}.png`;
+          tileImageCacheRef.current.set(key, img);
+        }
       }
     }
   }, []);
@@ -133,7 +143,7 @@ export function GardenCanvas({
 
       setIsWalking(true);
       if (walkTimer) clearTimeout(walkTimer);
-      walkTimer = setTimeout(() => setIsWalking(false), 200);
+      walkTimer = setTimeout(() => setIsWalking(false), 220);
 
       switch (e.key) {
         case 'ArrowUp':
@@ -217,7 +227,7 @@ export function GardenCanvas({
     activeTool,
   ]);
 
-  // Main 60FPS Game Loop Render Cycle with Particle System
+  // Main 60FPS Game Loop Render Cycle (Particle effect completely removed!)
   React.useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -226,70 +236,6 @@ export function GardenCanvas({
 
     let animationId: number;
     let tick = 0;
-
-    // Initialize particle pool of falling leaves, blossoms and spores
-    const particleCount = 42;
-    const particles: Particle[] = [];
-
-    const getSpeciesColors = (): { colors: string[]; shapes: ('leaf' | 'petal' | 'spore')[] } => {
-      const planted = state.plantedTrees;
-      const colors: string[] = [];
-      const shapes: ('leaf' | 'petal' | 'spore')[] = [];
-
-      // Check planted species
-      const slugs = new Set(planted.map((t) => t.treeSlug));
-
-      if (slugs.has('gulmohar') || slugs.has('palash') || slugs.has('hibiscus')) {
-        // Vibrant scarlet red & flame petals
-        colors.push('#dc2626', '#ef4444', '#f87171');
-        shapes.push('petal');
-      }
-      if (slugs.has('amaltas') || slugs.has('papaya')) {
-        // Golden yellow shower petals
-        colors.push('#facc15', '#fde047', '#fef08a');
-        shapes.push('petal');
-      }
-      if (slugs.has('jacaranda')) {
-        // Lavender purple blossoms
-        colors.push('#a855f7', '#c084fc', '#d8b4fe');
-        shapes.push('petal');
-      }
-      if (state.activeBiomeId === 'autumn_orchard') {
-        colors.push('#ea580c', '#f97316', '#eab308');
-        shapes.push('leaf');
-      }
-
-      // Default ambient tender leaves & pollen spores
-      colors.push('#4ade80', '#22c55e', '#86efac', '#fef08a');
-      shapes.push('leaf', 'spore');
-
-      return { colors, shapes };
-    };
-
-    const spawnParticle = (startY?: number): Particle => {
-      const { colors, shapes } = getSpeciesColors();
-      const color = colors[Math.floor(Math.random() * colors.length)];
-      const shape = shapes[Math.floor(Math.random() * shapes.length)];
-
-      return {
-        x: Math.random() * totalWidth,
-        y: startY !== undefined ? startY : Math.random() * totalHeight,
-        vx: (Math.random() - 0.5) * 0.4 + 0.3, // Slight natural eastward breeze
-        vy: 0.5 + Math.random() * 0.9,
-        size: shape === 'spore' ? 1.5 + Math.random() : 3.5 + Math.random() * 3,
-        rotation: Math.random() * Math.PI * 2,
-        rotationSpeed: (Math.random() - 0.5) * 0.05,
-        swayOffset: Math.random() * Math.PI * 2,
-        swaySpeed: 0.03 + Math.random() * 0.03,
-        color,
-        shape,
-        opacity: 0.4 + Math.random() * 0.55,
-      };
-    };
-
-    for (let i = 0; i < particleCount; i++) {
-      particles.push(spawnParticle());
-    }
 
     const render = () => {
       tick++;
@@ -301,7 +247,12 @@ export function GardenCanvas({
       const currentBiome = state.activeBiomeId || 'meadow';
       const currentSkin = state.activeSkinId || 'gardener_default';
 
-      // 1. Draw Terrain Grid (Background)
+      // 1. Draw Image Terrain Grid (Background)
+      const grassImg = tileImageCacheRef.current.get(`${currentBiome}_grass`);
+      const pathImg = tileImageCacheRef.current.get(`${currentBiome}_path`);
+      const waterImg = tileImageCacheRef.current.get(`${currentBiome}_water`);
+      const fenceImg = tileImageCacheRef.current.get(`${currentBiome}_fence`);
+
       for (let r = 0; r < state.gridRows; r++) {
         for (let c = 0; c < state.gridCols; c++) {
           const px = c * TILE_SIZE;
@@ -310,19 +261,35 @@ export function GardenCanvas({
 
           // Perimeter Fence
           if (r === 0 || r === state.gridRows - 1 || c === 0 || c === state.gridCols - 1) {
-            drawFenceTile(ctx, px, py, currentBiome);
+            if (fenceImg && fenceImg.complete && fenceImg.naturalWidth > 0) {
+              ctx.drawImage(fenceImg, px, py, TILE_SIZE, TILE_SIZE);
+            } else {
+              drawFenceTile(ctx, px, py, currentBiome);
+            }
           }
           // Garden Cobblestone Pathway: horizontal path on row 5 and vertical path on col 7
           else if (r === 5 || (c === 7 && r < 7)) {
-            drawPathTile(ctx, px, py, seed, currentBiome);
+            if (pathImg && pathImg.complete && pathImg.naturalWidth > 0) {
+              ctx.drawImage(pathImg, px, py, TILE_SIZE, TILE_SIZE);
+            } else {
+              drawPathTile(ctx, px, py, seed, currentBiome);
+            }
           }
           // Garden Pond at (7, 7) and (8, 7)
           else if ((c === 7 || c === 8) && (r === 7 || r === 8)) {
-            drawWaterTile(ctx, px, py, tick, c === 7 && r === 7, currentBiome);
+            if (waterImg && waterImg.complete && waterImg.naturalWidth > 0) {
+              ctx.drawImage(waterImg, px, py, TILE_SIZE, TILE_SIZE);
+            } else {
+              drawWaterTile(ctx, px, py, tick, c === 7 && r === 7, currentBiome);
+            }
           }
           // Biome Ground Terrain
           else {
-            drawGrassTile(ctx, px, py, seed, currentBiome);
+            if (grassImg && grassImg.complete && grassImg.naturalWidth > 0) {
+              ctx.drawImage(grassImg, px, py, TILE_SIZE, TILE_SIZE);
+            } else {
+              drawGrassTile(ctx, px, py, seed, currentBiome);
+            }
           }
         }
       }
@@ -361,7 +328,7 @@ export function GardenCanvas({
         if (activeTool === 'plant' && equippedSlug && isHoverInBounds && !isOccupied) {
           ctx.save();
           ctx.globalAlpha = 0.55;
-          const img = imageCacheRef.current.get(equippedSlug);
+          const img = treeImageCacheRef.current.get(equippedSlug);
           if (img && img.complete && img.naturalWidth > 0) {
             const drawSize = 64;
             const cx = x * TILE_SIZE + TILE_SIZE / 2;
@@ -408,26 +375,28 @@ export function GardenCanvas({
 
       for (const entity of renderEntities) {
         if (entity.type === 'player') {
-          const px = state.playerPos.x * TILE_SIZE;
-          const py = state.playerPos.y * TILE_SIZE;
-          const cx = px + TILE_SIZE / 2;
-          const bottomY = py + TILE_SIZE;
+          const charPx = state.playerPos.x * TILE_SIZE;
+          const charPy = state.playerPos.y * TILE_SIZE;
+          const cx = charPx + TILE_SIZE / 2;
+          const bottomY = charPy + TILE_SIZE;
 
-          // Determine sprite key based on skin and directional motion
-          let spriteKey = 'gardener_front';
-          if (currentSkin !== 'gardener_default') {
-            spriteKey = currentSkin;
-          } else {
-            if (state.playerPos.direction === 'up') spriteKey = 'gardener_back';
-            else if (state.playerPos.direction === 'left' || state.playerPos.direction === 'right') spriteKey = 'gardener_walk';
-            else spriteKey = 'gardener_front';
+          // Multi-frame animation cadence calculation
+          const dirKey =
+            state.playerPos.direction === 'left' || state.playerPos.direction === 'right'
+              ? 'side'
+              : state.playerPos.direction;
+
+          let frameIdx = 0;
+          if (isWalking) {
+            // 4-phase walking cycle: idle (0) -> left step (1) -> idle (0) -> right step (2)
+            const cyclePhase = Math.floor((tick / 7) % 4);
+            if (cyclePhase === 1) frameIdx = 1;
+            else if (cyclePhase === 3) frameIdx = 2;
+            else frameIdx = 0;
           }
 
-          const img = characterImageCacheRef.current.get(spriteKey);
-
-          // Walk step bounce & leg cadence
-          const stepBob = isWalking ? Math.sin(tick * 0.45) * 2.5 : 0;
-          const isFlipped = state.playerPos.direction === 'left';
+          const spriteKey = `${currentSkin}_${dirKey}_${frameIdx}`;
+          const charImg = characterImageCacheRef.current.get(spriteKey);
 
           // Player drop shadow
           ctx.fillStyle = 'rgba(0, 0, 0, 0.28)';
@@ -435,20 +404,29 @@ export function GardenCanvas({
           ctx.ellipse(cx, bottomY - 3, 11, 4, 0, 0, Math.PI * 2);
           ctx.fill();
 
-          if (img && img.complete && img.naturalWidth > 0) {
+          if (charImg && charImg.complete && charImg.naturalWidth > 0) {
             ctx.save();
-            const spriteSize = 46;
-            ctx.translate(cx, bottomY - spriteSize / 2 + stepBob);
-            if (isFlipped) {
+            const spriteSize = 48;
+            ctx.translate(cx, bottomY - spriteSize / 2 - 2);
+
+            // If walking left, flip the side profile horizontally!
+            if (state.playerPos.direction === 'left') {
               ctx.scale(-1, 1);
             }
-            ctx.drawImage(img, -spriteSize / 2, -spriteSize / 2, spriteSize, spriteSize);
+
+            ctx.drawImage(
+              charImg,
+              -spriteSize / 2,
+              -spriteSize / 2,
+              spriteSize,
+              spriteSize,
+            );
             ctx.restore();
           } else {
             drawGardener(
               ctx,
-              px,
-              py,
+              charPx,
+              charPy,
               state.playerPos.direction,
               isWalking,
               tick,
@@ -471,9 +449,8 @@ export function GardenCanvas({
           // Gentle wind sway
           const sway = Math.sin((tick + pt.x * 5) / 26) * 1.5;
 
-          const img = imageCacheRef.current.get(pt.treeSlug);
+          const img = treeImageCacheRef.current.get(pt.treeSlug);
           if (img && img.complete && img.naturalWidth > 0) {
-            // Scale sprite according to growth stage
             let scale = 1.0;
             if (pt.growthStage === 1) scale = 0.4;
             else if (pt.growthStage === 2) scale = 0.6;
@@ -491,7 +468,6 @@ export function GardenCanvas({
               drawH,
             );
           } else {
-            // Procedural fallback
             drawTreeSprite(ctx, tileX, tileY, pt.treeSlug, pt.growthStage, tick);
           }
 
@@ -501,47 +477,6 @@ export function GardenCanvas({
             ctx.fillRect(cx - 3, bottomY - 6, 6, 2);
           }
         }
-      }
-
-      // 6. Draw Falling Leaves, Petals & Spores Particle Effect (Foreground)
-      for (let i = 0; i < particles.length; i++) {
-        const p = particles[i];
-
-        // Drift update
-        p.x += p.vx + Math.sin(tick * p.swaySpeed + p.swayOffset) * 0.75;
-        p.y += p.vy;
-        p.rotation += p.rotationSpeed;
-
-        // Respawn if out of bounds
-        if (p.y > totalHeight + 10 || p.x < -10 || p.x > totalWidth + 10) {
-          particles[i] = spawnParticle(-10);
-          continue;
-        }
-
-        // Draw particle
-        ctx.save();
-        ctx.globalAlpha = p.opacity;
-        ctx.translate(p.x, p.y);
-        ctx.rotate(p.rotation);
-        ctx.fillStyle = p.color;
-
-        if (p.shape === 'spore') {
-          ctx.beginPath();
-          ctx.arc(0, 0, p.size, 0, Math.PI * 2);
-          ctx.fill();
-        } else if (p.shape === 'petal') {
-          // Delicate curved blossom petal
-          ctx.beginPath();
-          ctx.ellipse(0, 0, p.size, p.size * 0.6, 0, 0, Math.PI * 2);
-          ctx.fill();
-        } else {
-          // Elongated leaf with vein
-          ctx.beginPath();
-          ctx.ellipse(0, 0, p.size * 1.3, p.size * 0.6, 0, 0, Math.PI * 2);
-          ctx.fill();
-        }
-
-        ctx.restore();
       }
 
       animationId = requestAnimationFrame(render);
