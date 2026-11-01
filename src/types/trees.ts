@@ -57,3 +57,4 @@ export interface GardenState {
     timesWatered: number;
   };
 }
+
