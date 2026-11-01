@@ -84,6 +84,22 @@ describe('safeNextPath (open-redirect guard on ?next=)', () => {
     assert.equal(safeNextPath('/\\evil.example'), null);
   });
 
+  it('rejects control characters browsers STRIP before parsing', () => {
+    // These start with a single slash and contain no `//`, so a prefix guard
+    // waves them through — and they resolve to https://evil.example, because
+    // the URL spec removes tab, LF and CR from the input first.
+    assert.equal(safeNextPath('/\t/evil.example'), null);
+    assert.equal(safeNextPath('/\n/evil.example'), null);
+    assert.equal(safeNextPath('/\r/evil.example'), null);
+    assert.equal(safeNextPath('/\t\t//evil.example'), null);
+  });
+
+  it('returns the re-serialised path, so caller and check cannot diverge', () => {
+    // Whatever survives is what the browser would have navigated to anyway.
+    assert.equal(safeNextPath('/track/../home'), '/home');
+    assert.equal(safeNextPath('/track?a=1#b'), '/track?a=1#b');
+  });
+
   it('rejects anything that is not a path, and absent values', () => {
     assert.equal(safeNextPath('evil.example'), null);
     assert.equal(safeNextPath('javascript:alert(1)'), null);

@@ -18,17 +18,39 @@ export function landingPathFor(me: {
 /**
  * A `?next=` value that is safe to navigate to, or null.
  *
- * Only same-site PATHS. An absolute URL here is an open redirect, and on a
- * trusted domain that is a phishing primitive: a link to
- * `/login?next=https://evil.example` looks like your site and lands on
- * theirs. `//evil.example` is protocol-relative and resolves off-site too,
- * which is why the second character matters as much as the first.
+ * Parse and compare ORIGINS. Do not pattern-match the string.
  *
- * A backslash is rejected because some agents normalise `/\` to `//`.
+ * The first version of this rejected a leading `//` and `/\\` by prefix, which
+ * looked sufficient and was not. The URL spec has browsers STRIP tab, LF and
+ * CR from a URL before parsing, so `/<TAB>/evil.example` starts with a single
+ * slash, contains no `//`, and still resolves to `https://evil.example`:
+ *
+ *   "/\t/evil.example"  prefix-guard=PASS  →  origin https://evil.example
+ *   "/\n/evil.example"  prefix-guard=PASS  →  origin https://evil.example
+ *   "/\r/evil.example"  prefix-guard=PASS  →  origin https://evil.example
+ *
+ * That is a parser differential: the check read the raw string while the
+ * browser navigated the normalised one. Resolving against a sentinel base and
+ * comparing origins closes the whole class, including the tricks nobody here
+ * has thought of yet.
+ *
+ * Returning the RE-SERIALISED path matters as much as the check: the caller
+ * navigates to exactly what was validated, with the control characters gone,
+ * so the two can never disagree again.
+ *
+ * Why it matters at all: an absolute `?next=` on a trusted domain is a
+ * phishing primitive — the link looks like your site and lands on theirs.
  */
 export function safeNextPath(raw: string | null | undefined): string | null {
-  if (!raw) return null;
-  if (!raw.startsWith('/')) return null;
-  if (raw.startsWith('//') || raw.startsWith('/\\')) return null;
-  return raw;
+  if (!raw || !raw.startsWith('/')) return null;
+  // A sentinel rather than window.location.origin, so this is pure and
+  // testable without a DOM. Only the origin COMPARISON matters, not the host.
+  const base = 'https://next.invalid';
+  try {
+    const url = new URL(raw, base);
+    if (url.origin !== base) return null;
+    return `${url.pathname}${url.search}${url.hash}`;
+  } catch {
+    return null;
+  }
 }
