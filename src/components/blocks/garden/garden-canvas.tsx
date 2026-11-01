@@ -692,7 +692,7 @@ export function GardenCanvas({
   const inspectedTreeDef = inspectedTree ? getTreeBySlug(inspectedTree.treeSlug) : null;
 
   return (
-    <div className="relative flex flex-col items-center justify-center select-none overflow-hidden rounded-xl border-2 border-border bg-card shadow-md p-2">
+    <div className="relative flex flex-col items-center justify-center select-none overflow-hidden rounded-2xl border-2 border-border/80 bg-card shadow-md p-2.5 sm:p-3 w-full">
       {/* Canvas Viewport */}
       <div className="relative overflow-auto max-w-full rounded-lg shadow-inner">
         <canvas

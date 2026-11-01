@@ -1,6 +1,6 @@
 'use client';
 
-import { Cloud, CloudOff, CloudUpload, Coins, Gift, HelpCircle, Leaf, Loader2, Palette, Sprout, Trees } from 'lucide-react';
+import { Cloud, CloudOff, CloudUpload, Coins, Gift, HelpCircle, Leaf, Loader2, Palette, Sparkles, Sprout, Trees } from 'lucide-react';
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -139,49 +139,133 @@ export function GardenHeader({
           </div>
         </div>
 
-        {/* 3 Metric Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <Card className="p-4 border-border bg-card shadow-subtle flex items-center justify-between">
-            <div className="space-y-0.5">
-              <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                Planted Forest
-              </span>
-              <p className="font-mono text-2xl font-extrabold text-foreground">
-                {plantedCount} {plantedCount === 1 ? 'Tree' : 'Trees'}
-              </p>
-            </div>
-            <span className="flex size-10 items-center justify-center rounded-sm bg-secondary/30 text-primary">
-              <Sprout className="size-5" />
-            </span>
-          </Card>
+        {/* 3 Metric Summary Cards (Game RPG HUD Stat Cards) */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 w-full">
+          {/* Card 1: Planted Forest */}
+          <div className="relative flex flex-col justify-between p-4 rounded-2xl border-2 border-border/80 bg-gradient-to-b from-card via-card to-emerald-950/5 dark:to-emerald-950/20 shadow-md shadow-black/5 hover:shadow-lg hover:border-emerald-500/40 hover:-translate-y-0.5 transition-all duration-200 overflow-hidden group">
+            {/* Top decorative accent strip */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-green-400 to-emerald-600" />
 
-          <Card className="p-4 border-border bg-card shadow-subtle flex items-center justify-between">
-            <div className="space-y-0.5">
-              <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                Annual Carbon Offset
-              </span>
-              <p className="font-mono text-2xl font-extrabold text-positive">
-                {formatKg(totalOffset, 1)}/yr
-              </p>
-            </div>
-            <span className="flex size-10 items-center justify-center rounded-sm bg-accent/60 text-positive">
-              <Leaf className="size-5" />
-            </span>
-          </Card>
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-1">
+                <span className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
+                  <Sprout className="size-3.5" />
+                  <span>Sanctuary Canopy</span>
+                </span>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="font-mono text-3xl font-black text-foreground tracking-tight">
+                    {plantedCount}
+                  </span>
+                  <span className="text-xs font-bold text-muted-foreground uppercase">
+                    {plantedCount === 1 ? 'Tree' : 'Trees'}
+                  </span>
+                </div>
+              </div>
 
-          <Card className="p-4 border-border bg-card shadow-subtle flex items-center justify-between">
-            <div className="space-y-0.5">
-              <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                Species Diversity
-              </span>
-              <p className="font-mono text-2xl font-extrabold text-foreground">
-                {uniqueSpecies} Species
-              </p>
+              <div className="size-11 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 text-white flex items-center justify-center shadow-md shadow-emerald-500/25 shrink-0 border border-emerald-400/30 group-hover:scale-105 transition-transform">
+                <Trees className="size-5" />
+              </div>
             </div>
-            <span className="flex size-10 items-center justify-center rounded-sm bg-secondary/30 text-primary">
-              <Trees className="size-5" />
-            </span>
-          </Card>
+
+            {/* Micro RPG Progress Bar */}
+            <div className="space-y-1.5 pt-3 mt-1 border-t border-border/60">
+              <div className="flex items-center justify-between text-[10px] font-mono text-muted-foreground">
+                <span className="font-semibold text-foreground/80">Grove Rank {Math.floor(plantedCount / 4) + 1}</span>
+                <span>{plantedCount} planted</span>
+              </div>
+              <div className="w-full bg-muted/80 rounded-full h-1.5 overflow-hidden">
+                <div
+                  className="bg-emerald-500 h-full rounded-full transition-all duration-500"
+                  style={{
+                    width: `${Math.min(100, Math.max(8, ((plantedCount % 4) / 4) * 100))}%`,
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Card 2: Annual Carbon Offset */}
+          <div className="relative flex flex-col justify-between p-4 rounded-2xl border-2 border-border/80 bg-gradient-to-b from-card via-card to-teal-950/5 dark:to-teal-950/20 shadow-md shadow-black/5 hover:shadow-lg hover:border-teal-500/40 hover:-translate-y-0.5 transition-all duration-200 overflow-hidden group">
+            {/* Top decorative accent strip */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-teal-500 via-emerald-400 to-teal-600" />
+
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-1">
+                <span className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest text-teal-600 dark:text-teal-400">
+                  <Leaf className="size-3.5" />
+                  <span>Carbon Sequestration</span>
+                </span>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="font-mono text-3xl font-black text-teal-600 dark:text-teal-400 tracking-tight">
+                    {formatKg(totalOffset, 1)}
+                  </span>
+                  <span className="text-xs font-bold text-muted-foreground uppercase">
+                    / yr
+                  </span>
+                </div>
+              </div>
+
+              <div className="size-11 rounded-xl bg-gradient-to-br from-teal-500 to-emerald-600 text-white flex items-center justify-center shadow-md shadow-teal-500/25 shrink-0 border border-teal-400/30 group-hover:scale-105 transition-transform">
+                <Leaf className="size-5" />
+              </div>
+            </div>
+
+            {/* Active Carbon Sink Status */}
+            <div className="flex items-center justify-between text-[11px] pt-3 mt-1 border-t border-border/60">
+              <span className="flex items-center gap-1.5 font-bold text-emerald-600 dark:text-emerald-400 text-[10px] uppercase tracking-wide">
+                <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>Active Biosphere</span>
+              </span>
+              <span className="font-mono text-[10px] font-bold text-muted-foreground">
+                ~{((totalOffset / 365) * 1000).toFixed(0)} g/day CO₂
+              </span>
+            </div>
+          </div>
+
+          {/* Card 3: Species Diversity */}
+          <div className="relative flex flex-col justify-between p-4 rounded-2xl border-2 border-border/80 bg-gradient-to-b from-card via-card to-amber-950/5 dark:to-amber-950/20 shadow-md shadow-black/5 hover:shadow-lg hover:border-amber-500/40 hover:-translate-y-0.5 transition-all duration-200 overflow-hidden group">
+            {/* Top decorative accent strip */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500" />
+
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-1">
+                <span className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-widest text-amber-600 dark:text-amber-400">
+                  <Sparkles className="size-3.5" />
+                  <span>Species Biodiversity</span>
+                </span>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="font-mono text-3xl font-black text-foreground tracking-tight">
+                    {uniqueSpecies}
+                  </span>
+                  <span className="text-xs font-bold text-muted-foreground uppercase">
+                    / 22 Discovered
+                  </span>
+                </div>
+              </div>
+
+              <div className="size-11 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 text-white flex items-center justify-center shadow-md shadow-amber-500/25 shrink-0 border border-amber-400/30 group-hover:scale-105 transition-transform">
+                <Sparkles className="size-5" />
+              </div>
+            </div>
+
+            {/* Catalog Discovery Progress Bar */}
+            <div className="space-y-1.5 pt-3 mt-1 border-t border-border/60">
+              <div className="flex items-center justify-between text-[10px] font-mono text-muted-foreground">
+                <span className="font-semibold text-foreground/80">Catalog Index</span>
+                <span className="font-bold text-amber-600 dark:text-amber-400">
+                  {Math.round((uniqueSpecies / 22) * 100)}%
+                </span>
+              </div>
+              <div className="w-full bg-muted/80 rounded-full h-1.5 overflow-hidden">
+                <div
+                  className="bg-gradient-to-r from-amber-400 to-orange-500 h-full rounded-full transition-all duration-500"
+                  style={{
+                    width: `${Math.min(100, Math.max(6, (uniqueSpecies / 22) * 100))}%`,
+                  }}
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

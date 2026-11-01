@@ -164,10 +164,10 @@ export function GardenShopDialog({
                 <Card
                   key={skin.id}
                   className={cn(
-                    'p-4 flex flex-col justify-between transition-all border',
+                    'p-4 flex flex-col justify-between transition-all duration-200 border-2 rounded-xl shadow-xs hover:shadow-md',
                     isEquipped
-                      ? 'border-primary/80 ring-1 ring-primary/40 bg-primary/5'
-                      : 'border-border bg-card hover:border-border/80',
+                      ? 'border-primary ring-2 ring-primary/30 bg-primary/5'
+                      : 'border-border/80 bg-card hover:border-primary/40 hover:-translate-y-0.5',
                   )}
                 >
                   <div className="space-y-2.5">
@@ -263,10 +263,10 @@ export function GardenShopDialog({
                 <Card
                   key={biome.id}
                   className={cn(
-                    'p-4 flex flex-col justify-between transition-all border',
+                    'p-4 flex flex-col justify-between transition-all duration-200 border-2 rounded-xl shadow-xs hover:shadow-md',
                     isEquipped
-                      ? 'border-primary/80 ring-1 ring-primary/40 bg-primary/5'
-                      : 'border-border bg-card hover:border-border/80',
+                      ? 'border-primary ring-2 ring-primary/30 bg-primary/5'
+                      : 'border-border/80 bg-card hover:border-primary/40 hover:-translate-y-0.5',
                   )}
                 >
                   <div className="space-y-2.5">
@@ -382,10 +382,10 @@ export function GardenShopDialog({
                 <Card
                   key={pet.id}
                   className={cn(
-                    'p-4 flex flex-col justify-between transition-all border',
+                    'p-4 flex flex-col justify-between transition-all duration-200 border-2 rounded-xl shadow-xs hover:shadow-md',
                     isRoaming
-                      ? 'border-primary/80 ring-1 ring-primary/40 bg-primary/5'
-                      : 'border-border bg-card hover:border-border/80',
+                      ? 'border-primary ring-2 ring-primary/30 bg-primary/5'
+                      : 'border-border/80 bg-card hover:border-primary/40 hover:-translate-y-0.5',
                   )}
                 >
                   <div className="space-y-2.5">

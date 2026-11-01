@@ -79,11 +79,11 @@ export function GardenHotbar({
   ];
 
   return (
-    <div className="flex flex-col gap-3 w-full max-w-4xl mx-auto">
+    <div className="flex flex-col gap-3 w-full">
       {/* Tool Buttons & Hotbar Floating Toolbar */}
       <nav
         aria-label="Garden action toolbar"
-        className="relative flex flex-wrap lg:flex-nowrap items-center justify-center lg:justify-between gap-2.5 sm:gap-3 rounded-2xl border border-border/80 bg-card/95 p-2 sm:p-2.5 shadow-lg shadow-black/5 dark:shadow-black/25 backdrop-blur-md transition-shadow hover:shadow-xl w-full"
+        className="relative flex flex-wrap lg:flex-nowrap items-center justify-between gap-3 sm:gap-4 rounded-2xl border-2 border-border/80 bg-card/95 p-2.5 sm:p-3 shadow-lg shadow-black/5 dark:shadow-black/25 backdrop-blur-md transition-shadow hover:shadow-xl w-full"
       >
         {/* Group 1: Mode Tabs (Plant, Water, Relocate, Remove) */}
         <div
@@ -134,7 +134,7 @@ export function GardenHotbar({
         />
 
         {/* Group 2: Center 6 Hotbar Tree Slots with Fade Edges on Mobile */}
-        <div className="relative flex items-center max-w-full overflow-hidden">
+        <div className="relative flex items-center justify-center max-w-full overflow-hidden flex-1">
           {/* Left subtle fade mask on mobile */}
           <div
             className="pointer-events-none absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-card to-transparent z-10 lg:hidden"
@@ -144,7 +144,7 @@ export function GardenHotbar({
           <div
             role="listbox"
             aria-label="Seed hotbar"
-            className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1 px-1 max-w-full"
+            className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1 px-1 max-w-full justify-center"
           >
             {state.hotbar.map((slug, idx) => {
               const isSelected = state.activeHotbarIndex === idx;
@@ -169,10 +169,10 @@ export function GardenHotbar({
                     }
                     onClick={() => onSelectHotbarIndex(idx)}
                     className={cn(
-                      'relative flex flex-col justify-between items-center w-14 sm:w-16 h-[72px] sm:h-[76px] p-1.5 rounded-xl border-2 transition-all duration-200 ease-out select-none group shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
+                      'relative flex flex-col justify-between items-center w-14 sm:w-16 h-[74px] sm:h-[78px] p-1.5 rounded-xl border-2 transition-all duration-200 ease-out select-none group shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
                       isSelected
-                        ? 'border-emerald-600 bg-card shadow-md shadow-emerald-500/20 scale-[1.04] z-10 ring-2 ring-emerald-500/40 -translate-y-0.5'
-                        : 'border-border/70 bg-card/75 hover:bg-card hover:border-emerald-500/50 hover:scale-[1.01] active:scale-95 opacity-90 hover:opacity-100',
+                        ? 'border-emerald-500 bg-card shadow-md shadow-emerald-500/20 scale-[1.05] z-10 ring-2 ring-emerald-500/40 -translate-y-0.5'
+                        : 'border-border/70 bg-muted/30 dark:bg-muted/15 hover:bg-card hover:border-emerald-500/50 hover:scale-[1.02] active:scale-95 opacity-90 hover:opacity-100',
                     )}
                     title={
                       tree
