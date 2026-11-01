@@ -52,6 +52,8 @@ export function GardenCanvas({
   const characterImageCacheRef = React.useRef<Map<string, HTMLImageElement>>(new Map());
   // Cache for loaded biome tile PNG images
   const tileImageCacheRef = React.useRef<Map<string, HTMLImageElement>>(new Map());
+  // Cache for full unified empty garden layout map images
+  const mapImageCacheRef = React.useRef<Map<string, HTMLImageElement>>(new Map());
 
   // Preload tree sprites, multi-frame character sprites & biome tiles
   React.useEffect(() => {
@@ -113,8 +115,24 @@ export function GardenCanvas({
       }
     }
 
-    // 3. Biome tilesets (16 tiles)
-    const biomes = ['meadow', 'zen_bamboo', 'autumn_orchard', 'sacred_grove'];
+    // 3. Preload all unified empty garden layout map images
+    const biomes = [
+      'meadow',
+      'zen_bamboo',
+      'autumn_orchard',
+      'sacred_grove',
+      'desert_oasis',
+      'crystal_glade',
+    ];
+    for (const biome of biomes) {
+      if (!mapImageCacheRef.current.has(biome)) {
+        const img = new Image();
+        img.src = `/maps/${biome}.png`;
+        mapImageCacheRef.current.set(biome, img);
+      }
+    }
+
+    // 4. Biome tilesets fallback (grass, path, water, fence)
     const tileTypes = ['grass', 'path', 'water', 'fence'];
 
     for (const biome of biomes) {
@@ -247,48 +265,54 @@ export function GardenCanvas({
       const currentBiome = state.activeBiomeId || 'meadow';
       const currentSkin = state.activeSkinId || 'gardener_default';
 
-      // 1. Draw Image Terrain Grid (Background)
-      const grassImg = tileImageCacheRef.current.get(`${currentBiome}_grass`);
-      const pathImg = tileImageCacheRef.current.get(`${currentBiome}_path`);
-      const waterImg = tileImageCacheRef.current.get(`${currentBiome}_water`);
-      const fenceImg = tileImageCacheRef.current.get(`${currentBiome}_fence`);
+      // 1. Draw Unified Garden Layout Map Image (Entire map in one cohesive image)
+      const mapImg = mapImageCacheRef.current.get(currentBiome);
+      if (mapImg && mapImg.complete && mapImg.naturalWidth > 0) {
+        ctx.drawImage(mapImg, 0, 0, totalWidth, totalHeight);
+      } else {
+        // Fallback tile-by-tile rendering while map image loads
+        const grassImg = tileImageCacheRef.current.get(`${currentBiome}_grass`);
+        const pathImg = tileImageCacheRef.current.get(`${currentBiome}_path`);
+        const waterImg = tileImageCacheRef.current.get(`${currentBiome}_water`);
+        const fenceImg = tileImageCacheRef.current.get(`${currentBiome}_fence`);
 
-      for (let r = 0; r < state.gridRows; r++) {
-        for (let c = 0; c < state.gridCols; c++) {
-          const px = c * TILE_SIZE;
-          const py = r * TILE_SIZE;
-          const seed = c * 31 + r * 17;
+        for (let r = 0; r < state.gridRows; r++) {
+          for (let c = 0; c < state.gridCols; c++) {
+            const px = c * TILE_SIZE;
+            const py = r * TILE_SIZE;
+            const seed = c * 31 + r * 17;
 
-          // Perimeter Fence
-          if (r === 0 || r === state.gridRows - 1 || c === 0 || c === state.gridCols - 1) {
-            if (fenceImg && fenceImg.complete && fenceImg.naturalWidth > 0) {
-              ctx.drawImage(fenceImg, px, py, TILE_SIZE, TILE_SIZE);
-            } else {
-              drawFenceTile(ctx, px, py, currentBiome);
+            // Perimeter Fence
+            if (r === 0 || r === state.gridRows - 1 || c === 0 || c === state.gridCols - 1) {
+              if (fenceImg && fenceImg.complete && fenceImg.naturalWidth > 0) {
+                ctx.drawImage(fenceImg, px, py, TILE_SIZE, TILE_SIZE);
+              } else {
+                drawFenceTile(ctx, px, py, currentBiome);
+              }
             }
-          }
-          // Garden Cobblestone Pathway: horizontal path on row 5 and vertical path on col 7
-          else if (r === 5 || (c === 7 && r < 7)) {
-            if (pathImg && pathImg.complete && pathImg.naturalWidth > 0) {
-              ctx.drawImage(pathImg, px, py, TILE_SIZE, TILE_SIZE);
-            } else {
-              drawPathTile(ctx, px, py, seed, currentBiome);
+            // Garden Cobblestone Pathway
+            else if (r === 5 || (c === 7 && r < 7)) {
+              if (pathImg && pathImg.complete && pathImg.naturalWidth > 0) {
+                ctx.drawImage(pathImg, px, py, TILE_SIZE, TILE_SIZE);
+              } else {
+                drawPathTile(ctx, px, py, seed, currentBiome);
+              }
             }
-          }
-          // Garden Pond at (7, 7) and (8, 7)
-          else if ((c === 7 || c === 8) && (r === 7 || r === 8)) {
-            if (waterImg && waterImg.complete && waterImg.naturalWidth > 0) {
-              ctx.drawImage(waterImg, px, py, TILE_SIZE, TILE_SIZE);
-            } else {
-              drawWaterTile(ctx, px, py, tick, c === 7 && r === 7, currentBiome);
+            // Garden Pond at (7, 7) and (8, 7)
+            else if ((c === 7 || c === 8) && (r === 7 || r === 8)) {
+              if (waterImg && waterImg.complete && waterImg.naturalWidth > 0) {
+                ctx.drawImage(waterImg, px, py, TILE_SIZE, TILE_SIZE);
+              } else {
+                drawWaterTile(ctx, px, py, tick, c === 7 && r === 7, currentBiome);
+              }
             }
-          }
-          // Biome Ground Terrain
-          else {
-            if (grassImg && grassImg.complete && grassImg.naturalWidth > 0) {
-              ctx.drawImage(grassImg, px, py, TILE_SIZE, TILE_SIZE);
-            } else {
-              drawGrassTile(ctx, px, py, seed, currentBiome);
+            // Biome Ground Terrain
+            else {
+              if (grassImg && grassImg.complete && grassImg.naturalWidth > 0) {
+                ctx.drawImage(grassImg, px, py, TILE_SIZE, TILE_SIZE);
+              } else {
+                drawGrassTile(ctx, px, py, seed, currentBiome);
+              }
             }
           }
         }

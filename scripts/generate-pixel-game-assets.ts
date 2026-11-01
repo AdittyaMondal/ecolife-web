@@ -415,3 +415,4 @@ for (const skin of SKINS) {
   console.log(`Saved 9 animation frames for skin: ${skin.id}`);
 }
 console.log('All pixel game assets generated successfully!');
+

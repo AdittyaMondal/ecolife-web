@@ -54,7 +54,9 @@ export type GardenBiomeId =
   | 'meadow'
   | 'zen_bamboo'
   | 'autumn_orchard'
-  | 'sacred_grove';
+  | 'sacred_grove'
+  | 'desert_oasis'
+  | 'crystal_glade';
 
 export interface ShopItemSkin {
   id: CharacterSkinId;

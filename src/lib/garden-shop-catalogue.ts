@@ -102,6 +102,34 @@ export const BIOME_ITEMS: ShopItemBiome[] = [
       fenceBase: '#2f3e46',
     },
   },
+  {
+    id: 'desert_oasis',
+    name: 'Sunlit Desert Oasis',
+    description: 'Golden sun-drenched sands, pale sandstone walkways, and a sparkling azure oasis pool with date-reed fencing.',
+    priceCoins: 280,
+    palette: {
+      grassBase: '#e0a96d',
+      grassLight: '#ebd2b4',
+      grassDark: '#b87c4c',
+      pathBase: '#f3e5d0',
+      waterBase: '#06b6d4',
+      fenceBase: '#926239',
+    },
+  },
+  {
+    id: 'crystal_glade',
+    name: 'Moonlit Crystal Glade',
+    description: 'Ethereal twilight violet loam, luminous amethyst crystal paths, and a tranquil moonlit spring with glowing reeds.',
+    priceCoins: 350,
+    palette: {
+      grassBase: '#3b2064',
+      grassLight: '#5b3296',
+      grassDark: '#20103c',
+      pathBase: '#8b5cf6',
+      waterBase: '#38bdf8',
+      fenceBase: '#4c1d95',
+    },
+  },
 ];
 
 export function getSkinById(id: CharacterSkinId): ShopItemSkin {

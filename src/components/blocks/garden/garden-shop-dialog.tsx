@@ -230,29 +230,11 @@ export function GardenShopDialog({
                     {/* Header info */}
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2.5">
-                        {/* Real tile images preview */}
-                        <div className="size-11 rounded-lg overflow-hidden grid grid-cols-2 grid-rows-2 border border-border shadow-xs bg-muted">
+                        {/* Real layout map thumbnail */}
+                        <div className="size-11 rounded-lg overflow-hidden border border-border shadow-xs bg-muted shrink-0">
                           <img
-                            src={`/tiles/${biome.id}_grass.png`}
-                            alt="Grass"
-                            className="size-full object-cover"
-                            style={{ imageRendering: 'pixelated' }}
-                          />
-                          <img
-                            src={`/tiles/${biome.id}_path.png`}
-                            alt="Path"
-                            className="size-full object-cover"
-                            style={{ imageRendering: 'pixelated' }}
-                          />
-                          <img
-                            src={`/tiles/${biome.id}_water.png`}
-                            alt="Water"
-                            className="size-full object-cover"
-                            style={{ imageRendering: 'pixelated' }}
-                          />
-                          <img
-                            src={`/tiles/${biome.id}_fence.png`}
-                            alt="Fence"
+                            src={`/maps/${biome.id}.png`}
+                            alt={biome.name}
                             className="size-full object-cover"
                             style={{ imageRendering: 'pixelated' }}
                           />
@@ -281,6 +263,16 @@ export function GardenShopDialog({
                           <span>Locked</span>
                         </span>
                       )}
+                    </div>
+
+                    {/* Full layout map preview banner */}
+                    <div className="w-full h-24 rounded-md overflow-hidden border border-border/80 shadow-2xs bg-muted relative">
+                      <img
+                        src={`/maps/${biome.id}.png`}
+                        alt={biome.name}
+                        className="size-full object-cover"
+                        style={{ imageRendering: 'pixelated' }}
+                      />
                     </div>
 
                     <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">

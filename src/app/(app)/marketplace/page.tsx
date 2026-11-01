@@ -380,28 +380,11 @@ export default function MarketplacePage() {
                     <div className="space-y-3">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-center gap-3">
-                          <div className="size-12 rounded-lg overflow-hidden grid grid-cols-2 grid-rows-2 border border-border shadow-xs bg-muted">
+                          {/* Map Thumbnail */}
+                          <div className="size-12 rounded-lg overflow-hidden border border-border shadow-xs bg-muted shrink-0">
                             <img
-                              src={`/tiles/${biome.id}_grass.png`}
-                              alt="Grass"
-                              className="size-full object-cover"
-                              style={{ imageRendering: 'pixelated' }}
-                            />
-                            <img
-                              src={`/tiles/${biome.id}_path.png`}
-                              alt="Path"
-                              className="size-full object-cover"
-                              style={{ imageRendering: 'pixelated' }}
-                            />
-                            <img
-                              src={`/tiles/${biome.id}_water.png`}
-                              alt="Water"
-                              className="size-full object-cover"
-                              style={{ imageRendering: 'pixelated' }}
-                            />
-                            <img
-                              src={`/tiles/${biome.id}_fence.png`}
-                              alt="Fence"
+                              src={`/maps/${biome.id}.png`}
+                              alt={biome.name}
                               className="size-full object-cover"
                               style={{ imageRendering: 'pixelated' }}
                             />
@@ -428,6 +411,16 @@ export default function MarketplacePage() {
                             <span>Locked</span>
                           </span>
                         )}
+                      </div>
+
+                      {/* Map Preview Banner */}
+                      <div className="w-full h-28 rounded-md overflow-hidden border border-border/80 shadow-2xs bg-muted relative">
+                        <img
+                          src={`/maps/${biome.id}.png`}
+                          alt={biome.name}
+                          className="size-full object-cover"
+                          style={{ imageRendering: 'pixelated' }}
+                        />
                       </div>
 
                       <p className="text-xs text-muted-foreground leading-relaxed">
