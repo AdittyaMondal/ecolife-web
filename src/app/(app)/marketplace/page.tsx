@@ -6,14 +6,18 @@ import {
   Coins,
   Gamepad2,
   Leaf,
+  Lock,
   MapPin,
   Package,
+  Palette,
   Plus,
   Search,
   ShoppingBag,
   Sparkles,
   Sprout,
   Trash2,
+  Trees,
+  User,
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -30,6 +34,7 @@ import { Input, Select } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Stepper } from '@/components/ui/stepper';
 import { meQuery } from '@/hooks/use-auth';
+import { useGarden } from '@/hooks/use-garden';
 import {
   addressesQuery,
   cartPreviewQuery,
@@ -43,8 +48,10 @@ import {
   useRemoveFromCart,
   useSetCartQuantity,
 } from '@/hooks/use-marketplace';
+import { BIOME_ITEMS, SKIN_ITEMS } from '@/lib/garden-shop-catalogue';
 import { formatKg, formatNumber, formatPaise } from '@/lib/format';
 import { getProductImageUrl } from '@/lib/images';
+import { cn } from '@/lib/utils';
 
 const CATEGORIES: { value: ProductCategory | 'all'; label: string }[] = [
   { value: 'all', label: 'All items' },
@@ -72,11 +79,21 @@ const CATEGORY_LABEL: Record<string, string> = {
 
 export default function MarketplacePage() {
   const router = useRouter();
+  const [marketTab, setMarketTab] = React.useState<'products' | 'garden'>('products');
+  const [gardenTab, setGardenTab] = React.useState<'skins' | 'biomes'>('skins');
   const [category, setCategory] = React.useState<ProductCategory | 'all'>('all');
   const [sort, setSort] = React.useState<ProductSort>('newest');
   const [searchInput, setSearchInput] = React.useState('');
   const [debouncedQuery, setDebouncedQuery] = React.useState('');
   const [cartOpen, setCartOpen] = React.useState(false);
+
+  const {
+    state: gardenState,
+    equipSkin,
+    buyAndEquipSkin,
+    equipBiome,
+    buyAndEquipBiome,
+  } = useGarden();
 
   React.useEffect(() => {
     const t = window.setTimeout(() => setDebouncedQuery(searchInput.trim()), 250);
@@ -154,7 +171,300 @@ export default function MarketplacePage() {
         </div>
       </header>
 
-      {/* Filter & Search Bar: Card p-4 (16px) -> inner controls rounded-sm (12px) */}
+      {/* Top Level Category Tabs: Products vs Garden Customization */}
+      <div className="flex flex-wrap items-center gap-2 border-b border-border pb-3">
+        <button
+          type="button"
+          onClick={() => setMarketTab('products')}
+          className={cn(
+            'flex items-center gap-2 rounded-md px-4 py-2 text-sm font-bold transition-all',
+            marketTab === 'products'
+              ? 'bg-primary text-primary-foreground shadow-2xs'
+              : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+          )}
+        >
+          <ShoppingBag className="size-4" />
+          <span>Eco Store & Plants</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setMarketTab('garden')}
+          className={cn(
+            'flex items-center gap-2 rounded-md px-4 py-2 text-sm font-bold transition-all',
+            marketTab === 'garden'
+              ? 'bg-primary text-primary-foreground shadow-2xs'
+              : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+          )}
+        >
+          <Gamepad2 className="size-4 text-amber-500" />
+          <span>Botanical Garden Outfits & Biomes</span>
+          <span className="rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide">
+            Coins
+          </span>
+        </button>
+      </div>
+
+      {marketTab === 'garden' ? (
+        <div className="space-y-6">
+          {/* Garden Sub-Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-border bg-card p-5 shadow-xs">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="flex size-7 items-center justify-center rounded-xs bg-secondary text-primary">
+                  <Trees className="size-4" />
+                </span>
+                <span className="text-xs font-bold uppercase tracking-wider text-positive">
+                  2D Pixel Garden Wardrobe
+                </span>
+              </div>
+              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
+                Character Outfits & Garden Biomes
+              </h2>
+              <p className="text-xs text-muted-foreground max-w-xl">
+                Unlock exclusive retro pixel skins and environmental biomes for your 2D botanical garden. All purchases persist to your account.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Link href="/garden">
+                <Button variant="primary" size="md" className="gap-2 shadow-xs">
+                  <Gamepad2 className="size-4" />
+                  <span>Launch 2D Garden</span>
+                </Button>
+              </Link>
+            </div>
+          </div>
+
+          {/* Sub-Tabs: Skins vs Biomes */}
+          <div className="flex items-center gap-2 border-b border-border pb-2">
+            <button
+              type="button"
+              onClick={() => setGardenTab('skins')}
+              className={cn(
+                'flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-md transition-all',
+                gardenTab === 'skins'
+                  ? 'bg-primary text-primary-foreground shadow-2xs'
+                  : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+              )}
+            >
+              <User className="size-4" />
+              <span>Character Outfits ({SKIN_ITEMS.length})</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setGardenTab('biomes')}
+              className={cn(
+                'flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-md transition-all',
+                gardenTab === 'biomes'
+                  ? 'bg-primary text-primary-foreground shadow-2xs'
+                  : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+              )}
+            >
+              <Palette className="size-4" />
+              <span>Garden Biomes ({BIOME_ITEMS.length})</span>
+            </button>
+          </div>
+
+          {/* Skins Grid */}
+          {gardenTab === 'skins' && (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {SKIN_ITEMS.map((skin) => {
+                const isUnlocked = (gardenState.unlockedSkins || ['gardener_default']).includes(skin.id);
+                const isEquipped = (gardenState.activeSkinId || 'gardener_default') === skin.id;
+                const canAfford = coinsBalance >= skin.priceCoins;
+
+                return (
+                  <Card
+                    key={skin.id}
+                    className={cn(
+                      'p-5 flex flex-col justify-between transition-all border',
+                      isEquipped
+                        ? 'border-primary ring-1 ring-primary/40 bg-primary/5'
+                        : 'border-border bg-card hover:border-border/80',
+                    )}
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-3">
+                          <div className="size-12 rounded-lg flex items-center justify-center border border-border bg-muted/40 shadow-xs p-1">
+                            <img
+                              src={`/sprites/${skin.id}_down_0.png`}
+                              alt={skin.name}
+                              className="size-full object-contain"
+                              style={{ imageRendering: 'pixelated' }}
+                            />
+                          </div>
+                          <div>
+                            <h3 className="text-base font-bold text-foreground">{skin.name}</h3>
+                            <span className="text-xs font-mono font-semibold text-muted-foreground">
+                              {skin.priceCoins === 0 ? 'Starter Skin (Free)' : `${skin.priceCoins} EcoCoins`}
+                            </span>
+                          </div>
+                        </div>
+
+                        {isEquipped ? (
+                          <Badge variant="positive" className="text-[10px] uppercase font-bold py-0.5">
+                            Equipped
+                          </Badge>
+                        ) : isUnlocked ? (
+                          <Badge variant="neutral" className="text-[10px] uppercase font-bold py-0.5">
+                            Owned
+                          </Badge>
+                        ) : (
+                          <span className="flex items-center gap-1 text-xs font-semibold text-muted-foreground">
+                            <Lock className="size-3.5" />
+                            <span>Locked</span>
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        {skin.description}
+                      </p>
+                    </div>
+
+                    <div className="pt-4 mt-3 border-t border-border/60">
+                      {isEquipped ? (
+                        <Button variant="outline" size="sm" disabled className="w-full text-xs">
+                          <Check className="size-3.5 mr-1.5 text-primary" />
+                          Currently Wearing
+                        </Button>
+                      ) : isUnlocked ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full text-xs hover:bg-primary/10 hover:text-primary transition-colors"
+                          onClick={() => equipSkin(skin.id)}
+                        >
+                          Equip Outfit
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          disabled={!canAfford}
+                          className="w-full text-xs"
+                          onClick={() => buyAndEquipSkin(skin, coinsBalance)}
+                        >
+                          <Coins className="size-3.5 mr-1.5" />
+                          Buy for {skin.priceCoins} Coins
+                        </Button>
+                      )}
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Biomes Grid */}
+          {gardenTab === 'biomes' && (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {BIOME_ITEMS.map((biome) => {
+                const isUnlocked = (gardenState.unlockedBiomes || ['meadow']).includes(biome.id);
+                const isEquipped = (gardenState.activeBiomeId || 'meadow') === biome.id;
+                const canAfford = coinsBalance >= biome.priceCoins;
+
+                return (
+                  <Card
+                    key={biome.id}
+                    className={cn(
+                      'p-5 flex flex-col justify-between transition-all border',
+                      isEquipped
+                        ? 'border-primary ring-1 ring-primary/40 bg-primary/5'
+                        : 'border-border bg-card hover:border-border/80',
+                    )}
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-3">
+                          {/* Map Thumbnail */}
+                          <div className="size-12 rounded-lg overflow-hidden border border-border shadow-xs bg-muted shrink-0">
+                            <img
+                              src={`/maps/${biome.id}.png`}
+                              alt={biome.name}
+                              className="size-full object-cover"
+                              style={{ imageRendering: 'pixelated' }}
+                            />
+                          </div>
+                          <div>
+                            <h3 className="text-base font-bold text-foreground">{biome.name}</h3>
+                            <span className="text-xs font-mono font-semibold text-muted-foreground">
+                              {biome.priceCoins === 0 ? 'Default Biome (Free)' : `${biome.priceCoins} EcoCoins`}
+                            </span>
+                          </div>
+                        </div>
+
+                        {isEquipped ? (
+                          <Badge variant="positive" className="text-[10px] uppercase font-bold py-0.5">
+                            Active
+                          </Badge>
+                        ) : isUnlocked ? (
+                          <Badge variant="neutral" className="text-[10px] uppercase font-bold py-0.5">
+                            Owned
+                          </Badge>
+                        ) : (
+                          <span className="flex items-center gap-1 text-xs font-semibold text-muted-foreground">
+                            <Lock className="size-3.5" />
+                            <span>Locked</span>
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Map Preview Banner */}
+                      <div className="w-full h-28 rounded-md overflow-hidden border border-border/80 shadow-2xs bg-muted relative">
+                        <img
+                          src={`/maps/${biome.id}.png`}
+                          alt={biome.name}
+                          className="size-full object-cover"
+                          style={{ imageRendering: 'pixelated' }}
+                        />
+                      </div>
+
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        {biome.description}
+                      </p>
+                    </div>
+
+                    <div className="pt-4 mt-3 border-t border-border/60">
+                      {isEquipped ? (
+                        <Button variant="outline" size="sm" disabled className="w-full text-xs">
+                          <Check className="size-3.5 mr-1.5 text-primary" />
+                          Currently Active
+                        </Button>
+                      ) : isUnlocked ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full text-xs hover:bg-primary/10 hover:text-primary transition-colors"
+                          onClick={() => equipBiome(biome.id)}
+                        >
+                          Apply Biome
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          disabled={!canAfford}
+                          className="w-full text-xs"
+                          onClick={() => buyAndEquipBiome(biome, coinsBalance)}
+                        >
+                          <Coins className="size-3.5 mr-1.5" />
+                          Buy for {biome.priceCoins} Coins
+                        </Button>
+                      )}
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      ) : (
+        <>
+          {/* Filter & Search Bar: Card p-4 (16px) -> inner controls rounded-sm (12px) */}
       <Card className="space-y-4 p-4">
         <div className="grid gap-3 sm:grid-cols-3">
           <div className="relative sm:col-span-2">
@@ -367,44 +677,45 @@ export default function MarketplacePage() {
         </>
       )}
 
-      {/* EcoLife Valley 2D Game Preview Card */}
-      <Card variant="secondary" className="p-6">
-        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
-          <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-2 rounded-xs bg-primary px-2.5 py-1 text-xs font-bold text-primary-foreground">
-              <Gamepad2 className="size-3.5" aria-hidden="true" />
-              Coming Soon · EcoLife Valley 2D Farm
-            </div>
-            <h2 className="text-xl font-bold tracking-tight text-secondary-foreground">
-              Spend your EcoCoins on 2D trees, farm upgrades & character skins
-            </h2>
-            <p className="text-sm text-secondary-foreground/80">
-              Alongside real-world plants and household items, your EcoCoins wallet will power your
-              own Cozy 2D Eco-Valley homestead—plant native fruit trees, unlock solar greenhouses,
-              and customize your farmer avatar as you hit daily carbon goals.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2 shrink-0 sm:grid-cols-3">
-            {[
-              { title: 'Heritage Banyan', cost: '120 coins', tag: '2D Tree' },
-              { title: 'Solar Barn Skin', cost: '250 coins', tag: 'Homestead' },
-              { title: 'Botanist Cape', cost: '180 coins', tag: 'Avatar Skin' },
-            ].map((item) => (
-              <div
-                key={item.title}
-                className="rounded-sm border border-secondary-foreground/15 bg-secondary-foreground/10 p-3 text-left"
-              >
-                <span className="inline-block rounded-xs bg-primary/20 px-1.5 py-0.5 text-[10px] font-bold text-primary">
-                  {item.tag}
-                </span>
-                <p className="mt-1.5 text-xs font-bold text-secondary-foreground">{item.title}</p>
-                <p className="mt-0.5 text-[11px] font-semibold text-primary">{item.cost}</p>
+          {/* EcoLife 2D Garden Highlight Card */}
+          <Card variant="secondary" className="p-6">
+            <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+              <div className="space-y-2 max-w-2xl">
+                <div className="inline-flex items-center gap-2 rounded-xs bg-primary px-2.5 py-1 text-xs font-bold text-primary-foreground">
+                  <Gamepad2 className="size-3.5" aria-hidden="true" />
+                  Live Now · EcoLife Botanical 2D Garden
+                </div>
+                <h2 className="text-xl font-bold tracking-tight text-secondary-foreground">
+                  Spend your EcoCoins on 2D trees, biomes & character skins
+                </h2>
+                <p className="text-sm text-secondary-foreground/80">
+                  Alongside real-world eco products, your EcoCoins wallet powers your
+                  own Cozy 2D Botanical Garden—plant native trees, unlock zen bamboo or autumn biomes,
+                  and dress your gardener in stylish outfits as you hit daily carbon goals.
+                </p>
               </div>
-            ))}
-          </div>
-        </div>
-      </Card>
+
+              <div className="flex flex-wrap items-center gap-2.5">
+                <Button
+                  variant="primary"
+                  size="md"
+                  onClick={() => setMarketTab('garden')}
+                  className="gap-2 text-xs font-bold shadow-xs"
+                >
+                  <Palette className="size-4" />
+                  <span>Browse Garden Wardrobe</span>
+                </Button>
+                <Link href="/garden">
+                  <Button variant="outline" size="md" className="gap-2 text-xs font-bold bg-card">
+                    <Gamepad2 className="size-4" />
+                    <span>Open Garden</span>
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </Card>
+        </>
+      )}
 
       {/* Cart & Coin Checkout Modal */}
       <CartCheckoutModal

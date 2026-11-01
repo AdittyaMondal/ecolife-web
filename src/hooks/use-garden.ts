@@ -3,9 +3,9 @@
 import * as React from 'react';
 import { toast } from 'sonner';
 import { getTreeBySlug, rollTreeReward, TREE_CATALOGUE } from '@/lib/tree-catalogue';
-import type { GardenState, PlantedTree, Tree } from '@/types/trees';
+import type { CharacterSkinId, GardenBiomeId, GardenState, PlantedTree, ShopItemBiome, ShopItemSkin, Tree } from '@/types/trees';
 
-const STORAGE_KEY = 'ecolife_garden_v1';
+const STORAGE_KEY = 'ecolife_garden_v2';
 
 const DEFAULT_COLS = 16;
 const DEFAULT_ROWS = 11;
@@ -15,46 +15,26 @@ export const INITIAL_GARDEN_STATE: GardenState = {
   gridRows: DEFAULT_ROWS,
   playerPos: { x: 7, y: 5, direction: 'down' },
   activeHotbarIndex: 0,
-  plantedTrees: [
-    {
-      instanceId: 'starter-neem-1',
-      treeSlug: 'neem',
-      x: 3,
-      y: 3,
-      plantedAt: new Date(Date.now() - 86400000 * 3).toISOString(),
-      growthStage: 4,
-    },
-    {
-      instanceId: 'starter-mango-1',
-      treeSlug: 'mango',
-      x: 12,
-      y: 3,
-      plantedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-      growthStage: 4,
-    },
-    {
-      instanceId: 'starter-amaltas-1',
-      treeSlug: 'amaltas',
-      x: 3,
-      y: 7,
-      plantedAt: new Date(Date.now() - 86400000).toISOString(),
-      growthStage: 3,
-    },
-  ],
+  // Garden starts completely clean and empty — the user places all trees!
+  plantedTrees: [],
   inventory: [
-    { treeSlug: 'neem', quantity: 2 },
-    { treeSlug: 'mango', quantity: 2 },
-    { treeSlug: 'gulmohar', quantity: 1 },
-    { treeSlug: 'amaltas', quantity: 1 },
-    { treeSlug: 'jacaranda', quantity: 1 },
-    { treeSlug: 'peepal', quantity: 1 },
+    { treeSlug: 'neem', quantity: 3 },
+    { treeSlug: 'mango', quantity: 3 },
+    { treeSlug: 'gulmohar', quantity: 2 },
+    { treeSlug: 'amaltas', quantity: 2 },
+    { treeSlug: 'jacaranda', quantity: 2 },
+    { treeSlug: 'peepal', quantity: 2 },
   ],
   hotbar: ['neem', 'mango', 'gulmohar', 'amaltas', 'jacaranda', 'peepal'],
   stats: {
-    totalPlanted: 3,
-    totalOffsetKgPerYear: 118.5,
-    timesWatered: 2,
+    totalPlanted: 0,
+    totalOffsetKgPerYear: 0,
+    timesWatered: 0,
   },
+  activeSkinId: 'gardener_default',
+  unlockedSkins: ['gardener_default'],
+  activeBiomeId: 'meadow',
+  unlockedBiomes: ['meadow'],
 };
 
 function calculateTotalOffset(planted: PlantedTree[]): number {
@@ -72,7 +52,26 @@ export function useGarden() {
   // Load from localStorage on mount
   React.useEffect(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
+      let saved = localStorage.getItem(STORAGE_KEY);
+      if (!saved) {
+        // Check for legacy v1 state and migrate by clearing starter trees
+        const legacy = localStorage.getItem('ecolife_garden_v1');
+        if (legacy) {
+          const parsed = JSON.parse(legacy);
+          // Remove default starter trees so user starts with an empty garden
+          parsed.plantedTrees = (parsed.plantedTrees || []).filter(
+            (t: PlantedTree) => !t.instanceId?.startsWith('starter-'),
+          );
+          parsed.stats = {
+            totalPlanted: parsed.plantedTrees.length,
+            totalOffsetKgPerYear: calculateTotalOffset(parsed.plantedTrees),
+            timesWatered: parsed.stats?.timesWatered || 0,
+          };
+          saved = JSON.stringify(parsed);
+          localStorage.setItem(STORAGE_KEY, saved);
+        }
+      }
+
       if (saved) {
         const parsed = JSON.parse(saved);
         // Ensure stats and hotbar integrity
@@ -400,6 +399,62 @@ export function useGarden() {
     return awarded;
   }, [state, saveState]);
 
+  // Equip an unlocked character skin
+  const equipSkin = React.useCallback(
+    (skinId: CharacterSkinId) => {
+      saveState({ ...state, activeSkinId: skinId });
+      toast.success('Equipped new character skin!');
+    },
+    [state, saveState],
+  );
+
+  // Buy and equip character skin with EcoCoins
+  const buyAndEquipSkin = React.useCallback(
+    (skin: ShopItemSkin, userCoins: number): boolean => {
+      if (skin.priceCoins > userCoins) {
+        toast.error(`Not enough EcoCoins! You have ${userCoins} and need ${skin.priceCoins}.`);
+        return false;
+      }
+      const unlocked = Array.from(new Set([...(state.unlockedSkins || ['gardener_default']), skin.id]));
+      saveState({
+        ...state,
+        unlockedSkins: unlocked,
+        activeSkinId: skin.id,
+      });
+      toast.success(`Purchased and equipped ${skin.name}!`);
+      return true;
+    },
+    [state, saveState],
+  );
+
+  // Equip an unlocked biome / layout
+  const equipBiome = React.useCallback(
+    (biomeId: GardenBiomeId) => {
+      saveState({ ...state, activeBiomeId: biomeId });
+      toast.success('Applied garden biome!');
+    },
+    [state, saveState],
+  );
+
+  // Buy and equip biome layout with EcoCoins
+  const buyAndEquipBiome = React.useCallback(
+    (biome: ShopItemBiome, userCoins: number): boolean => {
+      if (biome.priceCoins > userCoins) {
+        toast.error(`Not enough EcoCoins! You have ${userCoins} and need ${biome.priceCoins}.`);
+        return false;
+      }
+      const unlocked = Array.from(new Set([...(state.unlockedBiomes || ['meadow']), biome.id]));
+      saveState({
+        ...state,
+        unlockedBiomes: unlocked,
+        activeBiomeId: biome.id,
+      });
+      toast.success(`Purchased and applied ${biome.name} biome!`);
+      return true;
+    },
+    [state, saveState],
+  );
+
   return {
     state,
     isLoaded,
@@ -414,5 +469,9 @@ export function useGarden() {
     assignToHotbar,
     claimReward,
     isTileBlocked,
+    equipSkin,
+    buyAndEquipSkin,
+    equipBiome,
+    buyAndEquipBiome,
   };
 }

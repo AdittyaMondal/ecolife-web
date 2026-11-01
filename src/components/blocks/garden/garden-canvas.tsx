@@ -46,12 +46,112 @@ export function GardenCanvas({
   const totalWidth = state.gridCols * TILE_SIZE;
   const totalHeight = state.gridRows * TILE_SIZE;
 
+  // Cache for loaded tree sprite PNG images
+  const treeImageCacheRef = React.useRef<Map<string, HTMLImageElement>>(new Map());
+  // Cache for loaded character sprite PNG images (multi-frame)
+  const characterImageCacheRef = React.useRef<Map<string, HTMLImageElement>>(new Map());
+  // Cache for loaded biome tile PNG images
+  const tileImageCacheRef = React.useRef<Map<string, HTMLImageElement>>(new Map());
+  // Cache for full unified empty garden layout map images
+  const mapImageCacheRef = React.useRef<Map<string, HTMLImageElement>>(new Map());
+
+  // Preload tree sprites, multi-frame character sprites & biome tiles
+  React.useEffect(() => {
+    // 1. Tree catalogue sprites
+    const treeSlugs = [
+      'neem',
+      'mango',
+      'amaltas',
+      'gulmohar',
+      'jacaranda',
+      'banyan',
+      'peepal',
+      'red-sanders',
+      'palash',
+      'sandalwood',
+      'teak',
+      'amla',
+      'guava',
+      'curry-leaf',
+      'drumstick',
+      'tamarind',
+      'jamun',
+      'bael',
+      'kadamba',
+      'arjuna',
+      'papaya',
+      'hibiscus',
+    ];
+
+    for (const slug of treeSlugs) {
+      if (!treeImageCacheRef.current.has(slug)) {
+        const img = new Image();
+        img.src = `/trees/${slug}.png`;
+        treeImageCacheRef.current.set(slug, img);
+      }
+    }
+
+    // 2. Character multi-frame sprites for all 5 skins
+    const skins = [
+      'gardener_default',
+      'forest_ranger',
+      'solar_scout',
+      'monsoon_botanist',
+      'zen_hermit',
+    ];
+    const dirs = ['down', 'up', 'side'];
+    const frames = [0, 1, 2];
+
+    for (const skin of skins) {
+      for (const dir of dirs) {
+        for (const frame of frames) {
+          const key = `${skin}_${dir}_${frame}`;
+          if (!characterImageCacheRef.current.has(key)) {
+            const img = new Image();
+            img.src = `/sprites/${key}.png`;
+            characterImageCacheRef.current.set(key, img);
+          }
+        }
+      }
+    }
+
+    // 3. Preload all unified empty garden layout map images
+    const biomes = [
+      'meadow',
+      'zen_bamboo',
+      'autumn_orchard',
+      'sacred_grove',
+      'desert_oasis',
+      'crystal_glade',
+    ];
+    for (const biome of biomes) {
+      if (!mapImageCacheRef.current.has(biome)) {
+        const img = new Image();
+        img.src = `/maps/${biome}.png`;
+        mapImageCacheRef.current.set(biome, img);
+      }
+    }
+
+    // 4. Biome tilesets fallback (grass, path, water, fence)
+    const tileTypes = ['grass', 'path', 'water', 'fence'];
+
+    for (const biome of biomes) {
+      for (const t of tileTypes) {
+        const key = `${biome}_${t}`;
+        if (!tileImageCacheRef.current.has(key)) {
+          const img = new Image();
+          img.src = `/tiles/${key}.png`;
+          tileImageCacheRef.current.set(key, img);
+        }
+      }
+    }
+  }, []);
+
   // Keyboard navigation & actions
   React.useEffect(() => {
     let walkTimer: NodeJS.Timeout | null = null;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't intercept if user is typing in an input
       if (
         document.activeElement?.tagName === 'INPUT' ||
         document.activeElement?.tagName === 'TEXTAREA'
@@ -61,10 +161,9 @@ export function GardenCanvas({
 
       setIsWalking(true);
       if (walkTimer) clearTimeout(walkTimer);
-      walkTimer = setTimeout(() => setIsWalking(false), 200);
+      walkTimer = setTimeout(() => setIsWalking(false), 220);
 
       switch (e.key) {
-        // Movement: WASD or Arrow Keys
         case 'ArrowUp':
         case 'w':
         case 'W':
@@ -90,7 +189,6 @@ export function GardenCanvas({
           onMovePlayer(1, 0, 'right');
           break;
 
-        // Hotbar shortcuts 1..6
         case '1':
         case '2':
         case '3':
@@ -101,7 +199,6 @@ export function GardenCanvas({
           onSelectHotbar(Number(e.key) - 1);
           break;
 
-        // Actions
         case ' ':
         case 'e':
         case 'E':
@@ -148,7 +245,7 @@ export function GardenCanvas({
     activeTool,
   ]);
 
-  // Main 60FPS Game Loop Render Cycle
+  // Main 60FPS Game Loop Render Cycle (Particle effect completely removed!)
   React.useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -161,32 +258,62 @@ export function GardenCanvas({
     const render = () => {
       tick++;
 
-      // Clear & enforce crisp nearest-neighbor pixel rendering
+      // Enforce crisp nearest-neighbor pixel rendering
       ctx.imageSmoothingEnabled = false;
       ctx.clearRect(0, 0, totalWidth, totalHeight);
 
-      // 1. Draw Terrain Grid (Background)
-      for (let r = 0; r < state.gridRows; r++) {
-        for (let c = 0; c < state.gridCols; c++) {
-          const px = c * TILE_SIZE;
-          const py = r * TILE_SIZE;
-          const seed = c * 31 + r * 17;
+      const currentBiome = state.activeBiomeId || 'meadow';
+      const currentSkin = state.activeSkinId || 'gardener_default';
 
-          // Perimeter Fence
-          if (r === 0 || r === state.gridRows - 1 || c === 0 || c === state.gridCols - 1) {
-            drawFenceTile(ctx, px, py);
-          }
-          // Garden Cobblestone Pathway: horizontal path on row 5 and vertical path on col 7
-          else if (r === 5 || (c === 7 && r < 7)) {
-            drawPathTile(ctx, px, py, seed);
-          }
-          // Garden Pond at (7, 7) and (8, 7)
-          else if ((c === 7 || c === 8) && (r === 7 || r === 8)) {
-            drawWaterTile(ctx, px, py, tick, c === 7 && r === 7);
-          }
-          // Lush Green Meadow Grass
-          else {
-            drawGrassTile(ctx, px, py, seed);
+      // 1. Draw Unified Garden Layout Map Image (Entire map in one cohesive image)
+      const mapImg = mapImageCacheRef.current.get(currentBiome);
+      if (mapImg && mapImg.complete && mapImg.naturalWidth > 0) {
+        ctx.drawImage(mapImg, 0, 0, totalWidth, totalHeight);
+      } else {
+        // Fallback tile-by-tile rendering while map image loads
+        const grassImg = tileImageCacheRef.current.get(`${currentBiome}_grass`);
+        const pathImg = tileImageCacheRef.current.get(`${currentBiome}_path`);
+        const waterImg = tileImageCacheRef.current.get(`${currentBiome}_water`);
+        const fenceImg = tileImageCacheRef.current.get(`${currentBiome}_fence`);
+
+        for (let r = 0; r < state.gridRows; r++) {
+          for (let c = 0; c < state.gridCols; c++) {
+            const px = c * TILE_SIZE;
+            const py = r * TILE_SIZE;
+            const seed = c * 31 + r * 17;
+
+            // Perimeter Fence
+            if (r === 0 || r === state.gridRows - 1 || c === 0 || c === state.gridCols - 1) {
+              if (fenceImg && fenceImg.complete && fenceImg.naturalWidth > 0) {
+                ctx.drawImage(fenceImg, px, py, TILE_SIZE, TILE_SIZE);
+              } else {
+                drawFenceTile(ctx, px, py, currentBiome);
+              }
+            }
+            // Garden Cobblestone Pathway
+            else if (r === 5 || (c === 7 && r < 7)) {
+              if (pathImg && pathImg.complete && pathImg.naturalWidth > 0) {
+                ctx.drawImage(pathImg, px, py, TILE_SIZE, TILE_SIZE);
+              } else {
+                drawPathTile(ctx, px, py, seed, currentBiome);
+              }
+            }
+            // Garden Pond at (7, 7) and (8, 7)
+            else if ((c === 7 || c === 8) && (r === 7 || r === 8)) {
+              if (waterImg && waterImg.complete && waterImg.naturalWidth > 0) {
+                ctx.drawImage(waterImg, px, py, TILE_SIZE, TILE_SIZE);
+              } else {
+                drawWaterTile(ctx, px, py, tick, c === 7 && r === 7, currentBiome);
+              }
+            }
+            // Biome Ground Terrain
+            else {
+              if (grassImg && grassImg.complete && grassImg.naturalWidth > 0) {
+                ctx.drawImage(grassImg, px, py, TILE_SIZE, TILE_SIZE);
+              } else {
+                drawGrassTile(ctx, px, py, seed, currentBiome);
+              }
+            }
           }
         }
       }
@@ -225,7 +352,15 @@ export function GardenCanvas({
         if (activeTool === 'plant' && equippedSlug && isHoverInBounds && !isOccupied) {
           ctx.save();
           ctx.globalAlpha = 0.55;
-          drawTreeSprite(ctx, x * TILE_SIZE, y * TILE_SIZE, equippedSlug, 2, tick);
+          const img = treeImageCacheRef.current.get(equippedSlug);
+          if (img && img.complete && img.naturalWidth > 0) {
+            const drawSize = 64;
+            const cx = x * TILE_SIZE + TILE_SIZE / 2;
+            const bottomY = y * TILE_SIZE + TILE_SIZE;
+            ctx.drawImage(img, cx - drawSize / 2, bottomY - drawSize, drawSize, drawSize);
+          } else {
+            drawTreeSprite(ctx, x * TILE_SIZE, y * TILE_SIZE, equippedSlug, 4, tick);
+          }
           ctx.restore();
         }
       }
@@ -240,7 +375,7 @@ export function GardenCanvas({
       if (direction === 'right') targetX += 1;
 
       if (targetX >= 0 && targetX < state.gridCols && targetY >= 0 && targetY < state.gridRows) {
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
         ctx.lineWidth = 1.5;
         ctx.strokeRect(
           targetX * TILE_SIZE + 4,
@@ -251,7 +386,6 @@ export function GardenCanvas({
       }
 
       // 5. Draw Planted Trees & Player with Y-Sorting (Depth Buffering)
-      // Objects with lower Y render first; objects with higher Y render in front!
       const renderEntities: Array<{
         type: 'tree' | 'player';
         y: number;
@@ -265,23 +399,107 @@ export function GardenCanvas({
 
       for (const entity of renderEntities) {
         if (entity.type === 'player') {
-          drawGardener(
-            ctx,
-            state.playerPos.x * TILE_SIZE,
-            state.playerPos.y * TILE_SIZE,
-            state.playerPos.direction,
-            isWalking,
-            tick,
-          );
+          const charPx = state.playerPos.x * TILE_SIZE;
+          const charPy = state.playerPos.y * TILE_SIZE;
+          const cx = charPx + TILE_SIZE / 2;
+          const bottomY = charPy + TILE_SIZE;
+
+          // Multi-frame animation cadence calculation
+          const dirKey =
+            state.playerPos.direction === 'left' || state.playerPos.direction === 'right'
+              ? 'side'
+              : state.playerPos.direction;
+
+          let frameIdx = 0;
+          if (isWalking) {
+            // 4-phase walking cycle: idle (0) -> left step (1) -> idle (0) -> right step (2)
+            const cyclePhase = Math.floor((tick / 7) % 4);
+            if (cyclePhase === 1) frameIdx = 1;
+            else if (cyclePhase === 3) frameIdx = 2;
+            else frameIdx = 0;
+          }
+
+          const spriteKey = `${currentSkin}_${dirKey}_${frameIdx}`;
+          const charImg = characterImageCacheRef.current.get(spriteKey);
+
+          // Player drop shadow
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.28)';
+          ctx.beginPath();
+          ctx.ellipse(cx, bottomY - 3, 11, 4, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          if (charImg && charImg.complete && charImg.naturalWidth > 0) {
+            ctx.save();
+            const spriteSize = 48;
+            ctx.translate(cx, bottomY - spriteSize / 2 - 2);
+
+            // If walking left, flip the side profile horizontally!
+            if (state.playerPos.direction === 'left') {
+              ctx.scale(-1, 1);
+            }
+
+            ctx.drawImage(
+              charImg,
+              -spriteSize / 2,
+              -spriteSize / 2,
+              spriteSize,
+              spriteSize,
+            );
+            ctx.restore();
+          } else {
+            drawGardener(
+              ctx,
+              charPx,
+              charPy,
+              state.playerPos.direction,
+              isWalking,
+              tick,
+              currentSkin,
+            );
+          }
         } else if (entity.tree) {
-          drawTreeSprite(
-            ctx,
-            entity.tree.x * TILE_SIZE,
-            entity.tree.y * TILE_SIZE,
-            entity.tree.treeSlug,
-            entity.tree.growthStage,
-            tick,
-          );
+          const pt = entity.tree;
+          const tileX = pt.x * TILE_SIZE;
+          const tileY = pt.y * TILE_SIZE;
+          const cx = tileX + TILE_SIZE / 2;
+          const bottomY = tileY + TILE_SIZE;
+
+          // Tree ground shadow
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.22)';
+          ctx.beginPath();
+          ctx.ellipse(cx, bottomY - 3, 16, 5, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Gentle wind sway
+          const sway = Math.sin((tick + pt.x * 5) / 26) * 1.5;
+
+          const img = treeImageCacheRef.current.get(pt.treeSlug);
+          if (img && img.complete && img.naturalWidth > 0) {
+            let scale = 1.0;
+            if (pt.growthStage === 1) scale = 0.4;
+            else if (pt.growthStage === 2) scale = 0.6;
+            else if (pt.growthStage === 3) scale = 0.85;
+            else scale = 1.1;
+
+            const drawW = 68 * scale;
+            const drawH = 68 * scale;
+
+            ctx.drawImage(
+              img,
+              cx - drawW / 2 + sway,
+              bottomY - drawH + 2,
+              drawW,
+              drawH,
+            );
+          } else {
+            drawTreeSprite(ctx, tileX, tileY, pt.treeSlug, pt.growthStage, tick);
+          }
+
+          // Water droplet sparkle indicator if recently watered
+          if (pt.wateredAt) {
+            ctx.fillStyle = '#60a5fa';
+            ctx.fillRect(cx - 3, bottomY - 6, 6, 2);
+          }
         }
       }
 
@@ -308,8 +526,6 @@ export function GardenCanvas({
 
     if (tileX >= 0 && tileX < state.gridCols && tileY >= 0 && tileY < state.gridRows) {
       setHoveredTile({ x: tileX, y: tileY });
-
-      // Check if hovering over a planted tree to inspect
       const tree = state.plantedTrees.find((t) => t.x === tileX && t.y === tileY);
       setInspectedTree(tree || null);
     } else {
@@ -323,7 +539,6 @@ export function GardenCanvas({
     setInspectedTree(null);
   };
 
-  // Click on tile to interact/walk/plant
   const handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -345,55 +560,71 @@ export function GardenCanvas({
   const inspectedTreeDef = inspectedTree ? getTreeBySlug(inspectedTree.treeSlug) : null;
 
   return (
-    <div className="relative flex flex-col items-center select-none overflow-hidden rounded-xl border-4 border-emerald-950/80 bg-[#4e7d32] shadow-2xl p-2 sm:p-3">
-      {/* Floating Retro Inspection Tooltip */}
-      {inspectedTree && inspectedTreeDef && (
-        <div className="pointer-events-none absolute top-4 left-4 z-20 flex items-center gap-2.5 rounded-sm border-2 border-border bg-card/95 px-3 py-2 shadow-lg backdrop-blur-md animate-fade-in">
+    <div className="relative flex flex-col items-center justify-center select-none overflow-hidden rounded-xl border-2 border-border bg-card shadow-md p-2">
+      {/* Canvas Viewport */}
+      <div className="relative overflow-auto max-w-full rounded-lg shadow-inner">
+        <canvas
+          ref={canvasRef}
+          width={totalWidth}
+          height={totalHeight}
+          onClick={handleClick}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+          className="block cursor-pointer bg-emerald-950/20"
+          style={{ imageRendering: 'pixelated' }}
+        />
+
+        {/* Hover Inspector Pill Popup */}
+        {inspectedTree && inspectedTreeDef && (
           <div
-            className="size-3 rounded-full"
-            style={{ backgroundColor: inspectedTreeDef.rarity.color }}
-          />
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-xs font-bold text-foreground">
-                {inspectedTreeDef.name}
-              </span>
-              <span
-                className="rounded-xs px-1.5 py-0.2 text-[10px] font-bold text-white uppercase"
-                style={{ backgroundColor: inspectedTreeDef.rarity.color }}
-              >
-                {inspectedTreeDef.rarity.name}
-              </span>
+            className="pointer-events-none absolute bottom-3 left-3 flex items-center gap-2.5 rounded-lg border border-border/80 bg-background/95 px-3 py-2 shadow-lg backdrop-blur-md animate-fade-in"
+          >
+            <div className="size-7 rounded-sm overflow-hidden bg-primary/10 flex items-center justify-center p-0.5">
+              <img
+                src={`/trees/${inspectedTreeDef.slug}.png`}
+                alt={inspectedTreeDef.name}
+                className="size-full object-contain"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = 'none';
+                }}
+              />
             </div>
-            <p className="font-mono text-[11px] text-muted-foreground">
-              +{inspectedTreeDef.co2OffsetKgPerYear} kg CO₂e/yr · Stage {inspectedTree.growthStage}
-              /4
-            </p>
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-foreground">
+                  {inspectedTreeDef.name}
+                </span>
+                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-xs bg-muted text-muted-foreground uppercase font-bold">
+                  {inspectedTreeDef.rarity.name}
+                </span>
+              </div>
+              <p className="text-[11px] text-positive font-medium">
+                Offsets {inspectedTreeDef.co2OffsetKgPerYear} kg CO₂/yr •{' '}
+                {inspectedTree.growthStage === 4 ? '🌸 Mature Bloom' : `Stage ${inspectedTree.growthStage}/4`}
+              </p>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* Relocate Mode Active Banner */}
-      {movingTreeFrom && (
-        <div className="absolute top-4 right-4 z-20 flex items-center gap-2 rounded-sm border-2 border-amber-500 bg-amber-500/20 px-3 py-1.5 text-xs font-bold text-amber-300 shadow-md">
-          <span>Relocate Mode: Click any empty meadow tile to drop tree</span>
+      {/* Quick Controls Hint Bar */}
+      <div className="mt-2.5 flex flex-wrap items-center justify-between w-full px-2 text-[11px] text-muted-foreground">
+        <div className="flex items-center gap-3">
+          <span>
+            Move: <kbd className="rounded-xs bg-muted px-1.5 py-0.5 font-mono text-[10px] text-foreground">WASD</kbd> or <kbd className="rounded-xs bg-muted px-1.5 py-0.5 font-mono text-[10px] text-foreground">Arrows</kbd>
+          </span>
+          <span>
+            Action: <kbd className="rounded-xs bg-muted px-1.5 py-0.5 font-mono text-[10px] text-foreground">Space</kbd> / Click
+          </span>
+          <span>
+            Hotbar: <kbd className="rounded-xs bg-muted px-1.5 py-0.5 font-mono text-[10px] text-foreground">1-6</kbd>
+          </span>
         </div>
-      )}
-
-      {/* The Game Canvas */}
-      <canvas
-        ref={canvasRef}
-        width={totalWidth}
-        height={totalHeight}
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-        onClick={handleClick}
-        className="cursor-crosshair max-w-full rounded-md shadow-inner transition-transform"
-        style={{
-          imageRendering: 'pixelated',
-          aspectRatio: `${totalWidth} / ${totalHeight}`,
-        }}
-      />
+        <div className="flex items-center gap-2 text-positive font-medium">
+          <span className="size-2 rounded-full bg-positive animate-pulse" />
+          <span>Interactive 2D Canvas</span>
+        </div>
+      </div>
     </div>
   );
 }

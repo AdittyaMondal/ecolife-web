@@ -1,8 +1,11 @@
 /**
+/**
  * Crisp procedural pixel-art sprite rendering engine for EcoLife Garden.
- * All graphics are drawn with integer coordinates on disabled image-smoothing canvas
- * for authentic 16-bit retro aesthetic.
+ * Supports customizable biomes, character skins, and smooth 16-bit retro aesthetics.
  */
+
+import type { CharacterSkinId, GardenBiomeId } from '@/types/trees';
+import { getBiomeById } from '@/lib/garden-shop-catalogue';
 
 export const TILE_SIZE = 48; // Screen pixels per tile
 
@@ -53,14 +56,25 @@ export const PIXEL_PALETTE = {
 };
 
 /**
- * Draw a grass tile at (x, y) with organic blade variants and tiny daisies
+ * Draw a grass/terrain tile adapted to the active biome
  */
-export function drawGrassTile(ctx: CanvasRenderingContext2D, px: number, py: number, seed: number) {
-  ctx.fillStyle = PIXEL_PALETTE.grassBase;
+export function drawGrassTile(
+  ctx: CanvasRenderingContext2D,
+  px: number,
+  py: number,
+  seed: number,
+  biomeId: GardenBiomeId = 'meadow',
+) {
+  const biome = getBiomeById(biomeId);
+  const baseColor = biome.palette.grassBase;
+  const lightColor = biome.palette.grassLight;
+  const darkColor = biome.palette.grassDark;
+
+  ctx.fillStyle = baseColor;
   ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
 
-  // Subtle checkered grass blades
-  ctx.fillStyle = PIXEL_PALETTE.grassLight;
+  // Subtle checkered grass blades or foliage details
+  ctx.fillStyle = lightColor;
   if ((seed * 7) % 3 === 0) {
     ctx.fillRect(px + 6, py + 8, 4, 6);
     ctx.fillRect(px + 8, py + 6, 4, 4);
@@ -74,7 +88,7 @@ export function drawGrassTile(ctx: CanvasRenderingContext2D, px: number, py: num
   }
 
   // Dark blades
-  ctx.fillStyle = PIXEL_PALETTE.grassDark;
+  ctx.fillStyle = darkColor;
   if ((seed * 11) % 4 === 1) {
     ctx.fillRect(px + 36, py + 6, 4, 4);
   }
@@ -82,50 +96,75 @@ export function drawGrassTile(ctx: CanvasRenderingContext2D, px: number, py: num
     ctx.fillRect(px + 8, py + 22, 4, 4);
   }
 
-  // Occasional tiny wild daisy or clover
-  if (seed % 7 === 0) {
-    // White daisy
-    ctx.fillStyle = PIXEL_PALETTE.flowerWhite;
-    ctx.fillRect(px + 20, py + 14, 6, 6);
-    ctx.fillStyle = PIXEL_PALETTE.flowerYellow;
-    ctx.fillRect(px + 22, py + 16, 2, 2);
-  } else if (seed % 11 === 0) {
-    // Pink blossom
-    ctx.fillStyle = PIXEL_PALETTE.flowerPink;
-    ctx.fillRect(px + 24, py + 30, 5, 5);
-    ctx.fillStyle = PIXEL_PALETTE.flowerYellow;
-    ctx.fillRect(px + 25, py + 31, 3, 3);
+  // Biome-specific ambient accents
+  if (biomeId === 'autumn_orchard') {
+    // Amber fallen leaf
+    if (seed % 5 === 0) {
+      ctx.fillStyle = '#ea580c';
+      ctx.fillRect(px + 22, py + 16, 5, 4);
+      ctx.fillRect(px + 24, py + 14, 2, 2);
+    }
+  } else if (biomeId === 'zen_bamboo') {
+    // Bamboo leaf or small stone
+    if (seed % 6 === 0) {
+      ctx.fillStyle = '#344e41';
+      ctx.fillRect(px + 18, py + 24, 6, 3);
+    }
+  } else if (biomeId === 'sacred_grove') {
+    // Glowing magical moss flake
+    if (seed % 7 === 0) {
+      ctx.fillStyle = '#4ade80';
+      ctx.fillRect(px + 26, py + 12, 3, 3);
+    }
+  } else {
+    // Meadow: Wild daisy or pink flower
+    if (seed % 7 === 0) {
+      ctx.fillStyle = PIXEL_PALETTE.flowerWhite;
+      ctx.fillRect(px + 20, py + 14, 6, 6);
+      ctx.fillStyle = PIXEL_PALETTE.flowerYellow;
+      ctx.fillRect(px + 22, py + 16, 2, 2);
+    } else if (seed % 11 === 0) {
+      ctx.fillStyle = PIXEL_PALETTE.flowerPink;
+      ctx.fillRect(px + 24, py + 30, 5, 5);
+      ctx.fillStyle = PIXEL_PALETTE.flowerYellow;
+      ctx.fillRect(px + 25, py + 31, 3, 3);
+    }
   }
 }
 
 /**
- * Draw a dirt / stone pathway tile
+ * Draw a cobblestone / brick pathway tile adapted to the active biome
  */
-export function drawPathTile(ctx: CanvasRenderingContext2D, px: number, py: number, seed: number) {
-  ctx.fillStyle = PIXEL_PALETTE.pathBase;
+export function drawPathTile(
+  ctx: CanvasRenderingContext2D,
+  px: number,
+  py: number,
+  seed: number,
+  biomeId: GardenBiomeId = 'meadow',
+) {
+  const biome = getBiomeById(biomeId);
+  ctx.fillStyle = biome.palette.pathBase;
   ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
 
-  ctx.fillStyle = PIXEL_PALETTE.pathLight;
-  ctx.fillRect(px + 4, py + 4, 18, 14);
-  ctx.fillRect(px + 26, py + 22, 18, 16);
+  // Path stones / bricks
+  ctx.fillStyle = biome.palette.grassDark;
+  ctx.globalAlpha = 0.25;
+  ctx.strokeRect(px + 1, py + 1, TILE_SIZE - 2, TILE_SIZE - 2);
+  ctx.globalAlpha = 1.0;
 
-  ctx.fillStyle = PIXEL_PALETTE.pathDark;
-  ctx.fillRect(px + 2, py + 18, 4, 2);
-  ctx.fillRect(px + 22, py + 38, 4, 2);
-
-  // Tiny pebbles
+  // Pebble details
   ctx.fillStyle = PIXEL_PALETTE.pathPebble;
   if (seed % 2 === 0) {
-    ctx.fillRect(px + 10, py + 30, 3, 3);
-    ctx.fillRect(px + 34, py + 10, 4, 3);
+    ctx.fillRect(px + 8, py + 10, 8, 6);
+    ctx.fillRect(px + 26, py + 24, 12, 8);
   } else {
-    ctx.fillRect(px + 14, py + 12, 3, 3);
-    ctx.fillRect(px + 30, py + 32, 4, 3);
+    ctx.fillRect(px + 18, py + 8, 10, 7);
+    ctx.fillRect(px + 6, py + 26, 9, 6);
   }
 }
 
 /**
- * Draw garden water pond tile
+ * Draw a garden pond / water tile with gentle animated ripples
  */
 export function drawWaterTile(
   ctx: CanvasRenderingContext2D,
@@ -133,49 +172,55 @@ export function drawWaterTile(
   py: number,
   tick: number,
   hasLilypad = false,
+  biomeId: GardenBiomeId = 'meadow',
 ) {
-  ctx.fillStyle = PIXEL_PALETTE.waterBase;
+  const biome = getBiomeById(biomeId);
+  ctx.fillStyle = biome.palette.waterBase;
   ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
 
-  // Animated ripples
-  const offset = Math.floor((tick / 15) % 8);
-  ctx.fillStyle = PIXEL_PALETTE.waterLight;
-  ctx.fillRect(px + 4 + offset, py + 12, 12, 3);
-  ctx.fillRect(px + 24 - offset, py + 30, 14, 3);
+  // Animated wave glints
+  const waveOffset = Math.floor((tick / 15) % 4) * 4;
+  ctx.fillStyle = '#ffffff';
+  ctx.globalAlpha = 0.45;
+  ctx.fillRect(px + 6 + waveOffset, py + 12, 8, 2);
+  ctx.fillRect(px + 24 - waveOffset, py + 28, 10, 2);
+  ctx.globalAlpha = 1.0;
 
-  ctx.fillStyle = PIXEL_PALETTE.waterDark;
-  ctx.fillRect(px, py + TILE_SIZE - 4, TILE_SIZE, 4);
-
-  // Lilypad
+  // Lilypad on pond corner
   if (hasLilypad) {
     ctx.fillStyle = PIXEL_PALETTE.lilypad;
     ctx.beginPath();
-    ctx.arc(px + 24, py + 24, 9, 0, Math.PI * 1.7);
+    ctx.arc(px + 22, py + 22, 9, 0, Math.PI * 1.7);
     ctx.fill();
 
-    // Pink water flower
-    ctx.fillStyle = PIXEL_PALETTE.flowerPink;
-    ctx.fillRect(px + 21, py + 20, 4, 4);
-    ctx.fillStyle = PIXEL_PALETTE.flowerYellow;
-    ctx.fillRect(px + 22, py + 21, 2, 2);
+    // Pink water lotus flower
+    ctx.fillStyle = '#f472b6';
+    ctx.fillRect(px + 24, py + 16, 5, 5);
+    ctx.fillStyle = '#fde047';
+    ctx.fillRect(px + 25, py + 17, 3, 3);
   }
 }
 
 /**
- * Draw garden perimeter fence
+ * Draw a rustic wooden fence border tile
  */
-export function drawFenceTile(ctx: CanvasRenderingContext2D, px: number, py: number) {
-  // Underlying grass
-  ctx.fillStyle = PIXEL_PALETTE.grassBase;
+export function drawFenceTile(
+  ctx: CanvasRenderingContext2D,
+  px: number,
+  py: number,
+  biomeId: GardenBiomeId = 'meadow',
+) {
+  const biome = getBiomeById(biomeId);
+  // Grass underlay
+  ctx.fillStyle = biome.palette.grassBase;
   ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
 
-  // Wooden fence posts & horizontal rails
-  ctx.fillStyle = PIXEL_PALETTE.fenceWood;
-  // Rails
-  ctx.fillRect(px, py + 16, TILE_SIZE, 5);
-  ctx.fillRect(px, py + 30, TILE_SIZE, 5);
+  // Horizontal fence rails
+  ctx.fillStyle = biome.palette.fenceBase;
+  ctx.fillRect(px, py + 12, TILE_SIZE, 6);
+  ctx.fillRect(px, py + 28, TILE_SIZE, 6);
 
-  // Posts
+  // Vertical fence posts
   ctx.fillRect(px + 8, py + 6, 8, 36);
   ctx.fillRect(px + 32, py + 6, 8, 36);
 
@@ -183,17 +228,10 @@ export function drawFenceTile(ctx: CanvasRenderingContext2D, px: number, py: num
   ctx.fillStyle = PIXEL_PALETTE.fenceLight;
   ctx.fillRect(px + 8, py + 6, 8, 4);
   ctx.fillRect(px + 32, py + 6, 8, 4);
-  ctx.fillRect(px + 8, py + 16, 2, 5);
-  ctx.fillRect(px + 32, py + 16, 2, 5);
-
-  // Shadows
-  ctx.fillStyle = PIXEL_PALETTE.fenceDark;
-  ctx.fillRect(px + 14, py + 10, 2, 32);
-  ctx.fillRect(px + 38, py + 10, 2, 32);
 }
 
 /**
- * Draw Gardener Character Sprite
+ * Draw Gardener Character Sprite with customizable skins!
  */
 export function drawGardener(
   ctx: CanvasRenderingContext2D,
@@ -202,8 +240,9 @@ export function drawGardener(
   direction: 'up' | 'down' | 'left' | 'right',
   isWalking: boolean,
   tick: number,
+  skinId: CharacterSkinId = 'gardener_default',
 ) {
-  // Walk bob oscillation (0 or 2 pixels)
+  // Walk bob oscillation
   const bob = isWalking && Math.floor((tick / 8) % 2) === 1 ? -2 : 0;
   const legOffset = isWalking && Math.floor((tick / 8) % 2) === 1 ? 3 : 0;
 
@@ -211,13 +250,51 @@ export function drawGardener(
   const cy = py + TILE_SIZE / 2 + bob;
 
   // Drop shadow under feet
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.28)';
   ctx.beginPath();
-  ctx.ellipse(cx, py + TILE_SIZE - 4, 10, 4, 0, 0, Math.PI * 2);
+  ctx.ellipse(cx, py + TILE_SIZE - 4, 11, 4, 0, 0, Math.PI * 2);
   ctx.fill();
 
+  // Outfit colors based on active skin
+  let outfitPrimary = PIXEL_PALETTE.shirtGreen;
+  let outfitPants = PIXEL_PALETTE.overallsBlue;
+  let outfitPantsDark = PIXEL_PALETTE.overallsDark;
+  let outfitHat = PIXEL_PALETTE.hatStraw;
+  let outfitHatBand = PIXEL_PALETTE.hatBand;
+  let bootsColor = PIXEL_PALETTE.boots;
+
+  if (skinId === 'forest_ranger') {
+    outfitPrimary = '#a16207'; // Khaki safari jacket
+    outfitPants = '#451a03'; // Brown ranger pants
+    outfitPantsDark = '#290e02';
+    outfitHat = '#78350f'; // Dark ranger fedora
+    outfitHatBand = '#f59e0b'; // Gold badge band
+    bootsColor = '#1c1917';
+  } else if (skinId === 'solar_scout') {
+    outfitPrimary = '#0284c7'; // Cyan solar tunic
+    outfitPants = '#0f172a'; // Obsidian tech suit
+    outfitPantsDark = '#020617';
+    outfitHat = '#0ea5e9'; // Solar visor cap
+    outfitHatBand = '#38bdf8'; // Glowing neon visor
+    bootsColor = '#0369a1';
+  } else if (skinId === 'monsoon_botanist') {
+    outfitPrimary = '#eab308'; // Canary yellow raincoat
+    outfitPants = '#ca8a04';
+    outfitPantsDark = '#a16207';
+    outfitHat = '#facc15'; // Rain sou'wester hat
+    outfitHatBand = '#15803d'; // Green strap
+    bootsColor = '#14532d'; // Dark green wellies
+  } else if (skinId === 'zen_hermit') {
+    outfitPrimary = '#4d7c0f'; // Sage silk robe
+    outfitPants = '#365314';
+    outfitPantsDark = '#1a2e05';
+    outfitHat = '#d97706'; // Conical bamboo hat
+    outfitHatBand = '#78350f';
+    bootsColor = '#78350f'; // Wooden sandals
+  }
+
   // Boots / Feet
-  ctx.fillStyle = PIXEL_PALETTE.boots;
+  ctx.fillStyle = bootsColor;
   if (direction === 'left' || direction === 'right') {
     ctx.fillRect(cx - 5 + legOffset, cy + 12, 6, 6);
     ctx.fillRect(cx - 2 - legOffset, cy + 12, 6, 6);
@@ -227,13 +304,13 @@ export function drawGardener(
   }
 
   // Pants / Overalls body
-  ctx.fillStyle = PIXEL_PALETTE.overallsBlue;
+  ctx.fillStyle = outfitPants;
   ctx.fillRect(cx - 8, cy - 2, 16, 14);
-  ctx.fillStyle = PIXEL_PALETTE.overallsDark;
+  ctx.fillStyle = outfitPantsDark;
   ctx.fillRect(cx - 1, cy + 3, 2, 9); // leg divider
 
-  // Shirt sleeves
-  ctx.fillStyle = PIXEL_PALETTE.shirtGreen;
+  // Shirt / Jacket
+  ctx.fillStyle = outfitPrimary;
   ctx.fillRect(cx - 10, cy - 6, 20, 6);
 
   // Hands
@@ -253,17 +330,25 @@ export function drawGardener(
 
   // Directional facial details & hair
   if (direction === 'down') {
-    // Eyes
-    ctx.fillStyle = '#1e293b';
-    ctx.fillRect(cx - 4, cy - 11, 2, 3);
-    ctx.fillRect(cx + 2, cy - 11, 2, 3);
-    // Rosy cheeks
-    ctx.fillStyle = '#f43f5e';
-    ctx.fillRect(cx - 5, cy - 8, 2, 1);
-    ctx.fillRect(cx + 3, cy - 8, 2, 1);
-    // Smile
-    ctx.fillStyle = '#b91c1c';
-    ctx.fillRect(cx - 2, cy - 7, 4, 1);
+    if (skinId === 'solar_scout') {
+      // Tech HUD Visor
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillRect(cx - 6, cy - 13, 12, 4);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(cx - 4, cy - 12, 3, 2);
+    } else {
+      // Eyes
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(cx - 4, cy - 11, 2, 3);
+      ctx.fillRect(cx + 2, cy - 11, 2, 3);
+      // Rosy cheeks
+      ctx.fillStyle = '#f43f5e';
+      ctx.fillRect(cx - 5, cy - 8, 2, 1);
+      ctx.fillRect(cx + 3, cy - 8, 2, 1);
+      // Smile
+      ctx.fillStyle = '#b91c1c';
+      ctx.fillRect(cx - 2, cy - 7, 4, 1);
+    }
   } else if (direction === 'up') {
     // Back of head / hair
     ctx.fillStyle = PIXEL_PALETTE.hair;
@@ -280,31 +365,45 @@ export function drawGardener(
     ctx.fillRect(cx + 4, cy - 8, 2, 1); // cheek
   }
 
-  // Gardener Straw Hat (iconic brim and crown)
-  ctx.fillStyle = PIXEL_PALETTE.hatStraw;
-  ctx.fillRect(cx - 12, cy - 18, 24, 4); // Wide brim
-  ctx.fillRect(cx - 7, cy - 24, 14, 7); // Hat crown
+  // Headwear / Hat
+  if (skinId === 'zen_hermit') {
+    // Conical Asian Bamboo Rice Hat
+    ctx.fillStyle = outfitHat;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - 26);
+    ctx.lineTo(cx - 15, cy - 17);
+    ctx.lineTo(cx + 15, cy - 17);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = outfitHatBand;
+    ctx.fillRect(cx - 8, cy - 18, 16, 2);
+  } else {
+    // Standard / Ranger / Raincoat Hat
+    ctx.fillStyle = outfitHat;
+    ctx.fillRect(cx - 12, cy - 18, 24, 4); // Wide brim
+    ctx.fillRect(cx - 7, cy - 24, 14, 7); // Hat crown
 
-  // Green hat ribbon
-  ctx.fillStyle = PIXEL_PALETTE.hatBand;
-  ctx.fillRect(cx - 7, cy - 19, 14, 2);
+    // Hat ribbon / badge
+    ctx.fillStyle = outfitHatBand;
+    ctx.fillRect(cx - 7, cy - 19, 14, 2);
+  }
 }
 
 /**
- * Draw a pixel-art tree based on its species and growth stage
+ * Fallback procedural pixel-art tree renderer if sprite image is loading
  */
 export function drawTreeSprite(
   ctx: CanvasRenderingContext2D,
   px: number,
   py: number,
   treeSlug: string,
-  growthStage = 4, // 1: Seedling, 2: Sapling, 3: Young, 4: Full Mature
+  growthStage = 4,
   tick = 0,
 ) {
   const cx = px + TILE_SIZE / 2;
   const bottomY = py + TILE_SIZE - 2;
 
-  // Gentle wind sway oscillation for mature trees
+  // Gentle wind sway oscillation
   const sway = Math.sin((tick + px * 3) / 25) * 1.5;
 
   // Mound of fertile soil at base
@@ -313,232 +412,32 @@ export function drawTreeSprite(
   ctx.fillStyle = PIXEL_PALETTE.soilLight;
   ctx.fillRect(cx - 6, bottomY - 6, 12, 3);
 
-  // Stage 1: Seedling / Little Sprout
+  // Stage 1: Sprout
   if (growthStage === 1) {
     ctx.fillStyle = '#15803d';
     ctx.fillRect(cx - 1, bottomY - 14, 3, 9);
-    // Two little curved sprout leaves
     ctx.fillStyle = '#4ade80';
     ctx.fillRect(cx - 6, bottomY - 16, 5, 4);
     ctx.fillRect(cx + 2, bottomY - 16, 5, 4);
     return;
   }
 
-  // Stage 2: Young Sapling
+  // Stage 2: Sapling
   if (growthStage === 2) {
     ctx.fillStyle = '#78350f';
     ctx.fillRect(cx - 2, bottomY - 24, 4, 20);
-    // Small bushy canopy
     ctx.fillStyle = '#22c55e';
     ctx.beginPath();
     ctx.arc(cx + sway, bottomY - 26, 12, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = '#86efac';
-    ctx.fillRect(cx - 4 + sway, bottomY - 32, 6, 6);
     return;
   }
 
-  // Stage 3 & 4: Mature Species-Specific Pixel Trees
-  switch (treeSlug) {
-    case 'neem': {
-      // Slender tall brown trunk with branches
-      ctx.fillStyle = '#653818';
-      ctx.fillRect(cx - 3, bottomY - 32, 6, 28);
-      ctx.fillRect(cx - 8, bottomY - 28, 6, 4);
-      ctx.fillRect(cx + 2, bottomY - 24, 7, 4);
-
-      // Serrated feathery green canopy
-      ctx.fillStyle = '#15803d'; // Deep green
-      ctx.beginPath();
-      ctx.arc(cx - 10 + sway, bottomY - 36, 14, 0, Math.PI * 2);
-      ctx.arc(cx + 10 + sway, bottomY - 36, 14, 0, Math.PI * 2);
-      ctx.arc(cx + sway, bottomY - 44, 18, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Light leafy texture & yellow medicinal berries
-      ctx.fillStyle = '#4ade80';
-      ctx.fillRect(cx - 6 + sway, bottomY - 48, 8, 6);
-      ctx.fillRect(cx + 6 + sway, bottomY - 40, 6, 6);
-
-      ctx.fillStyle = '#fde047'; // Neem berries
-      ctx.fillRect(cx - 8 + sway, bottomY - 34, 3, 3);
-      ctx.fillRect(cx + 7 + sway, bottomY - 44, 3, 3);
-      ctx.fillRect(cx + 2 + sway, bottomY - 36, 3, 3);
-      break;
-    }
-
-    case 'mango': {
-      // Solid thick trunk
-      ctx.fillStyle = '#543015';
-      ctx.fillRect(cx - 5, bottomY - 28, 10, 24);
-
-      // Lush round dense dome canopy
-      ctx.fillStyle = '#166534';
-      ctx.beginPath();
-      ctx.arc(cx + sway, bottomY - 38, 22, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Bright leaf highlights
-      ctx.fillStyle = '#22c55e';
-      ctx.beginPath();
-      ctx.arc(cx - 4 + sway, bottomY - 42, 14, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Golden ripe mangoes hanging
-      ctx.fillStyle = '#f59e0b';
-      ctx.fillRect(cx - 10 + sway, bottomY - 36, 4, 5);
-      ctx.fillRect(cx + 8 + sway, bottomY - 40, 4, 5);
-      ctx.fillRect(cx - 2 + sway, bottomY - 46, 4, 5);
-      ctx.fillRect(cx + 4 + sway, bottomY - 32, 4, 5);
-      break;
-    }
-
-    case 'amaltas': {
-      // Slender trunk
-      ctx.fillStyle = '#713f12';
-      ctx.fillRect(cx - 3, bottomY - 30, 6, 26);
-
-      // Emerald canopy
-      ctx.fillStyle = '#15803d';
-      ctx.beginPath();
-      ctx.arc(cx + sway, bottomY - 38, 18, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Cascading golden-yellow floral tassels!
-      ctx.fillStyle = '#facc15';
-      // Draped chains of blossoms
-      ctx.fillRect(cx - 14 + sway, bottomY - 34, 5, 12);
-      ctx.fillRect(cx - 6 + sway, bottomY - 32, 6, 15);
-      ctx.fillRect(cx + 3 + sway, bottomY - 32, 6, 14);
-      ctx.fillRect(cx + 10 + sway, bottomY - 36, 5, 11);
-
-      ctx.fillStyle = '#fef08a'; // bright tips
-      ctx.fillRect(cx - 13 + sway, bottomY - 24, 3, 4);
-      ctx.fillRect(cx - 5 + sway, bottomY - 19, 4, 4);
-      ctx.fillRect(cx + 4 + sway, bottomY - 20, 4, 4);
-      break;
-    }
-
-    case 'teak': {
-      // Tall, straight, powerful timber trunk
-      ctx.fillStyle = '#451a03';
-      ctx.fillRect(cx - 5, bottomY - 42, 10, 38);
-
-      // Tiered broad horizontal leaf canopy
-      ctx.fillStyle = '#14532d';
-      ctx.fillRect(cx - 22 + sway, bottomY - 48, 44, 12);
-      ctx.fillRect(cx - 16 + sway, bottomY - 58, 32, 12);
-      ctx.fillRect(cx - 10 + sway, bottomY - 66, 20, 10);
-
-      ctx.fillStyle = '#16a34a'; // Large leaf highlights
-      ctx.fillRect(cx - 18 + sway, bottomY - 46, 10, 4);
-      ctx.fillRect(cx + 8 + sway, bottomY - 46, 10, 4);
-      ctx.fillRect(cx - 12 + sway, bottomY - 56, 8, 4);
-      break;
-    }
-
-    case 'gulmohar': {
-      // Graceful umbrella trunk
-      ctx.fillStyle = '#5c2c16';
-      ctx.fillRect(cx - 4, bottomY - 34, 8, 30);
-      ctx.fillRect(cx - 14, bottomY - 38, 12, 5);
-      ctx.fillRect(cx + 2, bottomY - 38, 12, 5);
-
-      // Fiery scarlet-red flowering umbrella!
-      ctx.fillStyle = '#dc2626'; // Vivid flame red
-      ctx.beginPath();
-      ctx.ellipse(cx + sway, bottomY - 44, 25, 16, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Orange and vermilion petals
-      ctx.fillStyle = '#f97316';
-      ctx.fillRect(cx - 16 + sway, bottomY - 48, 8, 8);
-      ctx.fillRect(cx + 8 + sway, bottomY - 48, 8, 8);
-      ctx.fillRect(cx - 4 + sway, bottomY - 54, 8, 8);
-
-      ctx.fillStyle = '#fef08a'; // Golden pistil centers
-      ctx.fillRect(cx - 8 + sway, bottomY - 42, 3, 3);
-      ctx.fillRect(cx + 4 + sway, bottomY - 44, 3, 3);
-      break;
-    }
-
-    case 'jacaranda': {
-      // Slender dark trunk
-      ctx.fillStyle = '#4a2810';
-      ctx.fillRect(cx - 3, bottomY - 32, 6, 28);
-
-      // Dreamy violet-purple blossom canopy!
-      ctx.fillStyle = '#7c3aed'; // Royal purple
-      ctx.beginPath();
-      ctx.arc(cx - 10 + sway, bottomY - 38, 16, 0, Math.PI * 2);
-      ctx.arc(cx + 10 + sway, bottomY - 38, 16, 0, Math.PI * 2);
-      ctx.arc(cx + sway, bottomY - 48, 18, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Lavender highlights
-      ctx.fillStyle = '#c084fc';
-      ctx.fillRect(cx - 8 + sway, bottomY - 52, 10, 8);
-      ctx.fillRect(cx + 6 + sway, bottomY - 42, 8, 8);
-      ctx.fillRect(cx - 14 + sway, bottomY - 38, 6, 6);
-      break;
-    }
-
-    case 'peepal': {
-      // Pale silvery trunk with sacred contours
-      ctx.fillStyle = '#78716c';
-      ctx.fillRect(cx - 5, bottomY - 36, 10, 32);
-
-      // Broad shimmering sacred canopy
-      ctx.fillStyle = '#15803d';
-      ctx.beginPath();
-      ctx.arc(cx + sway, bottomY - 44, 24, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Heart-leaf shimmer
-      ctx.fillStyle = '#86efac';
-      ctx.fillRect(cx - 12 + sway, bottomY - 50, 6, 6);
-      ctx.fillRect(cx + 6 + sway, bottomY - 52, 6, 6);
-      ctx.fillRect(cx - 4 + sway, bottomY - 40, 8, 6);
-
-      // Sacred golden aura glint (Epic tier)
-      if (Math.floor(tick / 20) % 2 === 0) {
-        ctx.fillStyle = '#fbbf24';
-        ctx.fillRect(cx + 16 + sway, bottomY - 56, 3, 3);
-        ctx.fillRect(cx - 18 + sway, bottomY - 42, 3, 3);
-      }
-      break;
-    }
-
-    default: {
-      // Massive ancient trunk with iconic aerial prop roots!
-      ctx.fillStyle = '#44281d';
-      ctx.fillRect(cx - 8, bottomY - 34, 16, 30);
-      // Aerial roots hanging to the ground
-      ctx.fillRect(cx - 18, bottomY - 26, 3, 24);
-      ctx.fillRect(cx + 15, bottomY - 26, 3, 24);
-      ctx.fillRect(cx - 24, bottomY - 20, 2, 18);
-      ctx.fillRect(cx + 22, bottomY - 20, 2, 18);
-
-      // Expansive giant canopy spreading wide
-      ctx.fillStyle = '#064e3b'; // Deep emerald
-      ctx.beginPath();
-      ctx.arc(cx - 18 + sway, bottomY - 42, 18, 0, Math.PI * 2);
-      ctx.arc(cx + 18 + sway, bottomY - 42, 18, 0, Math.PI * 2);
-      ctx.arc(cx + sway, bottomY - 50, 26, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Lush canopy highlights
-      ctx.fillStyle = '#10b981';
-      ctx.fillRect(cx - 14 + sway, bottomY - 58, 12, 8);
-      ctx.fillRect(cx + 6 + sway, bottomY - 54, 14, 8);
-      ctx.fillRect(cx - 24 + sway, bottomY - 42, 8, 6);
-
-      // Legendary golden amber sparkle
-      ctx.fillStyle = '#f59e0b';
-      ctx.fillRect(cx + 2 + sway, bottomY - 62, 4, 4);
-      ctx.fillRect(cx - 22 + sway, bottomY - 46, 3, 3);
-      ctx.fillRect(cx + 22 + sway, bottomY - 48, 3, 3);
-      break;
-    }
-  }
+  // Stage 3 & 4: Procedural Mature Fallback
+  ctx.fillStyle = '#653818';
+  ctx.fillRect(cx - 3, bottomY - 32, 6, 28);
+  ctx.fillStyle = '#15803d';
+  ctx.beginPath();
+  ctx.arc(cx + sway, bottomY - 40, 20, 0, Math.PI * 2);
+  ctx.fill();
 }

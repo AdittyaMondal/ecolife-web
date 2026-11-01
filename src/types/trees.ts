@@ -43,6 +43,47 @@ export interface GardenInventoryItem {
   quantity: number;
 }
 
+export type CharacterSkinId =
+  | 'gardener_default'
+  | 'forest_ranger'
+  | 'solar_scout'
+  | 'monsoon_botanist'
+  | 'zen_hermit';
+
+export type GardenBiomeId =
+  | 'meadow'
+  | 'zen_bamboo'
+  | 'autumn_orchard'
+  | 'sacred_grove'
+  | 'desert_oasis'
+  | 'crystal_glade';
+
+export interface ShopItemSkin {
+  id: CharacterSkinId;
+  name: string;
+  description: string;
+  priceCoins: number;
+  previewColor: string;
+  accentColor: string;
+  unlockedByDefault?: boolean;
+}
+
+export interface ShopItemBiome {
+  id: GardenBiomeId;
+  name: string;
+  description: string;
+  priceCoins: number;
+  palette: {
+    grassBase: string;
+    grassLight: string;
+    grassDark: string;
+    pathBase: string;
+    waterBase: string;
+    fenceBase: string;
+  };
+  unlockedByDefault?: boolean;
+}
+
 export interface GardenState {
   gridCols: number;
   gridRows: number;
@@ -56,5 +97,9 @@ export interface GardenState {
     totalOffsetKgPerYear: number;
     timesWatered: number;
   };
+  // Customization & Shop
+  activeSkinId?: CharacterSkinId;
+  unlockedSkins?: CharacterSkinId[];
+  activeBiomeId?: GardenBiomeId;
+  unlockedBiomes?: GardenBiomeId[];
 }
-
