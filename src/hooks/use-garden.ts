@@ -2,6 +2,8 @@
 
 import * as React from 'react';
 import { toast } from 'sonner';
+import { api } from '@/lib/fetcher';
+import { hasSessionHint } from '@/lib/session';
 import { getTreeBySlug, rollTreeReward, TREE_CATALOGUE } from '@/lib/tree-catalogue';
 import type {
   CharacterSkinId,
@@ -60,9 +62,13 @@ export function useGarden() {
   const [state, setState] = React.useState<GardenState>(INITIAL_GARDEN_STATE);
   const [isLoaded, setIsLoaded] = React.useState(false);
   const [movingTreeFrom, setMovingTreeFrom] = React.useState<{ x: number; y: number } | null>(null);
+  const [syncStatus, setSyncStatus] = React.useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const syncTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Load from localStorage on mount
+  // Load from localStorage on mount & sync with DB
   React.useEffect(() => {
+    let localParsed: GardenState | null = null;
+
     try {
       let saved = localStorage.getItem(STORAGE_KEY);
       if (!saved) {
@@ -70,7 +76,6 @@ export function useGarden() {
         const legacy = localStorage.getItem('ecolife_garden_v1');
         if (legacy) {
           const parsed = JSON.parse(legacy);
-          // Remove default starter trees so user starts with an empty garden
           parsed.plantedTrees = (parsed.plantedTrees || []).filter(
             (t: PlantedTree) => !t.instanceId?.startsWith('starter-'),
           );
@@ -85,33 +90,109 @@ export function useGarden() {
       }
 
       if (saved) {
-        const parsed = JSON.parse(saved);
-        // Ensure stats and hotbar integrity
-        if (!parsed.stats) {
-          parsed.stats = {
-            totalPlanted: parsed.plantedTrees?.length || 0,
-            totalOffsetKgPerYear: calculateTotalOffset(parsed.plantedTrees || []),
-            timesWatered: 0,
-          };
+        localParsed = JSON.parse(saved);
+        if (localParsed) {
+          if (!localParsed.stats) {
+            localParsed.stats = {
+              totalPlanted: localParsed.plantedTrees?.length || 0,
+              totalOffsetKgPerYear: calculateTotalOffset(localParsed.plantedTrees || []),
+              timesWatered: 0,
+            };
+          }
+          setState(localParsed);
         }
-        setState(parsed);
       }
     } catch (e) {
       console.warn('Could not load garden state from localStorage:', e);
     } finally {
       setIsLoaded(true);
     }
+
+    // Auto-sync with Database if user is signed in
+    if (hasSessionHint()) {
+      api
+        .get<{ gardenState: GardenState | null; updatedAt: string | null }>('/garden')
+        .then(async (res) => {
+          const dbState = res?.gardenState as GardenState | null;
+
+          if (dbState && dbState.gridCols) {
+            // Check if local has more or newer trees planted than DB
+            const localTreesCount = localParsed?.plantedTrees?.length || 0;
+            const dbTreesCount = dbState.plantedTrees?.length || 0;
+
+            if (localParsed && localTreesCount > dbTreesCount) {
+              console.log('[Garden Sync] Local garden has newly built content, syncing to DB...');
+              setSyncStatus('saving');
+              await api.put('/garden', { gardenState: localParsed });
+              setSyncStatus('saved');
+              toast.success('Your locally built garden has been saved to your account!');
+            } else {
+              console.log('[Garden Sync] Hydrated garden from DB cloud state.');
+              setState(dbState);
+              try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(dbState));
+              } catch {}
+              setSyncStatus('saved');
+            }
+          } else if (localParsed) {
+            // DB has no garden yet, push existing local garden to DB
+            console.log('[Garden Sync] Uploading initial local garden to DB...');
+            setSyncStatus('saving');
+            await api.put('/garden', { gardenState: localParsed });
+            setSyncStatus('saved');
+            toast.success('Garden successfully saved to cloud database!');
+          }
+        })
+        .catch((err) => {
+          console.warn('[Garden Sync] Could not fetch garden from server:', err);
+          setSyncStatus('error');
+        });
+    }
   }, []);
 
-  // Save to localStorage when state updates
+  // Save to localStorage and debounce sync to DB
   const saveState = React.useCallback((newState: GardenState) => {
     setState(newState);
+
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(newState));
     } catch (e) {
-      console.warn('Could not save garden state:', e);
+      console.warn('Could not save garden state locally:', e);
+    }
+
+    if (hasSessionHint()) {
+      setSyncStatus('saving');
+      if (syncTimerRef.current) {
+        clearTimeout(syncTimerRef.current);
+      }
+      syncTimerRef.current = setTimeout(async () => {
+        try {
+          await api.put('/garden', { gardenState: newState });
+          setSyncStatus('saved');
+        } catch (e) {
+          console.warn('[Garden Sync] Cloud sync error:', e);
+          setSyncStatus('error');
+        }
+      }, 600);
     }
   }, []);
+
+  // Explicit manual sync to cloud
+  const syncToCloud = React.useCallback(async () => {
+    if (!hasSessionHint()) {
+      toast.error('Please sign in to sync your garden with the cloud.');
+      return;
+    }
+    setSyncStatus('saving');
+    try {
+      await api.put('/garden', { gardenState: state });
+      setSyncStatus('saved');
+      toast.success('Garden saved to database!');
+    } catch (err: any) {
+      setSyncStatus('error');
+      toast.error('Sync failed: ' + (err.message || 'Network error'));
+    }
+  }, [state]);
 
   // Check if a tile has obstacles (fence or planted tree)
   const isTileBlocked = React.useCallback(
@@ -521,5 +602,7 @@ export function useGarden() {
     buyAndEquipBiome,
     togglePetRoam,
     buyPet,
+    syncStatus,
+    syncToCloud,
   };
 }

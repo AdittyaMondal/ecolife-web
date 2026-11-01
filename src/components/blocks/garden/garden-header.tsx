@@ -1,6 +1,6 @@
 'use client';
 
-import { Coins, Gift, HelpCircle, Leaf, Palette, Sprout, Trees } from 'lucide-react';
+import { Cloud, CloudOff, CloudUpload, Coins, Gift, HelpCircle, Leaf, Loader2, Palette, Sprout, Trees } from 'lucide-react';
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -13,6 +13,8 @@ export interface GardenHeaderProps {
   userCoins?: number;
   onClaimRewardSeed: () => void;
   onOpenShop?: () => void;
+  syncStatus?: 'idle' | 'saving' | 'saved' | 'error';
+  onSyncToCloud?: () => void;
 }
 
 export function GardenHeader({
@@ -20,6 +22,8 @@ export function GardenHeader({
   userCoins = 0,
   onClaimRewardSeed,
   onOpenShop,
+  syncStatus = 'idle',
+  onSyncToCloud,
 }: GardenHeaderProps) {
   const [helpOpen, setHelpOpen] = React.useState(false);
 
@@ -53,6 +57,43 @@ export function GardenHeader({
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            {/* Cloud Sync Status Indicator */}
+            {onSyncToCloud && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onSyncToCloud}
+                disabled={syncStatus === 'saving'}
+                className="gap-1.5 text-xs h-9 bg-card border-border hover:bg-accent"
+                title="Garden is synced to your cloud database account. Click to force re-sync."
+              >
+                {syncStatus === 'saving' && (
+                  <>
+                    <Loader2 className="size-3.5 animate-spin text-amber-500" />
+                    <span className="text-muted-foreground">Saving to DB...</span>
+                  </>
+                )}
+                {syncStatus === 'saved' && (
+                  <>
+                    <Cloud className="size-3.5 text-positive" />
+                    <span className="font-medium text-foreground">Saved to DB ✓</span>
+                  </>
+                )}
+                {syncStatus === 'error' && (
+                  <>
+                    <CloudOff className="size-3.5 text-destructive" />
+                    <span className="text-destructive font-medium">Sync Failed (Retry)</span>
+                  </>
+                )}
+                {syncStatus === 'idle' && (
+                  <>
+                    <CloudUpload className="size-3.5 text-muted-foreground" />
+                    <span>Sync to DB</span>
+                  </>
+                )}
+              </Button>
+            )}
+
             {/* Garden Shop & Wardrobe modal button */}
             {onOpenShop && (
               <Button

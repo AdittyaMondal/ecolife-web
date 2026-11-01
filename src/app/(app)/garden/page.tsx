@@ -36,6 +36,8 @@ export default function GardenPage() {
     buyAndEquipBiome,
     togglePetRoam,
     buyPet,
+    syncStatus,
+    syncToCloud,
   } = useGarden();
 
   const [activeTool, setActiveTool] = React.useState<'plant' | 'water' | 'remove' | 'move'>(
@@ -125,6 +127,8 @@ export default function GardenPage() {
         userCoins={userCoins}
         onClaimRewardSeed={handleClaimReward}
         onOpenShop={() => setShopOpen(true)}
+        syncStatus={syncStatus}
+        onSyncToCloud={syncToCloud}
       />
 
       {/* 2D Pixel Art Canvas Viewport */}
