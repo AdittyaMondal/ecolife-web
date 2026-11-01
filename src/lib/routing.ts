@@ -49,7 +49,24 @@ export function safeNextPath(raw: string | null | undefined): string | null {
   try {
     const url = new URL(raw, base);
     if (url.origin !== base) return null;
-    return `${url.pathname}${url.search}${url.hash}`;
+
+    /**
+     * Collapse leading slashes in the PATHNAME before returning it.
+     *
+     * Checking the input and returning something unchecked was the second bug
+     * in this function. `/.//evil.example` resolves same-origin, so the check
+     * above passes — and then `url.pathname` is `//evil.example`, which is
+     * protocol-relative the moment the caller navigates to it:
+     *
+     *   "/.//evil.example"     origin-ok  →  returns "//evil.example"
+     *   "/a/..//evil.example"  origin-ok  →  returns "//evil.example"
+     *   "/%2e//evil.example"   origin-ok  →  returns "//evil.example"
+     *
+     * One leading slash, enforced structurally, so there is no input left to
+     * be clever with. The result is a path on this site — at worst a 404.
+     */
+    const path = `/${url.pathname.replace(/^\/+/, '')}`;
+    return `${path}${url.search}${url.hash}`;
   } catch {
     return null;
   }

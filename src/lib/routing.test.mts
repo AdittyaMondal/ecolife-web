@@ -108,3 +108,31 @@ describe('safeNextPath (open-redirect guard on ?next=)', () => {
     assert.equal(safeNextPath(undefined), null);
   });
 });
+
+describe('safeNextPath returns a value that is itself safe', () => {
+  it('collapses a pathname that normalises to protocol-relative', () => {
+    // These resolve SAME-ORIGIN, so an origin check alone passes them — and
+    // then the returned pathname is `//evil.example`, which goes off-site the
+    // moment it is navigated. Checking the input is not enough; the output is
+    // what the caller uses.
+    assert.equal(safeNextPath('/.//evil.example'), '/evil.example');
+    assert.equal(safeNextPath('/a/..//evil.example'), '/evil.example');
+    assert.equal(safeNextPath('/%2e//evil.example'), '/evil.example');
+  });
+
+  it('never returns a value with more than one leading slash', () => {
+    for (const raw of [
+      '/.//evil.example',
+      '/a/..//evil.example',
+      '/%2e//evil.example',
+      '/./././/x',
+      '/track',
+      '/track?a=1#b',
+    ]) {
+      const out = safeNextPath(raw);
+      if (out === null) continue;
+      assert.ok(out.startsWith('/'), `${raw} -> ${out}`);
+      assert.ok(!out.startsWith('//'), `${raw} -> ${out} is protocol-relative`);
+    }
+  });
+});
