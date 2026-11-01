@@ -1,4 +1,4 @@
-import { Leaf } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 /**
@@ -10,11 +10,16 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   return (
     <div className="flex min-h-dvh flex-col justify-between bg-background px-4 py-8">
       <header className="mx-auto flex w-full max-w-md items-center justify-between">
-        <Link href="/" className="inline-flex items-center gap-2.5 text-foreground">
-          <span className="flex size-9 items-center justify-center rounded-xs bg-secondary text-primary">
-            <Leaf className="size-5" aria-hidden="true" />
-          </span>
-          <span className="text-lg font-semibold tracking-tight">EcoLife</span>
+        <Link href="/" className="inline-flex items-center gap-2.5 text-foreground group">
+          <Image
+            src="/logo.png"
+            alt="EcoLife Logo"
+            width={36}
+            height={36}
+            className="size-9 object-contain transition-transform group-hover:scale-105"
+            priority
+          />
+          <span className="text-xl font-bold tracking-tight">EcoLife</span>
         </Link>
         <Link
           href="/methodology"

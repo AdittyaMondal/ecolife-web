@@ -21,6 +21,7 @@ import {
   Zap,
 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import * as React from 'react';
 import { Badge } from '@/components/ui/badge';
@@ -356,12 +357,17 @@ function OnboardingStepContent() {
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
         {/* Top Bar */}
         <header className="flex items-center justify-between gap-4">
-          <Link href="/" className="inline-flex items-center gap-2.5 text-foreground">
-            <span className="flex size-9 items-center justify-center rounded-xs bg-secondary text-primary">
-              <Leaf className="size-5" aria-hidden="true" />
-            </span>
+          <Link href="/" className="inline-flex items-center gap-2.5 text-foreground group">
+            <Image
+              src="/logo.png"
+              alt="EcoLife Logo"
+              width={36}
+              height={36}
+              className="size-9 object-contain transition-transform group-hover:scale-105"
+              priority
+            />
             <div>
-              <span className="block text-base font-semibold tracking-tight leading-none">
+              <span className="block text-base font-bold tracking-tight leading-none">
                 EcoLife
               </span>
               <span className="text-xs text-muted-foreground">15-Question Baseline Setup</span>

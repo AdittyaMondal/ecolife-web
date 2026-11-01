@@ -12,6 +12,7 @@ import {
   Trophy,
 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 
@@ -26,11 +27,16 @@ export default function LandingPage() {
     <div className="min-h-dvh bg-background">
       {/* Concentric Top Navigation Bar */}
       <header className="mx-auto flex max-w-6xl items-center justify-between px-4 py-6 sm:px-6">
-        <Link href="/" className="flex items-center gap-2.5">
-          <span className="flex size-10 items-center justify-center rounded-sm bg-primary text-primary-foreground font-extrabold">
-            <Leaf className="size-5" aria-hidden="true" />
-          </span>
-          <span className="text-lg font-extrabold tracking-tight text-foreground">EcoLife</span>
+        <Link href="/" className="flex items-center gap-2.5 group">
+          <Image
+            src="/logo.png"
+            alt="EcoLife Logo"
+            width={40}
+            height={40}
+            className="size-10 object-contain transition-transform group-hover:scale-105"
+            priority
+          />
+          <span className="text-xl font-extrabold tracking-tight text-foreground">EcoLife</span>
         </Link>
 
         <nav className="flex items-center gap-2">

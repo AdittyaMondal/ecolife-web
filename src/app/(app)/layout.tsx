@@ -21,6 +21,7 @@ import {
   User,
 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import * as React from 'react';
@@ -103,13 +104,18 @@ function AppLayoutShell({ children }: { children: React.ReactNode }) {
           <div className="flex items-center justify-between gap-2">
             <Link
               href="/home"
-              className="inline-flex items-center gap-2.5 rounded-sm p-1 text-foreground transition hover:opacity-90"
+              className="inline-flex items-center gap-2.5 rounded-sm p-1 text-foreground transition hover:opacity-90 group"
             >
-              <span className="flex size-9 items-center justify-center rounded-xs bg-secondary text-primary">
-                <Leaf className="size-5" aria-hidden="true" />
-              </span>
+              <Image
+                src="/logo.png"
+                alt="EcoLife Logo"
+                width={36}
+                height={36}
+                className="size-9 object-contain transition-transform group-hover:scale-105"
+                priority
+              />
               <span className="flex flex-col">
-                <span className="text-base font-semibold tracking-tight leading-none">EcoLife</span>
+                <span className="text-base font-bold tracking-tight leading-none">EcoLife</span>
                 <span className="mt-0.5 text-xs text-muted-foreground">Carbon &amp; Rewards</span>
               </span>
             </Link>
@@ -360,10 +366,15 @@ function AppLayoutShell({ children }: { children: React.ReactNode }) {
       {/* Mobile Top Bar (<md) */}
       <header className="sticky top-0 z-20 flex items-center justify-between gap-2 border-b border-border bg-card/95 px-4 py-3 backdrop-blur-md md:hidden">
         <Link href="/home" className="inline-flex items-center gap-2">
-          <span className="flex size-8 items-center justify-center rounded-xs bg-secondary text-primary">
-            <Leaf className="size-4" aria-hidden="true" />
-          </span>
-          <span className="text-base font-semibold tracking-tight text-foreground">EcoLife</span>
+          <Image
+            src="/logo.png"
+            alt="EcoLife Logo"
+            width={32}
+            height={32}
+            className="size-8 object-contain"
+            priority
+          />
+          <span className="text-base font-bold tracking-tight text-foreground">EcoLife</span>
         </Link>
 
         <div className="flex items-center gap-1.5">

@@ -2,26 +2,24 @@
 
 import { useQuery } from '@tanstack/react-query';
 import {
-  Bot,
   ChevronDown,
   Info,
-  Leaf,
   Loader2,
   Maximize2,
   Minimize2,
-  RefreshCw,
   Send,
   Sparkles,
   Trash2,
-  User,
   X,
 } from 'lucide-react';
+import Image from 'next/image';
 import * as React from 'react';
 import { toast } from 'sonner';
 import { meQuery } from '@/hooks/use-auth';
 import { homeQuery } from '@/hooks/use-home';
 import { onboardingQuery } from '@/hooks/use-onboarding';
 import { trackTodayQuery } from '@/hooks/use-track';
+import { api } from '@/lib/fetcher';
 import { cn } from '@/lib/utils';
 
 export interface ChatMessage {
@@ -31,7 +29,7 @@ export interface ChatMessage {
   timestamp: number;
 }
 
-const STORAGE_KEY = 'ecolife_ai_chat_history_v1';
+const STORAGE_KEY = 'ecolife_ai_chat_history_v2';
 const MAX_MEMORY_TURNS = 5; // Up to 5 previous chats (turns)
 
 const SUGGESTED_PROMPTS = [
@@ -42,83 +40,8 @@ const SUGGESTED_PROMPTS = [
   'Give me an actionable eco challenge for today',
 ];
 
-/** Simple markdown-like text formatter for headers, bold, bullets, and line breaks */
-function FormattedMessage({ text }: { text: string }) {
-  const lines = text.split('\n');
-
-  return (
-    <div className="space-y-1.5 text-xs sm:text-sm leading-relaxed">
-      {lines.map((line, lineIdx) => {
-        const trimmed = line.trim();
-
-        // Empty line
-        if (!trimmed) {
-          return <div key={lineIdx} className="h-1.5" />;
-        }
-
-        // Horizontal rule
-        if (/^---+$/.test(trimmed)) {
-          return <hr key={lineIdx} className="my-2 border-border/60" />;
-        }
-
-        // Headers
-        if (trimmed.startsWith('### ')) {
-          return (
-            <h4 key={lineIdx} className="font-bold text-foreground text-sm pt-1">
-              {formatInline(trimmed.slice(4))}
-            </h4>
-          );
-        }
-        if (trimmed.startsWith('## ')) {
-          return (
-            <h3 key={lineIdx} className="font-bold text-foreground text-base pt-1.5">
-              {formatInline(trimmed.slice(3))}
-            </h3>
-          );
-        }
-        if (trimmed.startsWith('# ')) {
-          return (
-            <h2 key={lineIdx} className="font-extrabold text-foreground text-base pt-2">
-              {formatInline(trimmed.slice(2))}
-            </h2>
-          );
-        }
-
-        // Bullet point
-        if (trimmed.startsWith('* ') || trimmed.startsWith('- ')) {
-          return (
-            <div key={lineIdx} className="flex items-start gap-2 pl-1">
-              <span className="text-primary font-bold select-none">•</span>
-              <span className="flex-1">{formatInline(trimmed.slice(2))}</span>
-            </div>
-          );
-        }
-
-        // Numbered list
-        const numMatch = trimmed.match(/^(\d+)\.\s+(.*)/);
-        if (numMatch) {
-          return (
-            <div key={lineIdx} className="flex items-start gap-2 pl-1">
-              <span className="font-semibold text-primary select-none">{numMatch[1]}.</span>
-              <span className="flex-1">{formatInline(numMatch[2])}</span>
-            </div>
-          );
-        }
-
-        // Regular paragraph
-        return (
-          <p key={lineIdx} className="text-foreground/90">
-            {formatInline(line)}
-          </p>
-        );
-      })}
-    </div>
-  );
-}
-
 /** Formats inline **bold**, *italic*, and `code` */
 function formatInline(text: string): React.ReactNode[] {
-  // Regex to match **bold**, *italic*, and `code`
   const regex = /(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`)/g;
   const parts = text.split(regex);
 
@@ -141,7 +64,7 @@ function formatInline(text: string): React.ReactNode[] {
       return (
         <code
           key={index}
-          className="rounded bg-muted px-1 py-0.5 font-mono text-[11px] text-primary"
+          className="rounded-xs bg-primary/10 px-1.5 py-0.5 font-mono text-[11px] font-medium text-primary-foreground dark:text-primary"
         >
           {part.slice(1, -1)}
         </code>
@@ -149,6 +72,74 @@ function formatInline(text: string): React.ReactNode[] {
     }
     return part;
   });
+}
+
+/** Markdown-like text formatter for headers, bold, bullets, and line breaks */
+function FormattedMessage({ text }: { text: string }) {
+  const lines = text.split('\n');
+
+  return (
+    <div className="space-y-1.5 text-xs sm:text-sm leading-relaxed">
+      {lines.map((line, lineIdx) => {
+        const trimmed = line.trim();
+
+        if (!trimmed) {
+          return <div key={lineIdx} className="h-1.5" />;
+        }
+
+        if (/^---+$/.test(trimmed)) {
+          return <hr key={lineIdx} className="my-2.5 border-border/60" />;
+        }
+
+        if (trimmed.startsWith('### ')) {
+          return (
+            <h4 key={lineIdx} className="font-bold text-foreground text-sm pt-1 tracking-tight">
+              {formatInline(trimmed.slice(4))}
+            </h4>
+          );
+        }
+        if (trimmed.startsWith('## ')) {
+          return (
+            <h3 key={lineIdx} className="font-bold text-foreground text-base pt-1.5 tracking-tight">
+              {formatInline(trimmed.slice(3))}
+            </h3>
+          );
+        }
+        if (trimmed.startsWith('# ')) {
+          return (
+            <h2 key={lineIdx} className="font-extrabold text-foreground text-base pt-2 tracking-tight">
+              {formatInline(trimmed.slice(2))}
+            </h2>
+          );
+        }
+
+        if (trimmed.startsWith('* ') || trimmed.startsWith('- ')) {
+          return (
+            <div key={lineIdx} className="flex items-start gap-2 pl-1">
+              <span className="text-primary font-bold select-none">•</span>
+              <span className="flex-1 text-foreground/95">{formatInline(trimmed.slice(2))}</span>
+            </div>
+          );
+        }
+
+        const numMatch = trimmed.match(/^(\d+)\.\s+(.*)/);
+        if (numMatch) {
+          return (
+            <div key={lineIdx} className="flex items-start gap-2 pl-1">
+              <span className="font-bold text-primary select-none">{numMatch[1]}.</span>
+              <span className="flex-1 text-foreground/95">{formatInline(numMatch[2])}</span>
+            </div>
+          );
+        }
+
+        return (
+          <p key={lineIdx} className="text-foreground/90">
+            {formatInline(line)}
+          </p>
+        );
+      })}
+    </div>
+  );
 }
 
 export function FloatingChat() {
@@ -188,7 +179,7 @@ export function FloatingChat() {
       {
         id: 'welcome',
         role: 'assistant',
-        content: `👋 Hello${initialName}! I am your **EcoLife AI Advisor**, powered by Google Gemini. \n\nI have live access to your profile, your **15 lifestyle onboarding questions**, today's **daily tracking**, and your **virtual garden**! \n\nHow can I help you reduce your footprint or earn EcoCoins today?`,
+        content: `👋 Hello${initialName}! I am your **EcoLife AI Advisor**, running securely on our backend with Google Gemini Flash. \n\nI have live access to your profile, your **15 lifestyle onboarding answers**, today's **daily tracking**, and your **virtual garden**! \n\nHow can I help you reduce your footprint or earn EcoCoins today?`,
         timestamp: Date.now(),
       },
     ]);
@@ -259,7 +250,6 @@ export function FloatingChat() {
     setIsLoading(true);
 
     try {
-      // Build context payload
       const contextPayload = {
         user: {
           name: me?.name,
@@ -273,7 +263,9 @@ export function FloatingChat() {
         onboarding: {
           completed: onboarding?.complete,
           answers: onboarding?.answers,
-          baseline: home?.today?.baselineTotalKg ? { totalKg: home.today.baselineTotalKg } : undefined,
+          baseline: home?.today?.baselineTotalKg
+            ? { totalKg: home.today.baselineTotalKg }
+            : undefined,
         },
         dailyTrack: {
           date: trackToday?.date,
@@ -289,7 +281,7 @@ export function FloatingChat() {
         garden: getGardenContext(),
       };
 
-      // Memory of up to 5 previous turns (up to 10 previous messages + current)
+      // Memory: last 5 previous turns (up to 10 previous messages + current)
       const historyToSend = newMessages
         .filter((m) => m.id !== 'welcome')
         .slice(-(MAX_MEMORY_TURNS * 2 + 1))
@@ -298,25 +290,16 @@ export function FloatingChat() {
           content: m.content,
         }));
 
-      const res = await fetch('/api/ai/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: historyToSend,
-          context: contextPayload,
-        }),
+      // Call the backend API via same-origin fetcher (proxies to ecolife-server)
+      const res = await api.post<{ reply: string }>('/ai/chat', {
+        messages: historyToSend,
+        context: contextPayload,
       });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to get a response from EcoLife AI.');
-      }
 
       const assistantMessage: ChatMessage = {
         id: `assistant-${Date.now()}`,
         role: 'assistant',
-        content: data.reply,
+        content: res.reply,
         timestamp: Date.now(),
       };
 
@@ -328,7 +311,7 @@ export function FloatingChat() {
       const errorMessage: ChatMessage = {
         id: `err-${Date.now()}`,
         role: 'assistant',
-        content: `⚠️ *Sorry, I encountered an error:* ${err.message || 'Please check your connection and try again.'}`,
+        content: `⚠️ *Sorry, I encountered an issue:* ${err.message || 'Please check your connection and try again.'}`,
         timestamp: Date.now(),
       };
       setMessages((prev) => [...prev, errorMessage]);
@@ -344,7 +327,7 @@ export function FloatingChat() {
       {
         id: 'welcome',
         role: 'assistant',
-        content: `Chat history reset. How can I assist you now${initialName}?`,
+        content: `Chat memory cleared. How can I assist you now${initialName}?`,
         timestamp: Date.now(),
       },
     ]);
@@ -364,23 +347,32 @@ export function FloatingChat() {
           aria-label="Open EcoLife AI Advisor"
           className={cn(
             'fixed right-4 bottom-20 md:right-6 md:bottom-6 z-40',
-            'group flex items-center gap-2.5 rounded-full p-3 md:px-4 md:py-3',
-            'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-xl shadow-emerald-950/20',
-            'hover:from-emerald-500 hover:to-teal-500 active:scale-95 transition-all duration-200',
-            'border border-emerald-400/30 backdrop-blur-md',
+            'group flex items-center gap-2.5 rounded-full p-2.5 md:px-4 md:py-2.5',
+            'bg-secondary text-secondary-foreground border border-border/80 shadow-lg shadow-forest-900/10',
+            'hover:bg-secondary/90 hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200',
+            'ring-2 ring-primary/30 hover:ring-primary/60 backdrop-blur-md',
           )}
         >
-          <div className="relative flex items-center justify-center">
-            <Sparkles className="size-5 md:size-5 animate-pulse text-emerald-100" />
-            <span className="absolute -top-1 -right-1 size-2.5 rounded-full bg-emerald-300 ring-2 ring-emerald-700 animate-ping" />
-            <span className="absolute -top-1 -right-1 size-2.5 rounded-full bg-emerald-300 ring-2 ring-emerald-700" />
+          <div className="relative flex size-7 md:size-8 items-center justify-center shrink-0">
+            <Image
+              src="/logo.png"
+              alt="EcoLife Logo"
+              width={28}
+              height={28}
+              className="size-7 md:size-8 object-contain transition-transform group-hover:rotate-6"
+              priority
+            />
+            <span className="absolute -top-0.5 -right-0.5 size-2.5 rounded-full bg-primary ring-2 ring-secondary animate-ping" />
+            <span className="absolute -top-0.5 -right-0.5 size-2.5 rounded-full bg-primary ring-2 ring-secondary" />
           </div>
-          <span className="hidden font-semibold text-sm tracking-wide md:inline">
-            EcoLife AI
-          </span>
-          <span className="hidden text-emerald-200 text-xs lg:inline">
-            • Advisor
-          </span>
+          <div className="hidden flex-col items-start text-left md:flex pr-1">
+            <span className="text-xs font-bold tracking-tight leading-none text-foreground">
+              EcoLife AI
+            </span>
+            <span className="text-[10px] text-muted-foreground mt-0.5 flex items-center gap-1">
+              <Sparkles className="size-2.5 text-primary" /> Advisor
+            </span>
+          </div>
         </button>
       )}
 
@@ -392,29 +384,36 @@ export function FloatingChat() {
           className={cn(
             'fixed right-3 bottom-20 md:right-6 md:bottom-6 z-50',
             'w-[calc(100vw-1.5rem)] sm:w-[420px]',
-            'flex flex-col rounded-2xl border border-border/80 bg-card/95 shadow-2xl backdrop-blur-xl',
+            'flex flex-col rounded-xl border border-border bg-card/95 shadow-2xl backdrop-blur-xl',
             'transition-all duration-300 ease-out origin-bottom-right',
             isMinimized ? 'h-14 overflow-hidden' : 'h-[580px] max-h-[calc(100vh-6.5rem)]',
           )}
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-border/60 bg-muted/40 px-3.5 py-2.5">
+          <div className="flex items-center justify-between border-b border-border bg-muted/40 px-3.5 py-2.5">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="relative flex size-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 text-white shadow-sm">
-                <Sparkles className="size-4" />
-                <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full bg-emerald-400 ring-2 ring-card" />
+              <div className="relative flex size-9 shrink-0 items-center justify-center rounded-sm bg-secondary p-1 border border-border/60">
+                <Image
+                  src="/logo.png"
+                  alt="EcoLife AI Logo"
+                  width={28}
+                  height={28}
+                  className="size-7 object-contain"
+                />
+                <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full bg-primary ring-2 ring-card" />
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <h3 className="truncate font-bold text-foreground text-sm">
+                  <h3 className="truncate font-bold text-foreground text-sm tracking-tight">
                     EcoLife AI
                   </h3>
-                  <span className="rounded-full bg-emerald-500/15 px-1.5 py-0.2 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
+                  <span className="rounded-full bg-primary/15 px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground dark:text-primary leading-none">
                     Gemini Flash
                   </span>
                 </div>
-                <p className="truncate text-[11px] text-muted-foreground">
-                  Personal Sustainability Advisor
+                <p className="truncate text-[11px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                  <span className="size-1.5 rounded-full bg-positive inline-block" />
+                  Backend Sync · 5-Turn Memory
                 </p>
               </div>
             </div>
@@ -424,11 +423,11 @@ export function FloatingChat() {
               <button
                 type="button"
                 onClick={() => setShowInfo(!showInfo)}
-                title="Data access & sync info"
+                title="Context data sync details"
                 aria-label="Data access info"
                 className={cn(
-                  'rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition',
-                  showInfo && 'bg-muted text-foreground',
+                  'rounded-xs p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition',
+                  showInfo && 'bg-accent text-accent-foreground',
                 )}
               >
                 <Info className="size-4" />
@@ -438,7 +437,7 @@ export function FloatingChat() {
                 onClick={handleClearHistory}
                 title="Clear chat history"
                 aria-label="Clear chat history"
-                className="rounded-lg p-1.5 text-muted-foreground hover:bg-destructive/15 hover:text-destructive transition"
+                className="rounded-xs p-1.5 text-muted-foreground hover:bg-destructive/15 hover:text-destructive transition"
               >
                 <Trash2 className="size-4" />
               </button>
@@ -447,7 +446,7 @@ export function FloatingChat() {
                 onClick={() => setIsMinimized(!isMinimized)}
                 title={isMinimized ? 'Expand' : 'Minimize'}
                 aria-label={isMinimized ? 'Expand chat' : 'Minimize chat'}
-                className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition"
+                className="rounded-xs p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition"
               >
                 {isMinimized ? (
                   <Maximize2 className="size-4" />
@@ -460,7 +459,7 @@ export function FloatingChat() {
                 onClick={() => setIsOpen(false)}
                 title="Close chat"
                 aria-label="Close chat"
-                className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition"
+                className="rounded-xs p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition"
               >
                 <X className="size-4" />
               </button>
@@ -469,36 +468,40 @@ export function FloatingChat() {
 
           {!isMinimized && (
             <>
-              {/* Context Sync Info Panel */}
+              {/* Context Sync Info Drawer */}
               {showInfo && (
-                <div className="border-b border-border/60 bg-emerald-950/10 dark:bg-emerald-950/30 px-3.5 py-2.5 text-xs">
-                  <div className="flex items-center justify-between pb-1 font-semibold text-emerald-700 dark:text-emerald-300">
-                    <span>Live Context Connected</span>
-                    <span className="text-[10px] text-muted-foreground">Memory: 5 chats</span>
+                <div className="border-b border-border/80 bg-accent/30 p-3 text-xs animate-in fade-in duration-150">
+                  <div className="flex items-center justify-between pb-1.5 font-semibold text-foreground">
+                    <span className="flex items-center gap-1.5">
+                      <Sparkles className="size-3 text-primary" /> Live Context Synced
+                    </span>
+                    <span className="text-[10px] text-muted-foreground bg-card border border-border px-1.5 py-0.5 rounded-xs">
+                      Backend Managed
+                    </span>
                   </div>
-                  <ul className="grid grid-cols-2 gap-1 text-[11px] text-muted-foreground">
-                    <li className="flex items-center gap-1">
-                      <span className="size-1.5 rounded-full bg-emerald-500" />
-                      15 Baseline Qs ({onboarding?.complete ? 'Completed' : 'Draft'})
-                    </li>
-                    <li className="flex items-center gap-1">
-                      <span className="size-1.5 rounded-full bg-emerald-500" />
-                      Daily Tracking ({trackToday?.existingLog ? 'Logged' : 'Pending'})
-                    </li>
-                    <li className="flex items-center gap-1">
-                      <span className="size-1.5 rounded-full bg-emerald-500" />
-                      EcoCoins ({me?.wallet?.coinsBalance ?? 0} coins)
-                    </li>
-                    <li className="flex items-center gap-1">
-                      <span className="size-1.5 rounded-full bg-emerald-500" />
-                      Virtual Garden Sync
-                    </li>
-                  </ul>
+                  <div className="grid grid-cols-2 gap-1.5 text-[11px] text-muted-foreground">
+                    <div className="flex items-center gap-1.5 rounded-xs bg-card/60 border border-border/50 px-2 py-1">
+                      <span className="size-1.5 rounded-full bg-positive shrink-0" />
+                      <span className="truncate">15Q Baseline: {onboarding?.complete ? 'Complete' : 'Pending'}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 rounded-xs bg-card/60 border border-border/50 px-2 py-1">
+                      <span className="size-1.5 rounded-full bg-positive shrink-0" />
+                      <span className="truncate">Daily Log: {trackToday?.existingLog ? 'Logged' : 'Pending'}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 rounded-xs bg-card/60 border border-border/50 px-2 py-1">
+                      <span className="size-1.5 rounded-full bg-positive shrink-0" />
+                      <span className="truncate">EcoCoins: {me?.wallet?.coinsBalance ?? 0}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 rounded-xs bg-card/60 border border-border/50 px-2 py-1">
+                      <span className="size-1.5 rounded-full bg-positive shrink-0" />
+                      <span className="truncate">Virtual Garden Sync</span>
+                    </div>
+                  </div>
                 </div>
               )}
 
               {/* Messages Feed */}
-              <div className="flex-1 overflow-y-auto p-3.5 space-y-3 scroll-smooth">
+              <div className="flex-1 overflow-y-auto p-3.5 space-y-3.5 scroll-smooth bg-background/50">
                 {messages.map((msg) => {
                   const isUser = msg.role === 'user';
                   return (
@@ -509,19 +512,32 @@ export function FloatingChat() {
                         isUser ? 'items-end' : 'items-start',
                       )}
                     >
-                      <div
-                        className={cn(
-                          'max-w-[85%] rounded-2xl p-3 text-xs sm:text-sm shadow-xs',
-                          isUser
-                            ? 'rounded-tr-xs bg-primary text-primary-foreground font-medium'
-                            : 'rounded-tl-xs bg-muted/60 text-foreground border border-border/50',
+                      <div className="flex items-end gap-2 max-w-[88%]">
+                        {!isUser && (
+                          <div className="flex size-6 shrink-0 items-center justify-center rounded-xs bg-secondary p-0.5 border border-border/50 mb-1">
+                            <Image
+                              src="/logo.png"
+                              alt="AI"
+                              width={20}
+                              height={20}
+                              className="size-5 object-contain"
+                            />
+                          </div>
                         )}
-                      >
-                        {isUser ? (
-                          <p className="whitespace-pre-wrap">{msg.content}</p>
-                        ) : (
-                          <FormattedMessage text={msg.content} />
-                        )}
+                        <div
+                          className={cn(
+                            'rounded-lg p-3 text-xs sm:text-sm shadow-xs',
+                            isUser
+                              ? 'rounded-tr-xs bg-secondary text-secondary-foreground font-normal border border-secondary/50'
+                              : 'rounded-tl-xs bg-card text-foreground border border-border/80 shadow-xs',
+                          )}
+                        >
+                          {isUser ? (
+                            <p className="whitespace-pre-wrap">{msg.content}</p>
+                          ) : (
+                            <FormattedMessage text={msg.content} />
+                          )}
+                        </div>
                       </div>
                       <span className="mt-1 px-1 text-[10px] text-muted-foreground">
                         {new Date(msg.timestamp).toLocaleTimeString([], {
@@ -535,15 +551,21 @@ export function FloatingChat() {
 
                 {isLoading && (
                   <div className="flex items-center gap-2 text-muted-foreground text-xs py-2 pl-2">
-                    <div className="flex size-7 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600">
-                      <Sparkles className="size-3.5 animate-spin" />
+                    <div className="flex size-6 items-center justify-center rounded-xs bg-secondary p-0.5 border border-border/50">
+                      <Image
+                        src="/logo.png"
+                        alt="Thinking"
+                        width={20}
+                        height={20}
+                        className="size-5 object-contain animate-spin"
+                      />
                     </div>
                     <div className="flex items-center gap-1">
-                      <span className="size-1.5 rounded-full bg-emerald-500 animate-bounce [animation-delay:-0.3s]" />
-                      <span className="size-1.5 rounded-full bg-emerald-500 animate-bounce [animation-delay:-0.15s]" />
-                      <span className="size-1.5 rounded-full bg-emerald-500 animate-bounce" />
+                      <span className="size-1.5 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]" />
+                      <span className="size-1.5 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]" />
+                      <span className="size-1.5 rounded-full bg-primary animate-bounce" />
                     </div>
-                    <span className="text-[11px]">EcoLife AI is thinking...</span>
+                    <span className="text-[11px] text-muted-foreground">EcoLife AI is thinking...</span>
                   </div>
                 )}
 
@@ -551,14 +573,14 @@ export function FloatingChat() {
               </div>
 
               {/* Quick Prompts Chips */}
-              <div className="flex items-center gap-1.5 overflow-x-auto border-t border-border/40 bg-muted/20 px-3 py-2 no-scrollbar">
+              <div className="flex items-center gap-1.5 overflow-x-auto border-t border-border/60 bg-muted/30 px-3 py-2 no-scrollbar">
                 {SUGGESTED_PROMPTS.map((prompt, i) => (
                   <button
                     key={i}
                     type="button"
                     disabled={isLoading}
                     onClick={() => handleSend(prompt)}
-                    className="shrink-0 rounded-full border border-border/60 bg-card/80 px-2.5 py-1 text-[11px] font-medium text-foreground hover:border-primary/50 hover:bg-accent/40 active:scale-95 transition disabled:opacity-50"
+                    className="shrink-0 rounded-full border border-border bg-card px-2.5 py-1 text-[11px] font-medium text-foreground/80 hover:text-foreground hover:border-primary/50 hover:bg-accent/40 active:scale-95 transition disabled:opacity-50"
                   >
                     {prompt}
                   </button>
@@ -566,7 +588,7 @@ export function FloatingChat() {
               </div>
 
               {/* Input Bar */}
-              <div className="border-t border-border/60 bg-card p-2.5">
+              <div className="border-t border-border bg-card p-2.5">
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
@@ -581,13 +603,13 @@ export function FloatingChat() {
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Ask about emissions, trees, diet, or tips..."
                     disabled={isLoading}
-                    className="flex-1 rounded-xl border border-border bg-background px-3 py-2 text-xs sm:text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-50"
+                    className="flex-1 rounded-sm border border-border bg-background px-3 py-2 text-xs sm:text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/60 disabled:opacity-50 transition"
                   />
                   <button
                     type="submit"
                     disabled={!input.trim() || isLoading}
                     aria-label="Send message"
-                    className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 active:scale-95 transition disabled:opacity-40"
+                    className="flex size-9 shrink-0 items-center justify-center rounded-sm bg-primary text-primary-foreground hover:opacity-90 active:scale-95 transition disabled:opacity-40 shadow-xs"
                   >
                     {isLoading ? (
                       <Loader2 className="size-4 animate-spin" />
