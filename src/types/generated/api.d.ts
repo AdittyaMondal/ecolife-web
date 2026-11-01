@@ -3094,8 +3094,18 @@ export interface paths {
                             data: {
                                 /** @enum {boolean} */
                                 success: true;
-                                /** @enum {string} */
+                                /**
+                                 * @description The status this seller's own items now carry.
+                                 * @example shipped
+                                 * @enum {string}
+                                 */
                                 status: "placed" | "confirmed" | "shipped" | "delivered" | "cancelled";
+                                /**
+                                 * @description The whole order, DERIVED from every seller's items: the least advanced live item, or cancelled when all items are. On a multi-seller order this will lag `status` until the other sellers catch up.
+                                 * @example confirmed
+                                 * @enum {string}
+                                 */
+                                orderStatus: "placed" | "confirmed" | "shipped" | "delivered" | "cancelled";
                             };
                             error: null;
                         };
@@ -3121,6 +3131,15 @@ export interface paths {
                 };
                 /** @description Not found */
                 404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Domain rule violation */
+                422: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -6059,6 +6078,589 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get global economy and commission settings */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Global system settings */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: components["schemas"]["SystemSettings"];
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Update global economy and commission settings
+         * @description Configures sales commission %, coin fee %, coin-to-rupee rate, and max coin redemption discount %.
+         */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["UpdateSystemSettingsBody"];
+                };
+            };
+            responses: {
+                /** @description Updated system settings */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: components["schemas"]["SystemSettings"];
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Validation failed */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/api/v1/admin/settings/sellers/{id}/commission": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get seller commission override */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Seller commission override */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: components["schemas"]["SellerCommissionOverride"];
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        /**
+         * Set or clear seller commission override
+         * @description Set `commissionRateBps: null` to revert to global platform default.
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["SellerCommissionOverrideBody"];
+                };
+            };
+            responses: {
+                /** @description Updated seller commission override */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: components["schemas"]["SellerCommissionOverride"];
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Validation failed */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/revenue/analytics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Platform revenue, GMV, coin liability, and payout summary */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Revenue analytics summary */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: components["schemas"]["RevenueAnalytics"];
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/revenue/settlements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List order settlements
+         * @description Line-item breakdown of sales, coin subsidies, platform commissions, and seller payouts.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    sellerOrgId?: string;
+                    status?: "pending" | "settled" | "cancelled";
+                    cursor?: string;
+                    limit?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Order settlements */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: {
+                                items: components["schemas"]["OrderSettlement"][];
+                                pageInfo: components["schemas"]["PageInfo"];
+                            };
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/revenue/payouts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List seller payout records */
+        get: {
+            parameters: {
+                query?: {
+                    sellerOrgId?: string;
+                    cursor?: string;
+                    limit?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Seller payouts */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: {
+                                items: components["schemas"]["SellerPayout"][];
+                                pageInfo: components["schemas"]["PageInfo"];
+                            };
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /**
+         * Disburse pending settlements to seller
+         * @description Creates a payout batch and marks associated settlements as settled.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["CreatePayoutBody"];
+                };
+            };
+            responses: {
+                /** @description Payout disbursed */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: components["schemas"]["SellerPayout"];
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Validation failed */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/revenue/ledger": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Immutable transaction ledger journal
+         * @description Double-entry style audit log for commissions, coin subsidies, fees, and payouts.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    sellerOrgId?: string;
+                    transactionType?: "sale_commission" | "coin_subsidy" | "coin_fee" | "seller_payout";
+                    orderId?: string;
+                    cursor?: string;
+                    limit?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Settlement ledger entries */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: {
+                                items: components["schemas"]["SettlementLedgerEntry"][];
+                                pageInfo: components["schemas"]["PageInfo"];
+                            };
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/notifications": {
         parameters: {
             query?: never;
@@ -6557,7 +7159,6 @@ export interface components {
              * @example yusuf@example.com
              */
             email: string;
-            /** @example correct horse battery */
             password: string;
         };
         RefreshBody: {
@@ -8296,6 +8897,308 @@ export interface components {
                 /** @example https://acme.example.com */
                 websiteUrl: string | null;
             };
+        };
+        SystemSettings: {
+            /** @example 1 */
+            id: number;
+            /**
+             * @description Commission in basis points (1000 = 10%)
+             * @example 1000
+             */
+            defaultCommissionRateBps: number;
+            /**
+             * @description Calculated commission percentage
+             * @example 10
+             */
+            defaultCommissionPercent: number;
+            /**
+             * @description Fee on coin redemptions in bps (200 = 2%)
+             * @example 200
+             */
+            coinRedemptionFeeBps: number;
+            /**
+             * @description Calculated coin fee percentage
+             * @example 2
+             */
+            coinRedemptionFeePercent: number;
+            /**
+             * @description 10 coins = 1 Rupee
+             * @example 10
+             */
+            coinsPerRupee: number;
+            /**
+             * @description Value of 1 coin in paise
+             * @example 10
+             */
+            coinValuePaise: number;
+            /**
+             * @description Max allowable coin redemption %
+             * @example 20
+             */
+            maxDiscountPercent: number;
+            /**
+             * @description Settlement hold period in days
+             * @example 7
+             */
+            payoutHoldDays: number;
+            /** @example 1 */
+            updatedBy: number | null;
+            /** @example 2026-11-01T10:00:00.000Z */
+            updatedAt: string;
+        };
+        UpdateSystemSettingsBody: {
+            defaultCommissionRateBps?: number;
+            coinRedemptionFeeBps?: number;
+            coinsPerRupee?: number;
+            coinValuePaise?: number;
+            maxDiscountPercent?: number;
+            payoutHoldDays?: number;
+        };
+        SellerCommissionOverride: {
+            /** @example 42 */
+            sellerOrgId: number;
+            /** @example GreenRoot Organics */
+            sellerName: string;
+            /** @example 800 */
+            commissionRateBps: number | null;
+            /** @example 8 */
+            commissionPercent: number | null;
+            /** @example 800 */
+            effectiveCommissionRateBps: number;
+            /** @example 8 */
+            effectiveCommissionPercent: number;
+        };
+        SellerCommissionOverrideBody: {
+            /**
+             * @description Seller override in basis points (800 = 8%), or null to inherit global default
+             * @example 800
+             */
+            commissionRateBps: number | null;
+        };
+        RevenueAnalytics: {
+            /**
+             * @description Integer paise. Never a float. 24000 = ₹240.00
+             * @example 24000
+             */
+            grossMerchandiseValuePaise: number;
+            /**
+             * @description Integer paise. Never a float. 24000 = ₹240.00
+             * @example 24000
+             */
+            totalCashCollectedPaise: number;
+            /**
+             * @description Integer paise. Never a float. 24000 = ₹240.00
+             * @example 24000
+             */
+            totalCoinDiscountPaise: number;
+            /** @example 1250 */
+            totalCoinsRedeemed: number;
+            /**
+             * @description Integer paise. Never a float. 24000 = ₹240.00
+             * @example 24000
+             */
+            platformRevenuePaise: number;
+            /**
+             * @description Integer paise. Never a float. 24000 = ₹240.00
+             * @example 24000
+             */
+            platformSalesCommissionPaise: number;
+            /**
+             * @description Integer paise. Never a float. 24000 = ₹240.00
+             * @example 24000
+             */
+            platformCoinFeesPaise: number;
+            /**
+             * @description Integer paise. Never a float. 24000 = ₹240.00
+             * @example 24000
+             */
+            totalSellerPayoutsPaise: number;
+            /**
+             * @description Integer paise. Never a float. 24000 = ₹240.00
+             * @example 24000
+             */
+            pendingSellerPayoutsPaise: number;
+            /**
+             * @description Integer paise. Never a float. 24000 = ₹240.00
+             * @example 24000
+             */
+            settledSellerPayoutsPaise: number;
+            /**
+             * @description Integer paise. Never a float. 24000 = ₹240.00
+             * @example 24000
+             */
+            netPlatformCashFlowPaise: number;
+            monthlyBreakdown: {
+                /** @example 2026-10 */
+                month: string;
+                /**
+                 * @description Integer paise. Never a float. 24000 = ₹240.00
+                 * @example 24000
+                 */
+                grossPaise: number;
+                /**
+                 * @description Integer paise. Never a float. 24000 = ₹240.00
+                 * @example 24000
+                 */
+                cashPaise: number;
+                /**
+                 * @description Integer paise. Never a float. 24000 = ₹240.00
+                 * @example 24000
+                 */
+                coinValuePaise: number;
+                /**
+                 * @description Integer paise. Never a float. 24000 = ₹240.00
+                 * @example 24000
+                 */
+                commissionPaise: number;
+                /**
+                 * @description Integer paise. Never a float. 24000 = ₹240.00
+                 * @example 24000
+                 */
+                payoutPaise: number;
+                /** @example 25 */
+                orderCount: number;
+            }[];
+        };
+        OrderSettlement: {
+            /** @example 101 */
+            id: number;
+            /** @example 55 */
+            orderId: number;
+            /** @example ECO-2026-00042 */
+            orderNumber: string;
+            /** @example 72 */
+            orderItemId: number;
+            /** @example Bamboo Toothbrush (Pack of 4) */
+            productName: string;
+            /** @example 12 */
+            sellerOrgId: number;
+            /** @example EcoLiving India */
+            sellerName: string;
+            /**
+             * @description Integer paise. Never a float. 24000 = ₹240.00
+             * @example 24000
+             */
+            saleAmountPaise: number;
+            /** @example 100 */
+            coinsUsed: number;
+            /**
+             * @description Integer paise. Never a float. 24000 = ₹240.00
+             * @example 24000
+             */
+            coinValuePaise: number;
+            /**
+             * @description Integer paise. Never a float. 24000 = ₹240.00
+             * @example 24000
+             */
+            cashPaidPaise: number;
+            /** @example 1000 */
+            commissionRateBps: number;
+            /**
+             * @description Integer paise. Never a float. 24000 = ₹240.00
+             * @example 24000
+             */
+            salesCommissionPaise: number;
+            /** @example 200 */
+            coinFeeRateBps: number;
+            /**
+             * @description Integer paise. Never a float. 24000 = ₹240.00
+             * @example 24000
+             */
+            coinFeePaise: number;
+            /**
+             * @description Integer paise. Never a float. 24000 = ₹240.00
+             * @example 24000
+             */
+            platformCommissionPaise: number;
+            /**
+             * @description Integer paise. Never a float. 24000 = ₹240.00
+             * @example 24000
+             */
+            sellerPayoutPaise: number;
+            /**
+             * @example pending
+             * @enum {string}
+             */
+            status: "pending" | "settled" | "cancelled";
+            /** @example null */
+            payoutId: number | null;
+            /** @example null */
+            settledAt: string | null;
+            /** @example 2026-11-01T10:00:00.000Z */
+            createdAt: string;
+        };
+        SellerPayout: {
+            /** @example 10 */
+            id: number;
+            /** @example PAY-2026-00001 */
+            payoutNumber: string;
+            /** @example 12 */
+            sellerOrgId: number;
+            /** @example EcoLiving India */
+            sellerName: string;
+            /**
+             * @description Integer paise. Never a float. 24000 = ₹240.00
+             * @example 24000
+             */
+            totalAmountPaise: number;
+            /** @example 5 */
+            settlementCount: number;
+            /**
+             * @example completed
+             * @enum {string}
+             */
+            status: "pending" | "processing" | "completed" | "failed";
+            /** @example Bank NEFT Ref: N123456789 */
+            referenceNote: string | null;
+            /** @example 1 */
+            processedBy: number | null;
+            /** @example 2026-11-01T10:00:00.000Z */
+            createdAt: string;
+        };
+        CreatePayoutBody: {
+            /** @example 12 */
+            sellerOrgId: number;
+            settlementIds?: number[];
+            /** @example Monthly disbursement via UPI/NEFT */
+            referenceNote?: string;
+        };
+        SettlementLedgerEntry: {
+            /** @example 501 */
+            id: number;
+            /** @example 101 */
+            settlementId: number | null;
+            /** @example 55 */
+            orderId: number;
+            /** @example ECO-2026-00042 */
+            orderNumber: string;
+            /** @example 72 */
+            orderItemId: number | null;
+            /** @example 12 */
+            sellerOrgId: number;
+            /** @example EcoLiving India */
+            sellerName: string;
+            /**
+             * @example sale_commission
+             * @enum {string}
+             */
+            transactionType: "sale_commission" | "coin_subsidy" | "coin_fee" | "seller_payout";
+            /**
+             * @description Integer paise. Never a float. 24000 = ₹240.00
+             * @example 24000
+             */
+            amountPaise: number;
+            /**
+             * @example pending
+             * @enum {string}
+             */
+            status: "pending" | "settled" | "cancelled";
+            /** @example order:55:item:72:sale_commission */
+            idempotencyKey: string;
+            /** @example Platform 10% commission on item 72 */
+            note: string | null;
+            /** @example 2026-11-01T10:00:00.000Z */
+            createdAt: string;
         };
         Notification: {
             /** @example 44 */

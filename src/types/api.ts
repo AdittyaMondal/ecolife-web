@@ -58,3 +58,15 @@ export type SellerOrderItem = Schema<'SellerOrderItem'>;
 export type SellerOrder = Schema<'SellerOrder'>;
 export type UpdateSellerOrderStatusBody = Schema<'UpdateSellerOrderStatusBody'>;
 export type SellerAnalytics = Schema<'SellerAnalytics'>;
+
+export type SystemSettings = Schema<'SystemSettings'>;
+export type UpdateSystemSettingsBody = Schema<'UpdateSystemSettingsBody'>;
+export type SellerCommissionOverrideBody = Schema<'SellerCommissionOverrideBody'> & {
+  reason?: string;
+};
+export type SellerCommissionOverride = Schema<'SellerCommissionOverride'>;
+export type OrderSettlement = Schema<'OrderSettlement'>;
+export type SellerPayout = Schema<'SellerPayout'>;
+export type CreatePayoutBody = Schema<'CreatePayoutBody'>;
+export type SettlementLedgerEntry = Schema<'SettlementLedgerEntry'>;
+export type RevenueAnalytics = Schema<'RevenueAnalytics'>;

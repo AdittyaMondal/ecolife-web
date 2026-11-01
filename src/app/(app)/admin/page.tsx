@@ -3,6 +3,8 @@
 import { useQuery } from '@tanstack/react-query';
 import {
   AlertTriangle,
+  BarChart3,
+  BookOpen,
   Building2,
   CheckCircle2,
   Clock,
@@ -12,11 +14,13 @@ import {
   Mail,
   MapPin,
   Phone,
+  Receipt,
   RotateCcw,
   Search,
   Shield,
   ShieldAlert,
   ShieldCheck,
+  Sliders,
   UserCheck,
   Users,
   XCircle,
@@ -24,6 +28,11 @@ import {
 import Link from 'next/link';
 import * as React from 'react';
 import { toast } from 'sonner';
+import { AdminEconomySettings } from '@/components/blocks/admin/admin-economy-settings';
+import { AdminRevenueAnalytics } from '@/components/blocks/admin/admin-revenue-analytics';
+import { AdminSellerCommissions } from '@/components/blocks/admin/admin-seller-commissions';
+import { AdminSettlementLedger } from '@/components/blocks/admin/admin-settlement-ledger';
+import { AdminSettlementsTable } from '@/components/blocks/admin/admin-settlements-table';
 import { Badge } from '@/components/ui/badge';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -44,6 +53,16 @@ const STATUS_FILTERS = [
   { value: 'rejected', label: 'Rejected' },
 ];
 
+type AdminPortalTab = 'queue' | 'revenue' | 'economy' | 'settlements' | 'ledger';
+
+const PORTAL_TABS = [
+  { value: 'queue', label: 'Review Queue' },
+  { value: 'revenue', label: 'Revenue Analytics' },
+  { value: 'economy', label: 'Economy & Commissions' },
+  { value: 'settlements', label: 'Order Settlements' },
+  { value: 'ledger', label: 'Audit Journal' },
+];
+
 function AdminSkeletons() {
   return (
     <div className="space-y-6 animate-pulse" aria-hidden="true">
@@ -61,6 +80,7 @@ function AdminSkeletons() {
 
 export default function AdminPage() {
   const { data: me, isLoading: isMeLoading } = useQuery(meQuery());
+  const [activeTab, setActiveTab] = React.useState<AdminPortalTab>('queue');
   const [selectedStatus, setSelectedStatus] = React.useState('pending');
   const [search, setSearch] = React.useState('');
 
@@ -217,7 +237,7 @@ export default function AdminPage() {
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Header Banner */}
-      <Card className="p-6 sm:p-8 border-border bg-card shadow-subtle space-y-4">
+      <Card className="p-6 sm:p-8 border-border bg-card shadow-subtle space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
@@ -229,11 +249,23 @@ export default function AdminPage() {
               </span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
-              Organization Review Queue
+              {activeTab === 'queue' && 'Organization Review Queue'}
+              {activeTab === 'revenue' && 'Platform Revenue & Coin Economy'}
+              {activeTab === 'economy' && 'Economy Settings & Commission Overrides'}
+              {activeTab === 'settlements' && 'Marketplace Order Settlements & Disbursements'}
+              {activeTab === 'ledger' && 'Immutable Double-Entry Audit Journal'}
             </h1>
             <p className="text-xs text-muted-foreground max-w-xl">
-              Inspect pending organization applications, verify legitimacy and contact details, and
-              activate partner portals for team carbon accounting.
+              {activeTab === 'queue' &&
+                'Inspect pending organization applications, verify legitimacy and contact details, and activate partner portals.'}
+              {activeTab === 'revenue' &&
+                'Track Gross Merchandise Value (GMV), cash collections, coin liability subsidies, net platform take rates, and cash flow.'}
+              {activeTab === 'economy' &&
+                'Configure platform baseline commission, coin redemption fee, 10:1 coin-to-rupee valuation, and per-seller overrides.'}
+              {activeTab === 'settlements' &&
+                'Inspect line-item order settlements, zero-loss payouts, and disburse batched payout obligations to sellers.'}
+              {activeTab === 'ledger' &&
+                'Audit immutable transaction ledger entries capturing commissions, coin subsidies, redemption fees, and payout disbursements.'}
             </p>
           </div>
 
@@ -244,9 +276,36 @@ export default function AdminPage() {
             </Badge>
           </div>
         </div>
+
+        {/* Portal Navigation Tabs */}
+        <div className="pt-2 border-t border-border/50">
+          <SegmentedControl
+            name="admin-portal-tabs"
+            label="Admin Portal Section"
+            options={PORTAL_TABS}
+            value={activeTab}
+            onChange={(val) => setActiveTab(val as AdminPortalTab)}
+          />
+        </div>
       </Card>
 
-      {/* Filter Tabs & Search Bar */}
+      {/* Tab Panels */}
+      {activeTab === 'revenue' && <AdminRevenueAnalytics />}
+
+      {activeTab === 'economy' && (
+        <div className="space-y-8">
+          <AdminEconomySettings />
+          <AdminSellerCommissions />
+        </div>
+      )}
+
+      {activeTab === 'settlements' && <AdminSettlementsTable />}
+
+      {activeTab === 'ledger' && <AdminSettlementLedger />}
+
+      {activeTab === 'queue' && (
+        <>
+          {/* Filter Tabs & Search Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="w-full sm:w-auto overflow-x-auto">
           <SegmentedControl
@@ -533,6 +592,8 @@ export default function AdminPage() {
             );
           })}
         </div>
+      )}
+        </>
       )}
 
       {/* Decision Review Modal Dialog (for Reject or Suspend with required note) */}
