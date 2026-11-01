@@ -42,17 +42,17 @@ export function GardenHotbar({
   return (
     <div className="flex flex-col gap-3 w-full max-w-4xl mx-auto">
       {/* Tool Buttons & Hotbar Row */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 rounded-lg border border-border bg-card/95 p-3 shadow-subtle backdrop-blur-md">
+      <div className="flex flex-wrap lg:flex-nowrap items-center justify-center lg:justify-between gap-3 rounded-2xl border border-border/80 bg-card/95 p-2.5 sm:p-3 shadow-subtle backdrop-blur-md">
         {/* Left: Mode Tools (Plant, Water, Move, Remove) */}
-        <div className="flex items-center gap-1.5 p-1 bg-muted rounded-md border border-border">
+        <div className="flex items-center gap-1 p-1 bg-muted/80 rounded-xl border border-border/60 shrink-0">
           <button
             type="button"
             onClick={() => onSelectTool('plant')}
             className={cn(
-              'flex items-center gap-1.5 rounded-sm px-3 py-1.5 text-xs font-bold transition-all',
+              'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all',
               activeTool === 'plant'
-                ? 'bg-primary text-primary-foreground shadow-2xs'
-                : 'text-muted-foreground hover:text-foreground hover:bg-card/60',
+                ? 'bg-emerald-600 text-white shadow-xs'
+                : 'text-muted-foreground hover:text-foreground hover:bg-card/70',
             )}
             title="Plant active tree [Space]"
           >
@@ -64,10 +64,10 @@ export function GardenHotbar({
             type="button"
             onClick={() => onSelectTool('water')}
             className={cn(
-              'flex items-center gap-1.5 rounded-sm px-3 py-1.5 text-xs font-bold transition-all',
+              'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all',
               activeTool === 'water'
-                ? 'bg-blue-600 text-white shadow-2xs'
-                : 'text-muted-foreground hover:text-foreground hover:bg-card/60',
+                ? 'bg-sky-600 text-white shadow-xs'
+                : 'text-muted-foreground hover:text-foreground hover:bg-card/70',
             )}
             title="Water tree to promote growth"
           >
@@ -79,10 +79,10 @@ export function GardenHotbar({
             type="button"
             onClick={() => onSelectTool('move')}
             className={cn(
-              'flex items-center gap-1.5 rounded-sm px-3 py-1.5 text-xs font-bold transition-all',
+              'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all',
               activeTool === 'move'
-                ? 'bg-amber-600 text-white shadow-2xs'
-                : 'text-muted-foreground hover:text-foreground hover:bg-card/60',
+                ? 'bg-amber-600 text-white shadow-xs'
+                : 'text-muted-foreground hover:text-foreground hover:bg-card/70',
             )}
             title="Move / Relocate tree [M]"
           >
@@ -94,10 +94,10 @@ export function GardenHotbar({
             type="button"
             onClick={() => onSelectTool('remove')}
             className={cn(
-              'flex items-center gap-1.5 rounded-sm px-3 py-1.5 text-xs font-bold transition-all',
+              'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all',
               activeTool === 'remove'
-                ? 'bg-destructive text-destructive-foreground shadow-2xs'
-                : 'text-muted-foreground hover:text-foreground hover:bg-card/60',
+                ? 'bg-rose-600 text-white shadow-xs'
+                : 'text-muted-foreground hover:text-foreground hover:bg-card/70',
             )}
             title="Dig up and return to inventory [R]"
           >
@@ -107,7 +107,7 @@ export function GardenHotbar({
         </div>
 
         {/* Center: 6 Hotbar Tree Slots */}
-        <div className="flex items-center gap-1.5 overflow-x-auto max-w-full p-1 bg-muted/70 rounded-md border border-border">
+        <div className="flex items-center gap-1.5 overflow-x-auto max-w-full p-1 bg-muted/60 rounded-xl border border-border/60">
           {state.hotbar.map((slug, idx) => {
             const isSelected = state.activeHotbarIndex === idx;
             const tree = slug ? getTreeBySlug(slug) : null;
@@ -121,10 +121,10 @@ export function GardenHotbar({
                 type="button"
                 onClick={() => onSelectHotbarIndex(idx)}
                 className={cn(
-                  'relative flex flex-col items-center justify-center size-14 rounded-sm border-2 transition-all select-none',
+                  'relative flex flex-col justify-between items-center w-14 sm:w-16 h-[72px] sm:h-[76px] p-1.5 rounded-xl border-2 transition-all select-none group shrink-0',
                   isSelected
-                    ? 'border-primary bg-card shadow-md scale-105 z-10 ring-2 ring-primary/40'
-                    : 'border-border bg-card/60 hover:bg-card hover:border-primary/50 opacity-90',
+                    ? 'border-emerald-600 bg-card shadow-md scale-105 z-10 ring-2 ring-emerald-500/30'
+                    : 'border-border/80 bg-card/70 hover:bg-card hover:border-emerald-500/40 opacity-90',
                 )}
                 title={
                   tree
@@ -132,32 +132,46 @@ export function GardenHotbar({
                     : `Empty Slot [${idx + 1}]`
                 }
               >
-                {/* Slot Number Pill */}
-                <span className="absolute top-1 left-1.5 font-mono text-[9px] font-bold text-muted-foreground">
-                  {idx + 1}
-                </span>
-
-                {/* Tree Icon & Rarity Bar */}
-                {tree ? (
-                  <>
-                    <span
-                      className="size-2 rounded-full absolute top-1.5 right-1.5"
-                      style={{ backgroundColor: tree.rarity.color }}
-                    />
-                    <span className="font-mono text-sm font-extrabold text-foreground tracking-tight pt-2">
-                      🌲
-                    </span>
-                    <span className="text-[10px] font-bold truncate max-w-[50px] leading-tight text-foreground">
-                      {tree.name.split(' ')[0]}
-                    </span>
-                    {/* Quantity Badge */}
-                    <span className="absolute bottom-0.5 right-1 font-mono text-[10px] font-extrabold text-primary">
+                {/* Top Row: Slot number & Quantity badge */}
+                <div className="flex items-center justify-between w-full leading-none">
+                  <span className="font-mono text-[10px] font-bold text-muted-foreground">
+                    {idx + 1}
+                  </span>
+                  {tree && (
+                    <span className="flex items-center gap-0.5 font-mono text-[9px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1 py-0.5 rounded leading-none">
+                      <span
+                        className="size-1.5 rounded-full shrink-0"
+                        style={{ backgroundColor: tree.rarity.color }}
+                      />
                       x{invCount}
                     </span>
-                  </>
-                ) : (
-                  <span className="text-xs text-muted-foreground/60 font-mono">—</span>
-                )}
+                  )}
+                </div>
+
+                {/* Center: Pixel-art Tree Sprite */}
+                <div className="flex items-center justify-center flex-1 my-0.5">
+                  {tree ? (
+                    <img
+                      src={`/trees/${tree.slug}.png`}
+                      alt={tree.name}
+                      className="size-7 sm:size-8 object-contain transition-transform group-hover:scale-110 drop-shadow-xs"
+                      style={{ imageRendering: 'pixelated' }}
+                    />
+                  ) : (
+                    <span className="text-xs text-muted-foreground/40 font-mono">—</span>
+                  )}
+                </div>
+
+                {/* Bottom: Tree Name (Isolated, completely free of badge overlap) */}
+                <div className="w-full text-center leading-none">
+                  {tree ? (
+                    <span className="text-[10px] font-bold text-foreground truncate block w-full">
+                      {tree.name.split(' ')[0]}
+                    </span>
+                  ) : (
+                    <span className="text-[9px] text-muted-foreground/50 block">Empty</span>
+                  )}
+                </div>
               </button>
             );
           })}
@@ -168,7 +182,7 @@ export function GardenHotbar({
           variant="secondary"
           size="sm"
           onClick={onOpenInventory}
-          className="gap-1.5 text-xs font-bold shrink-0 h-10"
+          className="gap-2 text-xs font-bold shrink-0 h-10 px-4 rounded-xl bg-emerald-950 text-white hover:bg-emerald-900 dark:bg-emerald-700 dark:hover:bg-emerald-600 shadow-xs"
         >
           <Package className="size-4" aria-hidden="true" />
           <span>Backpack &amp; Nursery</span>
@@ -176,7 +190,7 @@ export function GardenHotbar({
       </div>
 
       {/* Mobile Controls Drawer (Virtual D-Pad and Action Button for Touch Screens) */}
-      <div className="flex sm:hidden items-center justify-between p-3 rounded-lg border border-border bg-card shadow-subtle">
+      <div className="flex sm:hidden items-center justify-between p-3 rounded-2xl border border-border bg-card shadow-subtle">
         {/* Virtual D-pad */}
         <div className="grid grid-cols-3 gap-1.5 w-36">
           <div />

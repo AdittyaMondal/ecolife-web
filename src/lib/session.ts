@@ -30,8 +30,16 @@ export function getAccessToken(): string | null {
 }
 
 export function hasSessionHint(): boolean {
+  if (getAccessToken()) return true;
   if (typeof document === 'undefined') return false;
-  return document.cookie.split('; ').some((c) => c.startsWith(`${SESSION_HINT_COOKIE}=`));
+  return document.cookie.split('; ').some((c) => {
+    const trimmed = c.trim();
+    return (
+      trimmed.startsWith(`${SESSION_HINT_COOKIE}=`) ||
+      trimmed.startsWith('ecolife_session=') ||
+      trimmed.startsWith('ecolife_refresh=')
+    );
+  });
 }
 
 export function setSession(session: Session): void {
