@@ -4,14 +4,26 @@ import { qk } from '@/lib/query-keys';
 import type {
   AddOrganizationMemberBody,
   CreateOrganizationBody,
+  CreateOrgQuestionBody,
   JoinOrganizationBody,
   JoinOrganizationResult,
   MyOrganization,
   Organization,
+  OrganizationAnalytics,
+  OrganizationLookupResult,
   OrganizationMemberList,
+  OrgEmployeeAnswers,
+  OrgOnboardingQuestion,
+  OrgOnboardingStatus,
   Page,
+  RegenerateCodeResult,
+  ReorderOrgQuestionsBody,
   ReviewOrganizationBody,
+  SubmitOrgOnboardingAnswersBody,
+  UpdateMembershipPreferencesBody,
+  UpdateMembershipPreferencesResult,
   UpdateOrganizationBody,
+  UpdateOrgQuestionBody,
 } from '@/types/api';
 
 export const myOrganizationQuery = () =>
@@ -20,11 +32,29 @@ export const myOrganizationQuery = () =>
     queryFn: () => api.get<MyOrganization>('/organizations/me'),
   });
 
-export const orgMembersQuery = (orgId: number) =>
+export const orgMembersQuery = (
+  orgId: number,
+  filters?: { search?: string; role?: string; onboardingStatus?: string },
+) =>
   queryOptions({
-    queryKey: qk.orgMembers(orgId),
-    queryFn: () => api.get<OrganizationMemberList>(`/organizations/${orgId}/members`),
+    queryKey: qk.orgMembers(orgId, filters),
+    queryFn: () =>
+      api.get<OrganizationMemberList>(
+        `/organizations/${orgId}/members${qs({
+          search: filters?.search?.trim() || undefined,
+          role: filters?.role || undefined,
+          onboardingStatus: filters?.onboardingStatus || undefined,
+        })}`,
+      ),
     enabled: Boolean(orgId),
+  });
+
+export const orgAnalyticsQuery = (orgId: number) =>
+  queryOptions({
+    queryKey: qk.orgAnalytics(orgId),
+    queryFn: () => api.get<OrganizationAnalytics>(`/organizations/${orgId}/analytics`),
+    enabled: Boolean(orgId),
+    staleTime: 30_000,
   });
 
 export function useCreateOrganization() {
@@ -97,6 +127,40 @@ export function useLeaveOrganization() {
   });
 }
 
+export function useRegenerateOrgCode() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => api.post<RegenerateCodeResult>('/organizations/me/code/regenerate'),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: qk.myOrganization() });
+      qc.invalidateQueries({ queryKey: qk.me() });
+    },
+  });
+}
+
+export function useUpdateMembershipPreferences() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: UpdateMembershipPreferencesBody) =>
+      api.patch<UpdateMembershipPreferencesResult>('/organizations/me/membership', body),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: qk.myOrganization() });
+      qc.invalidateQueries({ queryKey: qk.me() });
+    },
+  });
+}
+
+export const orgLookupQuery = (code: string) => {
+  const clean = code.trim();
+  return queryOptions({
+    queryKey: qk.orgLookup(clean),
+    queryFn: () => api.get<OrganizationLookupResult>(`/organizations/lookup${qs({ code: clean })}`),
+    enabled: clean.length === 6 && /^\d{6}$/.test(clean),
+    retry: false,
+    staleTime: 30_000,
+  });
+};
+
 export const adminOrganizationsQuery = (status?: string) =>
   queryOptions({
     queryKey: qk.adminOrgs(status),
@@ -118,3 +182,81 @@ export function useReviewOrganization() {
   });
 }
 
+// --- Part 4: Custom Onboarding Questions & Answers --------------------------
+
+export const orgQuestionsQuery = (orgId: number) =>
+  queryOptions({
+    queryKey: qk.orgQuestions(orgId),
+    queryFn: () => api.get<OrgOnboardingQuestion[]>(`/organizations/${orgId}/questions`),
+    enabled: Boolean(orgId),
+  });
+
+export function useCreateOrgQuestion(orgId: number) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: CreateOrgQuestionBody) =>
+      api.post<OrgOnboardingQuestion>(`/organizations/${orgId}/questions`, body),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: qk.orgQuestions(orgId) });
+    },
+  });
+}
+
+export function useUpdateOrgQuestion(orgId: number) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ questionId, body }: { questionId: number; body: UpdateOrgQuestionBody }) =>
+      api.put<OrgOnboardingQuestion>(`/organizations/${orgId}/questions/${questionId}`, body),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: qk.orgQuestions(orgId) });
+    },
+  });
+}
+
+export function useReorderOrgQuestions(orgId: number) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: ReorderOrgQuestionsBody) =>
+      api.post<{ ok: boolean }>(`/organizations/${orgId}/questions/reorder`, body),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: qk.orgQuestions(orgId) });
+    },
+  });
+}
+
+export function useDeleteOrgQuestion(orgId: number) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (questionId: number) =>
+      api.delete<{ ok: boolean }>(`/organizations/${orgId}/questions/${questionId}`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: qk.orgQuestions(orgId) });
+    },
+  });
+}
+
+export const myOrgOnboardingQuery = () =>
+  queryOptions({
+    queryKey: qk.myOrgOnboarding(),
+    queryFn: () => api.get<OrgOnboardingStatus>('/organizations/me/onboarding'),
+  });
+
+export function useSubmitOrgOnboardingAnswers() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: SubmitOrgOnboardingAnswersBody) =>
+      api.post<{ ok: boolean; count: number }>('/organizations/me/onboarding', body),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: qk.myOrgOnboarding() });
+      qc.invalidateQueries({ queryKey: qk.me() });
+    },
+  });
+}
+
+export const orgMemberAnswersQuery = (orgId: number, userId: number) =>
+  queryOptions({
+    queryKey: qk.orgMemberAnswers(orgId, userId),
+    queryFn: () =>
+      api.get<OrgEmployeeAnswers>(`/organizations/${orgId}/members/${userId}/answers`),
+    enabled: Boolean(orgId) && Boolean(userId),
+  });

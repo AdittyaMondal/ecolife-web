@@ -51,6 +51,13 @@ export const qk = {
 
   organization: () => [...root, 'organization'] as const,
   myOrganization: () => [...root, 'organization', 'me'] as const,
-  orgMembers: (id: number) => [...root, 'organization', id, 'members'] as const,
+  orgLookup: (code: string) => [...root, 'organization', 'lookup', code] as const,
+  orgMembers: (id: number, filters?: Record<string, unknown>) =>
+    [...root, 'organization', id, 'members', filters ?? {}] as const,
+  orgAnalytics: (id: number) => [...root, 'organization', id, 'analytics'] as const,
+  orgQuestions: (id: number) => [...root, 'organization', id, 'questions'] as const,
+  myOrgOnboarding: () => [...root, 'organization', 'me', 'onboarding'] as const,
+  orgMemberAnswers: (id: number, userId: number) =>
+    [...root, 'organization', id, 'members', userId, 'answers'] as const,
   adminOrgs: (status?: string) => [...root, 'admin', 'organizations', status ?? 'all'] as const,
 };

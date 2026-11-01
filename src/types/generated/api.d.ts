@@ -106,12 +106,15 @@ export interface paths {
         put?: never;
         /**
          * Create an account and start a session
-         * @description Rate limited to 10 per 15 minutes per IP and per email. Email verification is required before any reward can be earned (PRD-v2 §4.4).
+         * @description Rate limited to 10 per 15 minutes per IP and per email. Email verification is required before any reward can be earned (PRD-v2 §4.4). Send `x-ecolife-platform: ios|android` to get `session.refreshToken` in the body; without it you are treated as a browser and the token is set as an httpOnly cookie with the body field null.
          */
         post: {
             parameters: {
                 query?: never;
-                header?: never;
+                header?: {
+                    /** @description Send ios or android to receive session.refreshToken in the response body. Omitted or web: the token is set as an httpOnly cookie and the body field is null. */
+                    "x-ecolife-platform"?: "ios" | "android" | "web";
+                };
                 path?: never;
                 cookie?: never;
             };
@@ -137,6 +140,24 @@ export interface paths {
                 };
                 /** @description Validation failed */
                 400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not found */
+                404: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -181,12 +202,15 @@ export interface paths {
         put?: never;
         /**
          * Exchange credentials for a session
-         * @description Failures are deliberately indistinguishable between unknown and wrong-password.
+         * @description Failures are deliberately indistinguishable between unknown and wrong-password. Send `x-ecolife-platform: ios|android` to get `session.refreshToken` in the body.
          */
         post: {
             parameters: {
                 query?: never;
-                header?: never;
+                header?: {
+                    /** @description Send ios or android to receive session.refreshToken in the response body. Omitted or web: the token is set as an httpOnly cookie and the body field is null. */
+                    "x-ecolife-platform"?: "ios" | "android" | "web";
+                };
                 path?: never;
                 cookie?: never;
             };
@@ -252,7 +276,10 @@ export interface paths {
         post: {
             parameters: {
                 query?: never;
-                header?: never;
+                header?: {
+                    /** @description Send ios or android to receive session.refreshToken in the response body. Omitted or web: the token is set as an httpOnly cookie and the body field is null. */
+                    "x-ecolife-platform"?: "ios" | "android" | "web";
+                };
                 path?: never;
                 cookie?: never;
             };
@@ -1221,7 +1248,7 @@ export interface paths {
         put?: never;
         /**
          * Submit the daily log — the core loop
-         * @description One transaction: validate, compute 5 categories, upsert the footprint, update the streak, evaluate the active goal, award rewards. Idempotent on (user, clientLogId), so an offline queue can replay safely. The response carries everything the result sheet needs — no refetch required.
+         * @description One transaction: validate, compute 5 categories, upsert the footprint, update the streak, evaluate the active goal, award rewards. Idempotent on (user, clientLogId), so an offline queue can replay safely. The response carries everything the result sheet needs — no refetch required. Replaying the SAME clientLogId returns the first result and awards nothing twice; a DIFFERENT clientLogId for a date that is already logged is TRACK_001 (409) — edit that log instead.
          */
         post: {
             parameters: {
@@ -1261,6 +1288,15 @@ export interface paths {
                 };
                 /** @description Not authenticated */
                 401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Conflict */
+                409: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -1744,6 +1780,164 @@ export interface paths {
                     };
                     content: {
                         "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/trees/rarities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Rarity tiers and their drop weights — public
+         * @description Weights are relative, not percentages: divide one by the sum of the active tiers. Published deliberately — the roll is server-side, so the odds cost nothing to disclose.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Rarity tiers, rarest last */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: {
+                                items: components["schemas"]["TreeRarity"][];
+                            };
+                            error: null;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/trees": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The tree catalogue — public
+         * @description Every tree a user can be rewarded with. `rarity` filters by rarity slug; an unknown slug is an empty page rather than a 404, so a stale filter does not look like an outage.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    rarity?: string;
+                    cursor?: string;
+                    limit?: number;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Catalogue, newest first */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: {
+                                items: components["schemas"]["Tree"][];
+                                pageInfo: components["schemas"]["PageInfo"];
+                            };
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Validation failed */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/trees/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One catalogue entry — public */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    slug: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Tree */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: components["schemas"]["Tree"];
+                            error: null;
+                        };
                     };
                 };
                 /** @description Not found */
@@ -2291,7 +2485,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Own orders */
+        /**
+         * Own orders
+         * @description Each row carries its full `address`, so a list does not have to be followed by one GET per order to render a delivery line.
+         */
         get: {
             parameters: {
                 query?: {
@@ -2335,7 +2532,9 @@ export interface paths {
         put?: never;
         /**
          * Place an order
-         * @description One transaction: decrement stock, insert the order with price snapshots, debit coins through the ledger. Replaying the same idempotencyKey returns the original order rather than charging twice.
+         * @description One transaction: decrement stock, insert the order with price snapshots, debit coins through the ledger. Replaying the same idempotencyKey returns the original order rather than charging twice — and returns it with its `address`, exactly as the first call did.
+         *
+         *     THERE IS NO PAYMENT STEP, and this is the design, not an omission: PRD-v2 §6.5 says "No real-money payment in v2". Coins buy a DISCOUNT (capped at MAX_DISCOUNT_PCT of the subtotal); the remaining `totalPaise` is settled offline and fulfilment is manual. The order therefore goes straight to `placed` with no payment-method field, no gateway redirect and no webhook to wait for. Clients should present it as "order placed, pay on delivery", never as "paid".
          */
         post: {
             parameters: {
@@ -2723,6 +2922,8 @@ export interface paths {
                 query?: {
                     filter?: "upcoming" | "nearby" | "registered" | "hosting" | "past";
                     type?: "plant_drive" | "cleanup_drive" | "awareness" | "recycling_drive" | "workshop" | "other";
+                    search?: string;
+                    organizationId?: number | null;
                     lat?: number | null;
                     lng?: number | null;
                     radiusKm?: number;
@@ -2843,7 +3044,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Event detail with viewer-relative state */
+        /**
+         * Event detail with viewer-relative state
+         * @description The path segment accepts the slug OR the numeric id, so an event reached from a notification payload, a deep link or a pass — all of which carry the id, as every mutation below is keyed by id — can be read back without first resolving a slug. A purely numeric slug is still matched as an id, so do not mint one.
+         */
         get: {
             parameters: {
                 query?: never;
@@ -2936,7 +3140,8 @@ export interface paths {
                          * @example public
                          * @enum {string}
                          */
-                        visibility?: "public" | "invite_only";
+                        visibility?: "public" | "invite_only" | "organization_only";
+                        organizationId?: number | null;
                         coverUrl?: string | null;
                         /** @example 2026-11-02T01:30:00.000Z */
                         startAt?: string;
@@ -2944,6 +3149,7 @@ export interface paths {
                         endAt?: string;
                         venueName?: string;
                         venueAddress?: string;
+                        venueMapUrl?: string | null;
                         latitude?: number;
                         longitude?: number;
                         /** @default 100 */
@@ -3074,7 +3280,7 @@ export interface paths {
         put?: never;
         /**
          * Register and receive a pass
-         * @description Idempotent: registering twice returns the existing pass. Closes at start + 1h or when capacity is reached.
+         * @description Idempotent: registering twice claims no second seat and pays no second reward. It DOES mint a fresh `passCode` while the pass is still `registered`, which is how a reinstall or a second device recovers a QR — the code is stored only as a hash and can never be read back, so rotation is the only recovery. The previous code stops working. A `checked_in` or `no_show` pass is spent and comes back with an empty code. Registration itself closes at start + 1h or when capacity is reached; that window is not re-checked for someone who already holds a pass.
          */
         post: {
             parameters: {
@@ -3202,7 +3408,7 @@ export interface paths {
         };
         /**
          * Own pass, including the code for the QR
-         * @description Only ever returns the caller's own pass. Cache it on device for offline display.
+         * @description Only ever returns the caller's own pass. `passCode` and `qrPayload` are ALWAYS empty here: the code is stored as a SHA-256 hash and cannot be reproduced. Cache them on device from the register response, and POST /events/{id}/register again to rotate to a fresh code if the cache is lost.
          */
         get: {
             parameters: {
@@ -3304,6 +3510,71 @@ export interface paths {
                 };
                 /** @description Not authorised */
                 403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/events/{id}/participants/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Export participant list as CSV (host only) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description CSV file download */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/csv": string;
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not found */
+                404: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -3880,10 +4151,14 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Roster — any member may read it */
+        /** Roster — any member may read it; insights filtered by privacy and role */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    search?: string;
+                    role?: "owner" | "member";
+                    onboardingStatus?: "completed" | "pending";
+                };
                 header?: never;
                 path: {
                     id: number;
@@ -4016,6 +4291,79 @@ export interface paths {
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/organizations/{id}/analytics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Cumulative organization carbon footprint analytics (owner only)
+         * @description Aggregated organization-level footprint: total emissions, per-month trend, category breakdown, and average per employee.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Organization Analytics */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: components["schemas"]["OrganizationAnalytics"];
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -4173,6 +4521,203 @@ export interface paths {
         };
         options?: never;
         head?: never;
+        /** Update membership preferences (e.g. carbon footprint privacy sharing) */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UpdateMembershipPreferencesBody"];
+                };
+            };
+            responses: {
+                /** @description Preferences updated */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: components["schemas"]["UpdateMembershipPreferencesResult"];
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Validation failed */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        trace?: never;
+    };
+    "/api/v1/organizations/lookup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Validate organization code before signup
+         * @description Public endpoint to check if an organization code exists and is approved to accept members.
+         */
+        get: {
+            parameters: {
+                query: {
+                    code: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Organization found and active */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: components["schemas"]["OrganizationLookupResult"];
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Validation failed */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/organizations/me/code/regenerate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Regenerate organization 6-digit code (owner only) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description New 6-digit code generated */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: components["schemas"]["RegenerateCodeResult"];
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
         patch?: never;
         trace?: never;
     };
@@ -4260,6 +4805,565 @@ export interface paths {
                 };
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/organizations/{id}/questions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List custom onboarding questions for an organization */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Questions list */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: components["schemas"]["OrgOnboardingQuestion"][];
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /** Create a custom onboarding question (owner only) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["CreateOrgQuestionBody"];
+                };
+            };
+            responses: {
+                /** @description Question created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: components["schemas"]["OrgOnboardingQuestion"];
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Validation failed */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/organizations/{id}/questions/{questionId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Update a custom onboarding question (owner only)
+         * @description Updating the prompt or type increments the question version so previous answers remain faithful snapshots.
+         */
+        put: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                    questionId: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["UpdateOrgQuestionBody"];
+                };
+            };
+            responses: {
+                /** @description Question updated */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: components["schemas"]["OrgOnboardingQuestion"];
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Validation failed */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        post?: never;
+        /** Delete (archive) a custom onboarding question (owner only) */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                    questionId: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Deleted */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: {
+                                /** @example true */
+                                ok: boolean;
+                            };
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/organizations/{id}/questions/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reorder custom onboarding questions (owner only) */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ReorderOrgQuestionsBody"];
+                };
+            };
+            responses: {
+                /** @description Reordered */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: {
+                                /** @example true */
+                                ok: boolean;
+                            };
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Validation failed */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/organizations/me/onboarding": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get custom onboarding questions and current answers for the caller */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Custom onboarding questions and answers */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: components["schemas"]["OrgOnboardingStatus"];
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        /** Submit answers for custom onboarding questions */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["SubmitOrgOnboardingAnswersBody"];
+                };
+            };
+            responses: {
+                /** @description Answers submitted */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: {
+                                /** @example true */
+                                ok: boolean;
+                                /** @example 3 */
+                                count: number;
+                            };
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Validation failed */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/organizations/{id}/members/{userId}/answers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** View a member's custom onboarding answers (owner only) */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: number;
+                    userId: number;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Member answers */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @enum {boolean} */
+                            status: true;
+                            data: components["schemas"]["OrgEmployeeAnswers"];
+                            error: null;
+                        };
+                    };
+                };
+                /** @description Not authenticated */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not authorised */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+                /** @description Not found */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Failure"];
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -4838,7 +5942,10 @@ export interface components {
              * @example 900
              */
             accessTokenExpiresIn: number;
-            /** @description Mobile only. Null for web, where it is an httpOnly cookie. */
+            /**
+             * @description Non-null ONLY when the request carried `x-ecolife-platform: ios` or `android`. Without that header the caller is treated as a browser: the token is set as an httpOnly cookie and this field is null. It is not a bug — returning a 30-day credential where JS can read it would hand any XSS the whole account.
+             * @example null
+             */
             refreshToken: string | null;
         };
         Me: {
@@ -4887,6 +5994,8 @@ export interface components {
             id: number;
             /** @example acme-industries */
             slug: string;
+            /** @example 482910 */
+            code: string;
             /** @example Acme Industries */
             name: string;
             /**
@@ -4922,6 +6031,11 @@ export interface components {
              * @example Asia/Kolkata
              */
             timezone: string;
+            /**
+             * @description Optional 6-digit organization code to link user upon signup
+             * @example 482910
+             */
+            organizationCode?: string;
         };
         LoginBody: {
             /**
@@ -5162,7 +6276,8 @@ export interface components {
             timezone?: string;
             /**
              * Format: uri
-             * @example https://cdn.ecolife.app/avatars/abc123.webp
+             * @description Any https URL the caller controls, or one returned by POST /uploads/presign.
+             * @example https://images.unsplash.com/photo-1607346256330-dee7af15f7c5?auto=format&fit=facearea&facepad=3&w=256&h=256&q=70
              */
             avatarUrl?: string | null;
             answers?: components["schemas"]["OnboardingAnswers"];
@@ -5372,6 +6487,10 @@ export interface components {
             existingLog: {
                 id: number;
                 answers: components["schemas"]["StoredDailyAnswers"];
+                /**
+                 * @description An ISO-8601 instant WITH offset — 02:00 the day after the log, in the user's own timezone. Parse it as an instant; do not reinterpret the wall time in the device's zone.
+                 * @example 2026-11-01T02:00:00+05:30
+                 */
                 editableUntil: string;
             } | null;
             /**
@@ -5606,6 +6725,56 @@ export interface components {
             /** @example true */
             onTrack: boolean;
         };
+        TreeRarity: {
+            /** @example 3 */
+            id: number;
+            /** @example rare */
+            slug: string;
+            /** @example Rare */
+            name: string;
+            /**
+             * @description 1 is the most common tier; higher is rarer.
+             * @example 3
+             */
+            rank: number;
+            /**
+             * @description Relative likelihood, not a percentage. Divide by the sum of active tiers.
+             * @example 100
+             */
+            dropWeight: number;
+            /** @example true */
+            isActive: boolean;
+        };
+        Tree: {
+            /** @example 7 */
+            id: number;
+            /** @example neem */
+            slug: string;
+            /** @example Neem */
+            name: string;
+            /** @example Azadirachta indica. Shade, medicine and a mosquito deterrent. */
+            description: string;
+            rarity: components["schemas"]["TreeRarity"];
+            /** @example https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=800&q=80 */
+            imageUrl: string;
+            /** @description Null when the tree has one artwork and no progression. */
+            growthStages: components["schemas"]["GrowthStage"][] | null;
+            /**
+             * @description Why a tree is the reward and not a sticker.
+             * @example 48.5
+             */
+            co2OffsetKgPerYear: number;
+            /** @example true */
+            isActive: boolean;
+        };
+        GrowthStage: {
+            /** @example 2 */
+            stage: number;
+            /** @example Sapling */
+            label: string;
+            /** @example https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=1200&q=80 */
+            imageUrl: string;
+        };
         LeaderboardRow: components["schemas"]["UserSummary"] & {
             /** @example 1 */
             rank: number;
@@ -5645,6 +6814,7 @@ export interface components {
              * @example 24000
              */
             pricePaise: number;
+            /** @example https://images.unsplash.com/photo-1592150621744-aca64f48394a?auto=format&fit=crop&w=800&q=80 */
             imageUrl: string | null;
             /** @example 34 */
             stock: number;
@@ -5828,7 +6998,12 @@ export interface components {
              * @example public
              * @enum {string}
              */
-            visibility: "public" | "invite_only";
+            visibility: "public" | "invite_only" | "organization_only";
+            /** @example 42 */
+            organizationId?: number | null;
+            /** @example TerraCorp */
+            organizationName?: string | null;
+            /** @example https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?auto=format&fit=crop&w=1200&q=80 */
             coverUrl: string | null;
             host: components["schemas"]["UserSummary"];
             /** @example 2026-11-02T01:30:00.000Z */
@@ -5839,6 +7014,8 @@ export interface components {
             venueName: string;
             /** @example Versova, Andheri West, Mumbai */
             venueAddress: string | null;
+            /** @example https://maps.google.com/?q=Versova+Beach */
+            venueMapUrl?: string | null;
             /** @example 19.1351 */
             latitude: number | null;
             /** @example 72.8126 */
@@ -5879,7 +7056,8 @@ export interface components {
              * @example public
              * @enum {string}
              */
-            visibility: "public" | "invite_only";
+            visibility: "public" | "invite_only" | "organization_only";
+            organizationId?: number | null;
             coverUrl?: string | null;
             /** @example 2026-11-02T01:30:00.000Z */
             startAt: string;
@@ -5887,6 +7065,7 @@ export interface components {
             endAt: string;
             venueName: string;
             venueAddress?: string;
+            venueMapUrl?: string | null;
             latitude?: number;
             longitude?: number;
             /** @default 100 */
@@ -5940,6 +7119,8 @@ export interface components {
             /** @example 77 */
             passId: number;
             user: components["schemas"]["UserSummary"];
+            /** @example attendee@example.com */
+            email?: string;
             /**
              * @example registered
              * @enum {string}
@@ -5981,6 +7162,8 @@ export interface components {
             id: number;
             /** @example acme-industries */
             slug: string;
+            /** @example 482910 */
+            code: string;
             /** @example Acme Industries */
             name: string;
             /**
@@ -6011,6 +7194,9 @@ export interface components {
             memberCount: number;
             /** @example null */
             reviewNote: string | null;
+            verificationDetails?: {
+                [key: string]: unknown;
+            } | null;
             /** @example null */
             reviewedAt: string | null;
             /** @example 2026-11-01T09:00:00.000Z */
@@ -6033,6 +7219,9 @@ export interface components {
             contactPhone?: string;
             city?: string;
             regionCode?: string;
+            verificationDetails?: {
+                [key: string]: unknown;
+            };
         };
         MyOrganization: {
             organization: components["schemas"]["Organization"] | null;
@@ -6049,9 +7238,13 @@ export interface components {
             contactPhone?: string;
             city?: string;
             regionCode?: string;
+            verificationDetails?: {
+                [key: string]: unknown;
+            };
             /**
              * Format: uri
-             * @example https://cdn.ecolife.app/avatars/abc123.webp
+             * @description Any https URL the caller controls, or one returned by POST /uploads/presign.
+             * @example https://images.unsplash.com/photo-1607346256330-dee7af15f7c5?auto=format&fit=facearea&facepad=3&w=256&h=256&q=70
              */
             logoUrl?: string | null;
         };
@@ -6062,16 +7255,94 @@ export interface components {
         OrganizationMember: {
             user: components["schemas"]["UserSummary"];
             /**
+             * Format: email
+             * @example colleague@acme.example.com
+             */
+            email?: string;
+            /**
              * @example owner
              * @enum {string}
              */
             role: "owner" | "member";
             /** @example 2026-11-01T09:00:00.000Z */
             joinedAt: string;
+            /**
+             * @default true
+             * @example true
+             */
+            shareFootprint: boolean;
+            /**
+             * @example completed
+             * @enum {string}
+             */
+            onboardingStatus: "completed" | "pending";
             /** @example 450 */
             pointsTotal?: number;
+            /** @example 5 */
+            currentStreak?: number;
             /** @example 6.8 */
             baselineTotalKg?: number | null;
+            /** @example 142.5 */
+            last30DaysTotalKg?: number | null;
+            /** @example 4.75 */
+            avgDailyKg?: number | null;
+            /** @example 12.5 */
+            reductionPct?: number | null;
+            /** @example 2026-10-31T18:30:00.000Z */
+            lastActiveAt?: string | null;
+        };
+        OrganizationAnalytics: {
+            organizationId: number;
+            /** @example 1440.6 */
+            totalFootprintKg: number;
+            /** @example 17.5 */
+            annualProjectedTonnes: number;
+            /** @example 25 */
+            totalMembers: number;
+            /** @example 18 */
+            activeLoggers: number;
+            /** @example 57.6 */
+            avgPerEmployeeKg: number;
+            /** @example 5.8 */
+            dailyPerCapitaKg: number;
+            /** @example 7.2 */
+            urbanBenchmarkDailyKg: number;
+            /** @example 19.4 */
+            reductionVsUrbanPct: number;
+            categories: components["schemas"]["OrgCategoryBreakdown"];
+            monthlyTrend: components["schemas"]["OrgMonthlyTrendItem"][];
+        };
+        OrgCategoryBreakdown: {
+            /** @example 450.2 */
+            transportKg: number;
+            /** @example 320.5 */
+            foodKg: number;
+            /** @example 510 */
+            homeEnergyKg: number;
+            /** @example 95.8 */
+            waterKg: number;
+            /** @example 64.1 */
+            wasteKg: number;
+            /** @example 31.3 */
+            transportPct: number;
+            /** @example 22.2 */
+            foodPct: number;
+            /** @example 35.4 */
+            homeEnergyPct: number;
+            /** @example 6.7 */
+            waterPct: number;
+            /** @example 4.4 */
+            wastePct: number;
+        };
+        OrgMonthlyTrendItem: {
+            /** @example 2026-10 */
+            month: string;
+            /** @example 1240.5 */
+            totalKg: number;
+            /** @example 62 */
+            avgPerEmployeeKg: number;
+            /** @example 20 */
+            activeLoggers: number;
         };
         AddOrganizationMemberBody: {
             /**
@@ -6091,6 +7362,36 @@ export interface components {
             /** @enum {boolean} */
             left: true;
         };
+        UpdateMembershipPreferencesResult: {
+            /** @enum {boolean} */
+            updated: true;
+            shareFootprint: boolean;
+        };
+        UpdateMembershipPreferencesBody: {
+            /** @example true */
+            shareFootprint: boolean;
+        };
+        OrganizationLookupResult: {
+            /** @example true */
+            valid: boolean;
+            /** @example Acme Industries */
+            name: string;
+            /**
+             * @description Corporate · Community · Seller portal
+             * @example industry
+             * @enum {string}
+             */
+            type: "industry" | "ngo" | "seller";
+            /** @example acme-industries */
+            slug: string;
+            /** @example 482910 */
+            code: string;
+        };
+        RegenerateCodeResult: {
+            /** @example 719302 */
+            code: string;
+            organization: components["schemas"]["Organization"];
+        };
         JoinOrganizationResult: {
             /** @enum {boolean} */
             joined: true;
@@ -6108,6 +7409,115 @@ export interface components {
              */
             code: string;
         };
+        OrgOnboardingQuestion: {
+            /** @example 1 */
+            id: number;
+            /** @example 42 */
+            organizationId: number;
+            /** @example What department do you work in? */
+            prompt: string;
+            /** @example Used for team impact reports */
+            description?: string | null;
+            type: components["schemas"]["OrgQuestionType"];
+            /**
+             * @example [
+             *       "Engineering",
+             *       "Sales",
+             *       "Design"
+             *     ]
+             */
+            options?: string[] | null;
+            /** @example true */
+            required: boolean;
+            /** @example 0 */
+            sortOrder: number;
+            /** @example 1 */
+            version: number;
+            /** @example true */
+            active: boolean;
+            /** @example 2026-11-01T00:00:00.000Z */
+            createdAt: string;
+            /** @example 2026-11-01T00:00:00.000Z */
+            updatedAt: string;
+        };
+        /** @enum {string} */
+        OrgQuestionType: "text" | "single_choice" | "multiple_choice" | "number" | "yes_no";
+        CreateOrgQuestionBody: {
+            /** @example What department do you work in? */
+            prompt: string;
+            /** @example Used for team impact reports */
+            description?: string;
+            type: components["schemas"]["OrgQuestionType"];
+            /**
+             * @example [
+             *       "Engineering",
+             *       "Sales",
+             *       "Design"
+             *     ]
+             */
+            options?: string[];
+            /**
+             * @default false
+             * @example false
+             */
+            required: boolean;
+        };
+        UpdateOrgQuestionBody: {
+            prompt?: string;
+            description?: string | null;
+            type?: components["schemas"]["OrgQuestionType"];
+            options?: string[] | null;
+            required?: boolean;
+        };
+        ReorderOrgQuestionsBody: {
+            /**
+             * @example [
+             *       3,
+             *       1,
+             *       2
+             *     ]
+             */
+            questionIds: number[];
+        };
+        OrgOnboardingStatus: {
+            organization: components["schemas"]["Organization"];
+            questions: components["schemas"]["OrgOnboardingQuestion"][];
+            answers: components["schemas"]["OrgAnswerItem"][];
+            /** @example true */
+            isCompleted: boolean;
+        };
+        OrgAnswerItem: {
+            /** @example 10 */
+            id: number;
+            /** @example 1 */
+            questionId: number;
+            /** @example What department do you work in? */
+            questionPrompt: string;
+            /** @example single_choice */
+            questionType: string;
+            /** @example 1 */
+            questionVersion: number;
+            /** @example Engineering */
+            answer?: unknown;
+            /** @example 2026-11-01T00:00:00.000Z */
+            answeredAt: string;
+        };
+        SubmitOrgOnboardingAnswersBody: {
+            answers: components["schemas"]["OrgAnswerInput"][];
+        };
+        OrgAnswerInput: {
+            /** @example 1 */
+            questionId: number;
+            /** @example Engineering */
+            answer?: unknown;
+        };
+        OrgEmployeeAnswers: {
+            /** @example 7 */
+            userId: number;
+            /** @example 42 */
+            organizationId: number;
+            answers: components["schemas"]["OrgAnswerItem"][];
+        };
         ReviewOrganizationBody: {
             /**
              * @example approve
@@ -6116,6 +7526,15 @@ export interface components {
             decision: "approve" | "reject" | "suspend" | "reinstate";
             /** @example GST certificate checked. */
             note?: string;
+            /** @description The identity fields exactly as the review queue showed them. Compared inside the UPDATE, so an edit landing mid-decision is refused rather than approved unseen. */
+            expected: {
+                /** @example Acme Industries */
+                name: string;
+                /** @example null */
+                logoUrl: string | null;
+                /** @example https://acme.example.com */
+                websiteUrl: string | null;
+            };
         };
         Notification: {
             /** @example 44 */
@@ -6136,7 +7555,10 @@ export interface components {
         PresignResult: {
             /** @example https://storage.example.com/... */
             uploadUrl: string;
-            /** @example https://cdn.ecolife.app/covers/abc123.webp */
+            /**
+             * @description Where the object will be readable once the PUT to `uploadUrl` succeeds. This is the Neon Object Storage endpoint for the branch, NOT a CDN and NOT cdn.ecolife.app — there is no CDN in front of the bucket today. The host varies per branch, so store the URL this call returns rather than reconstructing it.
+             * @example https://br-dry-grass-a1og82ui.storage.c-1.ap-southeast-1.aws.neon.tech/uploads/covers/2026/01f7c2e4-6b3a-4f1e-9c80-2a5d8e3b7a11.webp
+             */
             publicUrl: string;
             /** @example 300 */
             expiresInSeconds: number;

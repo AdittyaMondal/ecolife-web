@@ -1,6 +1,7 @@
 'use client';
 
-import { ArrowLeft, CalendarPlus, ImagePlus } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { ArrowLeft, Building2, CalendarPlus, ImagePlus } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import * as React from 'react';
@@ -9,6 +10,7 @@ import { Card } from '@/components/ui/card';
 import { ErrorBanner } from '@/components/ui/error-banner';
 import { Input, Select, Textarea } from '@/components/ui/input';
 import { type EventType, uploadImage, useCreateEvent } from '@/hooks/use-events';
+import { myOrganizationQuery } from '@/hooks/use-organization';
 
 const EVENT_TYPE_OPTIONS: { value: EventType; label: string }[] = [
   { value: 'plant_drive', label: 'Plantation Drive' },
@@ -22,15 +24,20 @@ const EVENT_TYPE_OPTIONS: { value: EventType; label: string }[] = [
 export default function NewEventPage() {
   const router = useRouter();
   const createEvent = useCreateEvent();
+  const { data: myOrg } = useQuery(myOrganizationQuery());
+  const org = myOrg?.organization;
 
   const [title, setTitle] = React.useState('');
   const [description, setDescription] = React.useState('');
   const [type, setType] = React.useState<EventType>('plant_drive');
-  const [visibility, setVisibility] = React.useState<'public' | 'invite_only'>('public');
+  const [visibility, setVisibility] = React.useState<
+    'public' | 'organization_only' | 'invite_only'
+  >('public');
   const [startAt, setStartAt] = React.useState('');
   const [endAt, setEndAt] = React.useState('');
   const [venueName, setVenueName] = React.useState('');
   const [venueAddress, setVenueAddress] = React.useState('');
+  const [venueMapUrl, setVenueMapUrl] = React.useState('');
   const [capacity, setCapacity] = React.useState('50');
   const [coverUrl, setCoverUrl] = React.useState('');
   const [uploadingCover, setUploadingCover] = React.useState(false);
@@ -71,10 +78,12 @@ export default function NewEventPage() {
       description: description.trim(),
       type,
       visibility,
+      organizationId: visibility === 'organization_only' ? myOrg?.organization?.id : undefined,
       startAt: new Date(startAt).toISOString(),
       endAt: new Date(endAt).toISOString(),
       venueName: venueName.trim(),
       venueAddress: venueAddress.trim() || undefined,
+      venueMapUrl: venueMapUrl.trim() || undefined,
       capacity: Math.max(2, Number(capacity) || 50),
       coverUrl: coverUrl.trim() || undefined,
       publish: true,
@@ -129,12 +138,28 @@ export default function NewEventPage() {
             <Select
               label="Visibility"
               value={visibility}
-              onChange={(e) => setVisibility(e.target.value as 'public' | 'invite_only')}
+              onChange={(e) =>
+                setVisibility(e.target.value as 'public' | 'organization_only' | 'invite_only')
+              }
             >
               <option value="public">Public (Listed in directory)</option>
+              {org && (
+                <option value="organization_only">
+                  Organization Only (Exclusive to {org.name})
+                </option>
+              )}
               <option value="invite_only">Invite only (Via direct link)</option>
             </Select>
           </div>
+
+          {visibility === 'organization_only' && org && (
+            <div className="flex items-center gap-2 rounded-xs border border-primary/20 bg-accent/40 p-2.5 text-xs text-foreground">
+              <Building2 className="size-4 shrink-0 text-positive" />
+              <span>
+                Exclusive event for <strong>{org.name}</strong> members only.
+              </span>
+            </div>
+          )}
 
           <Textarea
             label="Description & Instructions"
@@ -188,6 +213,14 @@ export default function NewEventPage() {
             value={venueAddress}
             onChange={(e) => setVenueAddress(e.target.value)}
             required
+          />
+
+          <Input
+            type="url"
+            label="Venue Map URL (Optional)"
+            placeholder="e.g. https://maps.google.com/?q=..."
+            value={venueMapUrl}
+            onChange={(e) => setVenueMapUrl(e.target.value)}
           />
 
           {/* Optional Cover Image Upload */}

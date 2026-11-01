@@ -2,15 +2,19 @@
 
 import { useInfiniteQuery } from '@tanstack/react-query';
 import {
+  Building2,
   Calendar,
   CheckCircle2,
   Compass,
+  ExternalLink,
   MapPin,
   Plus,
   QrCode,
+  Search,
   Sparkles,
   Trees,
   Users,
+  X,
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -32,13 +36,14 @@ import {
 } from '@/hooks/use-events';
 import { formatDateTimeRange, initials } from '@/lib/format';
 import { getEventCoverUrl } from '@/lib/images';
+import { cn } from '@/lib/utils';
 
 const FILTER_TABS: { value: EventFilter; label: string }[] = [
   { value: 'upcoming', label: 'Upcoming' },
+  { value: 'past', label: 'Past' },
   { value: 'nearby', label: 'Nearby' },
   { value: 'registered', label: 'My Passes' },
   { value: 'hosting', label: 'Hosting' },
-  { value: 'past', label: 'Past' },
 ];
 
 const EVENT_TYPES: { value: EventType | 'all'; label: string }[] = [
@@ -52,6 +57,7 @@ const EVENT_TYPES: { value: EventType | 'all'; label: string }[] = [
 ];
 
 export default function EventsPage() {
+  const [searchQuery, setSearchQuery] = React.useState('');
   const [filter, setFilter] = React.useState<EventFilter>('upcoming');
   const [eventType, setEventType] = React.useState<EventType | 'all'>('all');
   const [coords, setCoords] = React.useState<{ lat: number; lng: number }>({
@@ -79,6 +85,7 @@ export default function EventsPage() {
     eventsInfiniteQuery({
       filter,
       type: eventType === 'all' ? undefined : eventType,
+      search: searchQuery.trim() || undefined,
       lat: filter === 'nearby' ? coords.lat : undefined,
       lng: filter === 'nearby' ? coords.lng : undefined,
       radiusKm: filter === 'nearby' ? 25 : undefined,
@@ -117,6 +124,32 @@ export default function EventsPage() {
 
       {/* Filter Bar */}
       <Card className="space-y-4 p-4">
+        {/* Search Input Bar */}
+        <div className="relative">
+          <Search
+            className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+            aria-hidden="true"
+          />
+          <input
+            type="search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search events by title, description, or venue name…"
+            aria-label="Search events"
+            className="h-11 w-full rounded-sm border border-input bg-card pl-10 pr-9 text-sm text-foreground placeholder:text-muted-foreground/70 focus-visible:border-ring focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery('')}
+              aria-label="Clear search"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              <X className="size-4" />
+            </button>
+          )}
+        </div>
+
         <SegmentedControl
           name="events-filter"
           label="Filter events"
@@ -158,15 +191,25 @@ export default function EventsPage() {
       ) : allEvents.length === 0 ? (
         <EmptyState
           icon={<Trees className="size-5" />}
-          title="No events in this view"
-          description="Try switching filter tabs or host your own community plantation or cleanup drive."
+          title={searchQuery.trim() ? 'No events found' : 'No events in this view'}
+          description={
+            searchQuery.trim()
+              ? `No events match "${searchQuery.trim()}". Try adjusting your search query or filters.`
+              : 'Try switching filter tabs or host your own community plantation or cleanup drive.'
+          }
           action={
-            <Link href="/events/new">
-              <Button variant="primary" size="sm">
-                <Plus className="size-4" />
-                Create an Event
+            searchQuery.trim() ? (
+              <Button variant="outline" size="sm" onClick={() => setSearchQuery('')}>
+                Clear Search
               </Button>
-            </Link>
+            ) : (
+              <Link href="/events/new">
+                <Button variant="primary" size="sm">
+                  <Plus className="size-4" />
+                  Create an Event
+                </Button>
+              </Link>
+            )
           }
         />
       ) : (
@@ -177,6 +220,7 @@ export default function EventsPage() {
                 ev.capacity > 0
                   ? Math.min(100, Math.round((ev.registeredCount / ev.capacity) * 100))
                   : 0;
+              const remainingSpots = Math.max(0, ev.capacity - ev.registeredCount);
               const isCheckedIn = ev.viewer.passStatus === 'checked_in';
               const coverImg = getEventCoverUrl(ev);
 
@@ -203,9 +247,51 @@ export default function EventsPage() {
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-70 transition-opacity group-hover:opacity-50" />
 
                       <div className="absolute left-2.5 top-2.5 flex flex-wrap gap-1.5 z-10">
-                        <Badge tone="primary" className="font-semibold shadow-subtle">
+                        {/* Status Badge */}
+                        {ev.status === 'cancelled' ? (
+                          <Badge tone="destructive">Cancelled</Badge>
+                        ) : ev.status === 'completed' ? (
+                          <Badge tone="muted">Completed</Badge>
+                        ) : ev.status === 'ongoing' ? (
+                          <Badge
+                            tone="positive"
+                            className="border-emerald-500/40 text-emerald-600 dark:text-emerald-400"
+                          >
+                            Ongoing
+                          </Badge>
+                        ) : (
+                          <Badge tone="primary">Upcoming</Badge>
+                        )}
+
+                        {/* Event Type Badge */}
+                        <Badge
+                          tone="neutral"
+                          className="font-semibold shadow-subtle backdrop-blur-md bg-card/90"
+                        >
                           {EVENT_TYPE_LABEL[ev.type] ?? ev.type}
                         </Badge>
+
+                        {/* Organization Only / Partner Badge */}
+                        {ev.visibility === 'organization_only' ? (
+                          <Badge
+                            tone="secondary"
+                            className="inline-flex items-center gap-1 shadow-subtle"
+                          >
+                            <Building2 className="size-3 shrink-0" />
+                            <span>Organization Only</span>
+                            {ev.organizationName && <span>· {ev.organizationName}</span>}
+                          </Badge>
+                        ) : ev.organizationName ? (
+                          <Badge
+                            tone="accent"
+                            className="inline-flex items-center gap-1 shadow-subtle"
+                          >
+                            <Building2 className="size-3 shrink-0" />
+                            <span>Partner: {ev.organizationName}</span>
+                          </Badge>
+                        ) : null}
+
+                        {/* Viewer Host/Pass Badges */}
                         {ev.viewer.isHost && <Badge tone="positive">Hosting</Badge>}
                         {!ev.viewer.isHost && ev.viewer.isCoHost && (
                           <Badge tone="positive">Co-host</Badge>
@@ -240,12 +326,25 @@ export default function EventsPage() {
                           <Calendar className="size-3.5 text-positive shrink-0" />
                           <span>{formatDateTimeRange(ev.startAt, ev.endAt)}</span>
                         </div>
-                        <div className="flex items-center gap-1.5">
-                          <MapPin className="size-3.5 text-positive shrink-0" />
-                          <span className="truncate">
-                            {ev.venueName}
-                            {ev.venueAddress ? ` · ${ev.venueAddress}` : ''}
-                          </span>
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <MapPin className="size-3.5 text-positive shrink-0" />
+                            <span className="truncate">
+                              {ev.venueName}
+                              {ev.venueAddress ? ` · ${ev.venueAddress}` : ''}
+                            </span>
+                          </div>
+                          {ev.venueMapUrl && (
+                            <a
+                              href={ev.venueMapUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-[11px] font-semibold text-positive hover:underline shrink-0"
+                            >
+                              <ExternalLink className="size-3" />
+                              View Map
+                            </a>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -262,15 +361,27 @@ export default function EventsPage() {
                           </strong>{' '}
                           / {ev.capacity} registered
                         </span>
-                        <span className="text-[11px] font-semibold text-positive">
-                          +Points & Coins on check-in
+                        <span className="text-[11px] font-medium text-muted-foreground">
+                          <strong
+                            className={cn(
+                              'tabular-nums',
+                              remainingSpots === 0
+                                ? 'text-destructive font-semibold'
+                                : remainingSpots <= 5
+                                  ? 'text-warning font-semibold'
+                                  : 'text-foreground',
+                            )}
+                          >
+                            {remainingSpots}
+                          </strong>{' '}
+                          spots remaining
                         </span>
                       </div>
                       <ProgressBar
                         value={capacityPct}
                         max={100}
                         tone={capacityPct >= 100 ? 'warning' : 'primary'}
-                        aria-label={`${ev.registeredCount} of ${ev.capacity} spots filled`}
+                        aria-label={`${ev.registeredCount} of ${ev.capacity} spots filled, ${remainingSpots} spots remaining`}
                       />
                     </div>
 

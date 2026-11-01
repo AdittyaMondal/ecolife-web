@@ -13,9 +13,9 @@ import {
   LogOut,
   MailWarning,
   Moon,
+  ShieldCheck,
   ShoppingBag,
   Sun,
-  ShieldCheck,
   Trophy,
   User,
 } from 'lucide-react';
@@ -221,9 +221,54 @@ function AppLayoutShell({ children }: { children: React.ReactNode }) {
           {/* Secondary Navigation */}
           <nav aria-label="Community and account" className="flex flex-col gap-1">
             <p className="px-3 pb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              Community
+              Community &amp; Partners
             </p>
-            {SECONDARY_NAV.map((item) => {
+            {/* Dynamic Partner Portal Link */}
+            {(() => {
+              const org = me?.organization;
+              const orgHref =
+                org?.type === 'industry'
+                  ? '/organization/corporate'
+                  : org?.type === 'ngo'
+                    ? '/organization/community'
+                    : org?.type === 'seller'
+                      ? '/marketplace/seller'
+                      : '/organization';
+
+              const orgLabel =
+                org?.type === 'industry'
+                  ? 'Corporate Portal'
+                  : org?.type === 'ngo'
+                    ? 'Community Portal'
+                    : org?.type === 'seller'
+                      ? 'Seller Portal'
+                      : 'Organization';
+
+              const active = isActivePath(pathname, orgHref);
+
+              return (
+                <Link
+                  href={orgHref}
+                  aria-current={active ? 'page' : undefined}
+                  className={cn(
+                    'flex min-h-11 items-center gap-3 rounded-sm px-3 py-2 text-sm font-medium transition',
+                    active
+                      ? 'bg-primary font-semibold text-primary-foreground'
+                      : 'text-foreground hover:bg-muted',
+                  )}
+                >
+                  <Building2 className="size-4 shrink-0" aria-hidden="true" />
+                  <span>{orgLabel}</span>
+                  {org?.status === 'pending' && (
+                    <span className="ml-auto rounded-xs bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-amber-600 dark:text-amber-400">
+                      Pending
+                    </span>
+                  )}
+                </Link>
+              );
+            })()}
+
+            {SECONDARY_NAV.filter((item) => item.href !== '/organization').map((item) => {
               const Icon = item.icon;
               const active = isActivePath(pathname, item.href);
               return (

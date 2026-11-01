@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import jsQR from 'jsqr';
 import {
   ArrowLeft,
+  Building2,
   Calendar,
   Camera,
   CameraOff,
@@ -11,7 +12,9 @@ import {
   CheckCircle2,
   Coins,
   Copy,
+  Download,
   Edit3,
+  ExternalLink,
   MapPin,
   QrCode,
   Search,
@@ -32,10 +35,11 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ModalDialog } from '@/components/ui/dialog';
 import { ErrorBanner } from '@/components/ui/error-banner';
-import { Input, Textarea } from '@/components/ui/input';
+import { Input, Select, Textarea } from '@/components/ui/input';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
+  downloadEventParticipantsCsv,
   EVENT_TYPE_LABEL,
   type EventItem,
   eventParticipantsQuery,
@@ -52,6 +56,21 @@ import {
 } from '@/hooks/use-events';
 import { formatDateTimeRange, formatTime, initials, titleCase } from '@/lib/format';
 import { getEventCoverUrl } from '@/lib/images';
+
+function getEventStatusBadge(status: EventItem['status']) {
+  switch (status) {
+    case 'ongoing':
+      return { label: 'Ongoing', tone: 'warning' as const };
+    case 'completed':
+      return { label: 'Completed', tone: 'neutral' as const };
+    case 'cancelled':
+      return { label: 'Cancelled', tone: 'danger' as const };
+    case 'draft':
+      return { label: 'Draft', tone: 'neutral' as const };
+    default:
+      return { label: 'Upcoming', tone: 'positive' as const };
+  }
+}
 
 export default function EventDetailPage() {
   const params = useParams<{ slug: string }>();
@@ -85,6 +104,7 @@ export default function EventDetailPage() {
 
   const ev = event.data;
   const isStaff = ev.viewer.isHost || ev.viewer.isCoHost;
+  const statusBadge = getEventStatusBadge(ev.status);
 
   return (
     <div className="space-y-6">
@@ -98,17 +118,13 @@ export default function EventDetailPage() {
 
         <div className="flex flex-wrap items-center gap-2">
           <Badge tone="primary">{EVENT_TYPE_LABEL[ev.type] ?? titleCase(ev.type)}</Badge>
-          <Badge
-            tone={
-              ev.status === 'published'
-                ? 'positive'
-                : ev.status === 'cancelled'
-                  ? 'danger'
-                  : 'neutral'
-            }
-          >
-            {titleCase(ev.status)}
-          </Badge>
+          <Badge tone={statusBadge.tone}>{statusBadge.label}</Badge>
+          {ev.visibility === 'organization_only' && (
+            <Badge tone="accent">
+              <Building2 className="size-3" />
+              Organization Only
+            </Badge>
+          )}
           {ev.viewer.isHost && <Badge tone="positive">You are Host</Badge>}
           {!ev.viewer.isHost && ev.viewer.isCoHost && (
             <Badge tone="positive">You are Co-Host</Badge>
@@ -167,6 +183,24 @@ function EventOverviewCard({ event: ev }: { event: EventItem }) {
         </div>
       </div>
 
+      {/* Organization Host Banner */}
+      {(Boolean(ev.organizationName) || Boolean(ev.organizationId)) && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-sm border border-border bg-accent/40 px-4 py-3 text-sm">
+          <div className="flex items-center gap-2 font-medium text-foreground">
+            <Building2 className="size-4 shrink-0 text-positive" />
+            <span>
+              Hosted by{' '}
+              <strong className="font-semibold">{ev.organizationName || 'Organization'}</strong>
+            </span>
+          </div>
+          {ev.visibility === 'organization_only' && (
+            <Badge tone="accent" className="font-semibold">
+              Exclusive to {ev.organizationName || 'Organization'} Members
+            </Badge>
+          )}
+        </div>
+      )}
+
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-2 max-w-3xl">
           <p className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
@@ -213,7 +247,20 @@ function EventOverviewCard({ event: ev }: { event: EventItem }) {
             <span>Venue</span>
           </div>
           <p className="mt-1 text-sm font-bold text-foreground">{ev.venueName}</p>
-          {ev.venueAddress && <p className="text-xs text-muted-foreground">{ev.venueAddress}</p>}
+          <div className="mt-1 flex flex-wrap items-center justify-between gap-2">
+            {ev.venueAddress && <p className="text-xs text-muted-foreground">{ev.venueAddress}</p>}
+            {ev.venueMapUrl && (
+              <a
+                href={ev.venueMapUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 rounded-xs border border-border bg-card px-2 py-0.5 text-xs font-semibold text-foreground transition-colors hover:border-primary hover:text-positive"
+              >
+                <ExternalLink className="size-3 shrink-0" />
+                <span>Open in Maps</span>
+              </a>
+            )}
+          </div>
         </div>
 
         <div className="rounded-sm border border-border bg-muted/30 p-3.5 space-y-2">
@@ -432,6 +479,8 @@ function HostScannerAndParticipants({ event: ev }: { event: EventItem }) {
   const [cameraError, setCameraError] = React.useState<string | null>(null);
   const [participantFilter, setParticipantFilter] = React.useState('');
   const [coHostUserId, setCoHostUserId] = React.useState('');
+  const [exporting, setExporting] = React.useState(false);
+  const [exportError, setExportError] = React.useState<string | null>(null);
   const [lastScanResult, setLastScanResult] = React.useState<{
     userName: string;
     alreadyCheckedIn: boolean;
@@ -442,6 +491,18 @@ function HostScannerAndParticipants({ event: ev }: { event: EventItem }) {
   const videoRef = React.useRef<HTMLVideoElement | null>(null);
   const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
   const lastScannedCodeRef = React.useRef<string>('');
+
+  const handleExportCsv = async () => {
+    try {
+      setExporting(true);
+      setExportError(null);
+      await downloadEventParticipantsCsv(ev.id, `${ev.slug}-attendees.csv`);
+    } catch (err) {
+      setExportError(err instanceof Error ? err.message : 'Failed to export participants.');
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const submitPassCode = React.useCallback(
     async (raw: string) => {
@@ -543,9 +604,11 @@ function HostScannerAndParticipants({ event: ev }: { event: EventItem }) {
   };
 
   const allParticipants = participants.data?.items ?? [];
-  const filteredParticipants = allParticipants.filter((p) =>
-    p.user.name.toLowerCase().includes(participantFilter.trim().toLowerCase()),
-  );
+  const filteredParticipants = allParticipants.filter((p) => {
+    const q = participantFilter.trim().toLowerCase();
+    if (!q) return true;
+    return p.user.name.toLowerCase().includes(q) || p.email?.toLowerCase().includes(q);
+  });
 
   return (
     <div className="space-y-6">
@@ -657,18 +720,33 @@ function HostScannerAndParticipants({ event: ev }: { event: EventItem }) {
             </p>
           </div>
 
-          <div className="relative w-full sm:w-56">
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-            <input
-              type="search"
-              value={participantFilter}
-              onChange={(e) => setParticipantFilter(e.target.value)}
-              placeholder="Filter participants…"
-              aria-label="Filter participants"
-              className="h-9 w-full rounded-sm border border-input bg-card pl-8 pr-3 text-xs text-foreground"
-            />
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative w-full sm:w-48">
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+              <input
+                type="search"
+                value={participantFilter}
+                onChange={(e) => setParticipantFilter(e.target.value)}
+                placeholder="Filter participants…"
+                aria-label="Filter participants"
+                className="h-9 w-full rounded-sm border border-input bg-card pl-8 pr-3 text-xs text-foreground"
+              />
+            </div>
+
+            <Button
+              variant="outline"
+              size="sm"
+              loading={exporting}
+              onClick={handleExportCsv}
+              disabled={allParticipants.length === 0}
+            >
+              <Download className="size-3.5" />
+              Export Attendees (CSV)
+            </Button>
           </div>
         </div>
+
+        {exportError && <ErrorBanner error={exportError} />}
 
         {participants.isPending ? (
           <div className="space-y-2">
@@ -695,13 +773,20 @@ function HostScannerAndParticipants({ event: ev }: { event: EventItem }) {
                       {initials(reg.user.name)}
                     </span>
                     <div className="min-w-0">
-                      <Link
-                        href={`/users/${reg.user.id}`}
-                        className="truncate text-sm font-semibold text-foreground hover:text-positive block"
-                      >
-                        {reg.user.name}
-                      </Link>
-                      <span className="text-[11px] text-muted-foreground">
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                        <Link
+                          href={`/users/${reg.user.id}`}
+                          className="truncate text-sm font-semibold text-foreground hover:text-positive"
+                        >
+                          {reg.user.name}
+                        </Link>
+                        {reg.email && (
+                          <span className="truncate text-xs text-muted-foreground">
+                            ({reg.email})
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-[11px] text-muted-foreground block truncate">
                         {isCheckedIn && reg.checkedInAt
                           ? `Checked in at ${formatTime(reg.checkedInAt)}`
                           : `Pass #${reg.passId} · ${reg.user.city ?? 'Community member'}`}
@@ -715,6 +800,10 @@ function HostScannerAndParticipants({ event: ev }: { event: EventItem }) {
                         <CheckCircle2 className="size-3" />
                         Checked in
                       </Badge>
+                    ) : reg.status === 'cancelled' ? (
+                      <Badge tone="danger">Cancelled</Badge>
+                    ) : reg.status === 'no_show' ? (
+                      <Badge tone="neutral">No Show</Badge>
                     ) : (
                       <Button
                         variant="secondary"
@@ -791,6 +880,8 @@ function EditEventModal({
   const [capacity, setCapacity] = React.useState(String(ev.capacity));
   const [venueName, setVenueName] = React.useState(ev.venueName);
   const [venueAddress, setVenueAddress] = React.useState(ev.venueAddress ?? '');
+  const [venueMapUrl, setVenueMapUrl] = React.useState(ev.venueMapUrl ?? '');
+  const [visibility, setVisibility] = React.useState<EventItem['visibility']>(ev.visibility);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -801,6 +892,8 @@ function EditEventModal({
       capacity: Math.max(ev.registeredCount, Number(capacity) || ev.capacity),
       venueName: venueName.trim(),
       venueAddress: venueAddress.trim() || undefined,
+      venueMapUrl: venueMapUrl.trim() || null,
+      visibility,
     });
     onClose();
   };
@@ -810,7 +903,7 @@ function EditEventModal({
       open={open}
       onClose={onClose}
       title="Edit Event Details"
-      description="Update the title, description, venue, or capacity for your event."
+      description="Update the title, description, venue, map link, visibility, or capacity for your event."
     >
       <form onSubmit={handleSave} className="space-y-4">
         <Input
@@ -846,6 +939,28 @@ function EditEventModal({
           value={venueAddress}
           onChange={(e) => setVenueAddress(e.target.value)}
         />
+        <Input
+          type="url"
+          label="Venue Map URL (Google Maps, OpenStreetMap, etc.)"
+          placeholder="https://maps.google.com/?q=..."
+          value={venueMapUrl}
+          onChange={(e) => setVenueMapUrl(e.target.value)}
+        />
+        <Select
+          label="Visibility"
+          value={visibility}
+          onChange={(e) => setVisibility(e.target.value as EventItem['visibility'])}
+        >
+          <option value="public">Public (Listed in directory)</option>
+          <option value="invite_only">Invite only (Direct link)</option>
+          {(Boolean(ev.organizationId) ||
+            Boolean(ev.organizationName) ||
+            ev.visibility === 'organization_only') && (
+            <option value="organization_only">
+              Organization only ({ev.organizationName ?? 'Members only'})
+            </option>
+          )}
+        </Select>
 
         {updateEvent.isError && <ErrorBanner error={updateEvent.error} />}
 

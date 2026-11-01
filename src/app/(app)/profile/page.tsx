@@ -21,6 +21,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import * as React from 'react';
+import { OrganizationMembershipCard } from '@/components/blocks/organization/org-membership-card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -375,6 +376,9 @@ export default function ProfilePage() {
           </div>
         )}
       </Card>
+
+      {/* Organization Membership & 6-Digit Code Linking */}
+      <OrganizationMembershipCard />
 
       {/* Data Export, Sign Out & Danger Zone */}
       <Card className="p-6">

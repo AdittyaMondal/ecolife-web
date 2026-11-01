@@ -2,12 +2,17 @@
 
 import {
   Award,
+  CheckCircle2,
+  Clock,
   Crown,
+  FileQuestion,
+  Filter,
   Flame,
-  Mail,
-  Plus,
   Search,
+  Shield,
   Trash2,
+  TrendingDown,
+  TrendingUp,
   UserCheck,
   UserPlus,
   Users,
@@ -22,6 +27,7 @@ import { Input, Select } from '@/components/ui/input';
 import { useAddOrgMember, useRemoveOrgMember } from '@/hooks/use-organization';
 import { formatDate, formatKg, formatNumber, initials } from '@/lib/format';
 import type { Organization, OrganizationMember } from '@/types/api';
+import { OrgMemberAnswersDialog } from './org-member-answers-dialog';
 
 export interface OrgRosterProps {
   organization: Organization;
@@ -32,10 +38,18 @@ export interface OrgRosterProps {
 
 export function OrgRoster({ organization, members, currentUserId, userRole }: OrgRosterProps) {
   const [search, setSearch] = React.useState('');
+  const [roleFilter, setRoleFilter] = React.useState<'all' | 'owner' | 'member'>('all');
+  const [onboardingFilter, setOnboardingFilter] = React.useState<'all' | 'completed' | 'pending'>(
+    'all',
+  );
+  const [privacyFilter, setPrivacyFilter] = React.useState<'all' | 'sharing' | 'private'>('all');
+
   const [addModalOpen, setAddModalOpen] = React.useState(false);
   const [inviteEmail, setInviteEmail] = React.useState('');
   const [inviteRole, setInviteRole] = React.useState<'owner' | 'member'>('member');
   const [memberToRemove, setMemberToRemove] = React.useState<OrganizationMember | null>(null);
+  const [selectedMemberForAnswers, setSelectedMemberForAnswers] =
+    React.useState<OrganizationMember | null>(null);
 
   const addMember = useAddOrgMember(organization.id);
   const removeMember = useRemoveOrgMember(organization.id);
@@ -43,16 +57,39 @@ export function OrgRoster({ organization, members, currentUserId, userRole }: Or
   const isOwner = userRole === 'owner';
   const isApproved = organization.status === 'approved';
 
-  // Filter members by name or email
+  // Filter members by search, role, onboarding, and privacy
   const filteredMembers = React.useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return members;
+
     return members.filter((m) => {
+      // 1. Search filter
       const name = m.user.name?.toLowerCase() || '';
       const email = (m as OrganizationMember & { email?: string }).email?.toLowerCase() || '';
-      return name.includes(q) || email.includes(q);
+      const matchesSearch = !q || name.includes(q) || email.includes(q);
+      if (!matchesSearch) return false;
+
+      // 2. Role filter
+      if (roleFilter !== 'all' && m.role !== roleFilter) return false;
+
+      // 3. Onboarding filter
+      if (onboardingFilter !== 'all') {
+        const status =
+          (m as OrganizationMember & { onboardingStatus?: 'completed' | 'pending' })
+            .onboardingStatus ?? (m.baselineTotalKg != null ? 'completed' : 'pending');
+        if (status !== onboardingFilter) return false;
+      }
+
+      // 4. Privacy sharing filter
+      if (privacyFilter !== 'all') {
+        const isSharing =
+          (m as OrganizationMember & { shareFootprint?: boolean }).shareFootprint !== false;
+        if (privacyFilter === 'sharing' && !isSharing) return false;
+        if (privacyFilter === 'private' && isSharing) return false;
+      }
+
+      return true;
     });
-  }, [members, search]);
+  }, [members, search, roleFilter, onboardingFilter, privacyFilter]);
 
   const handleAddSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -108,24 +145,12 @@ export function OrgRoster({ organization, members, currentUserId, userRole }: Or
               <span>Employee &amp; Member Roster</span>
             </h3>
             <p className="text-xs text-muted-foreground">
-              {members.length} {members.length === 1 ? 'member' : 'members'} enrolled in this
-              organization
+              {filteredMembers.length} of {members.length} enrolled member
+              {members.length === 1 ? '' : 's'} displayed
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            {/* Search Input */}
-            <div className="relative min-w-48 sm:min-w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
-              <Input
-                placeholder="Search by name or email…"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-9 h-9 text-xs"
-              />
-            </div>
-
-            {/* Add Member button (Owner only & approved only) */}
+          <div className="flex items-center gap-2.5">
             {isOwner && isApproved && (
               <Button
                 variant="primary"
@@ -140,44 +165,106 @@ export function OrgRoster({ organization, members, currentUserId, userRole }: Or
           </div>
         </div>
 
-        {/* Member List Table / Cards */}
-        <div className="divide-y divide-border rounded-sm border border-border overflow-hidden bg-card">
+        {/* Search & Multi-Filter Control Bar (Requirement 12) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-1">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+            <Input
+              placeholder="Search employee or email…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9 h-9 text-xs"
+            />
+          </div>
+
+          {/* Role Filter */}
+          <Select
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value as 'all' | 'owner' | 'member')}
+            className="h-9 text-xs"
+          >
+            <option value="all">All Roles</option>
+            <option value="owner">Owners Only</option>
+            <option value="member">Members Only</option>
+          </Select>
+
+          {/* Onboarding Status Filter */}
+          <Select
+            value={onboardingFilter}
+            onChange={(e) => setOnboardingFilter(e.target.value as 'all' | 'completed' | 'pending')}
+            className="h-9 text-xs"
+          >
+            <option value="all">All Onboarding Statuses</option>
+            <option value="completed">Completed Baseline</option>
+            <option value="pending">Pending Setup</option>
+          </Select>
+
+          {/* Privacy Sharing Filter */}
+          <Select
+            value={privacyFilter}
+            onChange={(e) => setPrivacyFilter(e.target.value as 'all' | 'sharing' | 'private')}
+            className="h-9 text-xs"
+          >
+            <option value="all">All Privacy Consents</option>
+            <option value="sharing">Sharing Footprint</option>
+            <option value="private">Private (Not Consented)</option>
+          </Select>
+        </div>
+
+        {/* Member List Cards / Table */}
+        <div className="divide-y divide-border rounded-lg border border-border overflow-hidden bg-card">
           {filteredMembers.length === 0 ? (
             <div className="p-8 text-center space-y-2">
               <p className="text-sm font-semibold text-foreground">No members found</p>
               <p className="text-xs text-muted-foreground">
-                {search
-                  ? `No members match "${search}". Try searching by a different term.`
-                  : 'No colleagues have joined yet. Share your organization code above!'}
+                {search ||
+                roleFilter !== 'all' ||
+                onboardingFilter !== 'all' ||
+                privacyFilter !== 'all'
+                  ? 'No members match the selected filters. Clear or adjust your filters.'
+                  : 'No colleagues have joined yet. Share your 6-digit organization code above!'}
               </p>
             </div>
           ) : (
             filteredMembers.map((member) => {
+              const m = member as OrganizationMember & {
+                email?: string;
+                onboardingStatus?: 'completed' | 'pending';
+                currentStreak?: number;
+                last30DaysTotalKg?: number | null;
+                avgDailyKg?: number | null;
+                reductionPct?: number | null;
+                lastActiveAt?: string | null;
+              };
+
               const isMemberOwner = member.role === 'owner';
               const isCurrentUser = currentUserId === member.user.id;
-              const email = (member as OrganizationMember & { email?: string }).email;
+              const isOnboarded =
+                m.onboardingStatus === 'completed' || member.baselineTotalKg != null;
+              const isSharingFootprint = m.shareFootprint !== false;
 
               return (
                 <div
                   key={member.user.id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 transition hover:bg-muted/40"
+                  className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 transition hover:bg-muted/40"
                 >
-                  {/* Left: Avatar + Identity */}
+                  {/* Left: Avatar + Identity + Onboarding Status */}
                   <div className="flex items-center gap-3.5 min-w-0">
-                    <div className="flex size-10 shrink-0 items-center justify-center rounded-sm bg-secondary text-xs font-bold text-secondary-foreground">
+                    <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-secondary text-xs font-bold text-secondary-foreground border border-border">
                       {member.user.avatarUrl ? (
                         // biome-ignore lint/performance/noImgElement: dynamic user avatar
                         <img
                           src={member.user.avatarUrl}
                           alt={member.user.name}
-                          className="size-full rounded-sm object-cover"
+                          className="size-full rounded-lg object-cover"
                         />
                       ) : (
                         initials(member.user.name)
                       )}
                     </div>
 
-                    <div className="min-w-0 space-y-0.5">
+                    <div className="min-w-0 space-y-1">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-bold text-foreground truncate">
                           {member.user.name}
@@ -187,57 +274,153 @@ export function OrgRoster({ organization, members, currentUserId, userRole }: Or
                             You
                           </span>
                         )}
+                        <Badge
+                          variant={isMemberOwner ? 'primary' : 'neutral'}
+                          className="text-[10px] h-5 gap-1"
+                        >
+                          {isMemberOwner ? (
+                            <>
+                              <Crown className="size-3 text-yellow-300" aria-hidden="true" />
+                              <span>Owner</span>
+                            </>
+                          ) : (
+                            <>
+                              <UserCheck className="size-3" aria-hidden="true" />
+                              <span>Member</span>
+                            </>
+                          )}
+                        </Badge>
                       </div>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        {email && <span className="truncate">{email}</span>}
-                        {member.user.city && <span className="truncate">· {member.user.city}</span>}
+
+                      <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                        {m.email && <span className="truncate">{m.email}</span>}
+                        {member.user.city && <span>· {member.user.city}</span>}
                         <span>· Joined {formatDate(member.joinedAt)}</span>
+
+                        {/* Onboarding Status Badge (Requirement 12) */}
+                        {isOnboarded ? (
+                          <span className="inline-flex items-center gap-1 text-[11px] text-positive font-medium">
+                            <CheckCircle2 className="size-3 text-positive" />
+                            <span>Onboarded</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-[11px] text-amber-500 font-medium">
+                            <Clock className="size-3 text-amber-500" />
+                            <span>Setup Pending</span>
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
 
-                  {/* Right: Metrics + Role Badge + Owner Actions */}
-                  <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
-                    {/* Points & Baseline Metrics */}
-                    <div className="flex items-center gap-2 text-xs">
-                      {typeof member.baselineTotalKg === 'number' && member.baselineTotalKg > 0 && (
+                  {/* Right: Per-User Insights (Footprint, Trend, Activity, Privacy) (Requirement 12 & 13) */}
+                  <div className="flex flex-wrap items-center justify-between lg:justify-end gap-3 shrink-0 pt-2 lg:pt-0 border-t border-border/40 lg:border-t-0">
+                    {/* Privacy & Footprint Insights */}
+                    <div className="flex items-center gap-2.5">
+                      {!isSharingFootprint ? (
+                        /* Respect Privacy: Not Consented */
                         <span
-                          className="inline-flex items-center gap-1 rounded-xs bg-muted border border-border px-2 py-1 font-mono text-[11px] text-foreground"
-                          title="Daily carbon baseline"
+                          className="inline-flex items-center gap-1.5 rounded-md bg-muted border border-border px-2.5 py-1 text-xs text-muted-foreground font-medium"
+                          title="User has opted out of sharing individual footprint data with organization admins"
                         >
-                          <Flame className="size-3 text-amber-500" aria-hidden="true" />
-                          <span>{formatKg(member.baselineTotalKg, 1)}/d</span>
+                          <Shield className="size-3 text-muted-foreground" aria-hidden="true" />
+                          <span>Private Footprint</span>
                         </span>
+                      ) : (
+                        /* Consented Insights */
+                        <div className="flex items-center gap-2 text-xs">
+                          {/* Baseline Footprint */}
+                          {typeof member.baselineTotalKg === 'number' &&
+                            member.baselineTotalKg > 0 && (
+                              <span
+                                className="inline-flex items-center gap-1 rounded-md bg-muted border border-border px-2.5 py-1 font-mono text-xs text-foreground"
+                                title="Daily carbon footprint baseline"
+                              >
+                                <span className="text-muted-foreground">Base:</span>
+                                <span className="font-bold">
+                                  {formatKg(member.baselineTotalKg, 1)}/d
+                                </span>
+                              </span>
+                            )}
+
+                          {/* 30-Day Footprint */}
+                          {typeof m.last30DaysTotalKg === 'number' && m.last30DaysTotalKg > 0 && (
+                            <span
+                              className="inline-flex items-center gap-1 rounded-md bg-muted/80 border border-border px-2 py-1 font-mono text-xs text-foreground"
+                              title="Last 30 days total carbon footprint"
+                            >
+                              <span className="text-muted-foreground">30d:</span>
+                              <span className="font-bold">{formatKg(m.last30DaysTotalKg, 1)}</span>
+                            </span>
+                          )}
+
+                          {/* Trend / Reduction % */}
+                          {typeof m.reductionPct === 'number' && (
+                            <span
+                              className={`inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-bold font-mono ${
+                                m.reductionPct > 0
+                                  ? 'bg-positive/10 text-positive border border-positive/30'
+                                  : 'bg-amber-500/10 text-amber-500 border border-amber-500/30'
+                              }`}
+                              title={
+                                m.reductionPct > 0
+                                  ? `${m.reductionPct}% reduction vs baseline`
+                                  : `${Math.abs(m.reductionPct)}% increase vs baseline`
+                              }
+                            >
+                              {m.reductionPct > 0 ? (
+                                <>
+                                  <TrendingDown className="size-3" />
+                                  <span>-{m.reductionPct}%</span>
+                                </>
+                              ) : (
+                                <>
+                                  <TrendingUp className="size-3" />
+                                  <span>+{Math.abs(m.reductionPct)}%</span>
+                                </>
+                              )}
+                            </span>
+                          )}
+                        </div>
                       )}
 
-                      {typeof member.pointsTotal === 'number' && (
-                        <span
-                          className="inline-flex items-center gap-1 rounded-xs bg-accent/60 border border-tertiary/40 px-2 py-1 font-mono text-[11px] font-semibold text-positive"
-                          title="EcoPoints total"
-                        >
-                          <Award className="size-3" aria-hidden="true" />
-                          <span>{formatNumber(member.pointsTotal)} pts</span>
-                        </span>
-                      )}
+                      {/* Streak & EcoPoints Activity */}
+                      <div className="flex items-center gap-1.5 text-xs pl-1">
+                        {typeof m.currentStreak === 'number' && m.currentStreak > 0 && (
+                          <span
+                            className="inline-flex items-center gap-1 rounded-md bg-orange-500/10 text-orange-600 border border-orange-500/20 px-2 py-1 text-xs font-bold font-mono"
+                            title="Daily logging streak"
+                          >
+                            <Flame className="size-3 text-orange-500" />
+                            <span>{m.currentStreak}d</span>
+                          </span>
+                        )}
+
+                        {typeof member.pointsTotal === 'number' && (
+                          <span
+                            className="inline-flex items-center gap-1 rounded-md bg-primary/10 border border-primary/20 px-2 py-1 font-mono text-xs font-bold text-primary"
+                            title="EcoPoints total"
+                          >
+                            <Award className="size-3" />
+                            <span>{formatNumber(member.pointsTotal)}</span>
+                          </span>
+                        )}
+                      </div>
                     </div>
 
-                    {/* Role Badge */}
-                    <Badge
-                      variant={isMemberOwner ? 'primary' : 'neutral'}
-                      className="text-[11px] gap-1"
-                    >
-                      {isMemberOwner ? (
-                        <>
-                          <Crown className="size-3 text-yellow-300" aria-hidden="true" />
-                          <span>Owner</span>
-                        </>
-                      ) : (
-                        <>
-                          <UserCheck className="size-3" aria-hidden="true" />
-                          <span>Member</span>
-                        </>
-                      )}
-                    </Badge>
+                    {/* View Custom Onboarding Answers (Owner only) */}
+                    {isOwner && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSelectedMemberForAnswers(member)}
+                        className="size-8 p-0 text-muted-foreground hover:text-primary hover:bg-primary/10 shrink-0"
+                        title="View custom onboarding answers"
+                        aria-label={`View answers for ${member.user.name}`}
+                      >
+                        <FileQuestion className="size-3.5" aria-hidden="true" />
+                      </Button>
+                    )}
 
                     {/* Remove Member Button (Owner only, cannot remove self) */}
                     {isOwner && !isCurrentUser && (
@@ -245,7 +428,7 @@ export function OrgRoster({ organization, members, currentUserId, userRole }: Or
                         variant="outline"
                         size="sm"
                         onClick={() => setMemberToRemove(member)}
-                        className="size-8 p-0 text-muted-foreground hover:text-destructive hover:border-destructive/40"
+                        className="size-8 p-0 text-muted-foreground hover:text-destructive hover:border-destructive/40 shrink-0"
                         title="Remove member from organization"
                         aria-label={`Remove ${member.user.name}`}
                       >
@@ -264,75 +447,82 @@ export function OrgRoster({ organization, members, currentUserId, userRole }: Or
       <ModalDialog
         open={addModalOpen}
         onClose={() => setAddModalOpen(false)}
-        title="Add Colleague by Email"
-        description="Add a member who already has an account on EcoLife directly to your organization."
+        title="Add Team Member"
+        description={`Enroll an employee or colleague into ${organization.name}.`}
+        size="sm"
       >
-        <form onSubmit={handleAddSubmit} className="space-y-4 pt-2">
+        <form onSubmit={handleAddSubmit} className="space-y-4">
           <div className="space-y-1.5">
             <label htmlFor="invite-email" className="text-xs font-semibold text-foreground">
-              User Email Address <span className="text-destructive">*</span>
+              Colleague Email Address
             </label>
             <Input
               id="invite-email"
               type="email"
-              placeholder="colleague@yourcompany.com"
+              required
+              placeholder="colleague@example.com"
               value={inviteEmail}
               onChange={(e) => setInviteEmail(e.target.value)}
-              required
-              autoFocus
             />
             <p className="text-[11px] text-muted-foreground">
-              The user must already have registered an account with this email address.
+              The user must already have registered an account on EcoLife.
             </p>
           </div>
 
           <div className="space-y-1.5">
             <label htmlFor="invite-role" className="text-xs font-semibold text-foreground">
-              Organizational Role
+              Role in Organization
             </label>
             <Select
               id="invite-role"
               value={inviteRole}
-              onChange={(e) => setInviteRole(e.target.value as any)}
+              onChange={(e) => setInviteRole(e.target.value as 'owner' | 'member')}
             >
-              <option value="member">Member (view cumulative metrics &amp; roster)</option>
-              <option value="owner">Owner (can manage members &amp; organization details)</option>
+              <option value="member">Member (Can track and view team portal)</option>
+              <option value="owner">
+                Owner / Admin (Can manage roster, code, and ESG reports)
+              </option>
             </Select>
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setAddModalOpen(false)}
-            >
+            <Button type="button" variant="outline" onClick={() => setAddModalOpen(false)}>
               Cancel
             </Button>
             <Button
               type="submit"
               variant="primary"
-              size="sm"
-              disabled={addMember.isPending || !inviteEmail.trim()}
+              disabled={!inviteEmail.trim() || addMember.isPending}
+              loading={addMember.isPending}
             >
-              <UserPlus className="size-3.5 mr-1.5" aria-hidden="true" />
-              {addMember.isPending ? 'Adding…' : 'Add to Organization'}
+              Add to Organization
             </Button>
           </div>
         </form>
       </ModalDialog>
 
       {/* Remove Member Confirmation Dialog */}
-      <ConfirmDialog
-        open={Boolean(memberToRemove)}
-        onClose={() => setMemberToRemove(null)}
-        onConfirm={handleRemoveConfirm}
-        title={`Remove ${memberToRemove?.user.name}?`}
-        description="Are you sure you want to remove this employee from the organization? Their individual points and account will remain active, but they will be detached from your team's cumulative carbon tracking."
-        confirmText="Remove Member"
-        confirmVariant="destructive"
-        loading={removeMember.isPending}
-      />
+      {memberToRemove && (
+        <ConfirmDialog
+          open={Boolean(memberToRemove)}
+          onClose={() => setMemberToRemove(null)}
+          onConfirm={handleRemoveConfirm}
+          title={`Remove ${memberToRemove.user.name}?`}
+          description={`Are you sure you want to remove ${memberToRemove.user.name} from ${organization.name}? They will lose access to team challenges, leaderboards, and exclusive partner events.`}
+          confirmText="Remove Member"
+          confirmVariant="destructive"
+          loading={removeMember.isPending}
+        />
+      )}
+
+      {/* Member Custom Answers Dialog */}
+      {selectedMemberForAnswers && (
+        <OrgMemberAnswersDialog
+          organizationId={organization.id}
+          member={selectedMemberForAnswers}
+          onClose={() => setSelectedMemberForAnswers(null)}
+        />
+      )}
     </>
   );
 }

@@ -4,8 +4,9 @@ import {
   useMutation,
   useQueryClient,
 } from '@tanstack/react-query';
-import { api, qs } from '@/lib/fetcher';
+import { API_BASE, api, qs } from '@/lib/fetcher';
 import { qk } from '@/lib/query-keys';
+import { getAccessToken } from '@/lib/session';
 import type { Page, Schema } from '@/types/api';
 
 /**
@@ -26,6 +27,8 @@ export type EventFilter = 'upcoming' | 'nearby' | 'registered' | 'hosting' | 'pa
 export type EventListFilters = {
   filter?: EventFilter;
   type?: EventType;
+  search?: string;
+  organizationId?: number;
   lat?: number;
   lng?: number;
   radiusKm?: number;
@@ -207,4 +210,25 @@ export function passCodeFromQr(raw: string): string {
   const trimmed = raw.trim();
   const m = trimmed.match(/^ecolife:\/\/pass\/(.+)$/i);
   return m ? decodeURIComponent(m[1]) : trimmed;
+}
+
+/** Trigger browser download for an event's participants CSV export (host only). */
+export async function downloadEventParticipantsCsv(
+  eventId: number,
+  filename?: string,
+): Promise<void> {
+  const token = getAccessToken();
+  const res = await fetch(`${API_BASE}/events/${eventId}/participants/export`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+  });
+  if (!res.ok) throw new Error('Failed to export participants.');
+  const blob = await res.blob();
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename || `event-${eventId}-participants.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.URL.revokeObjectURL(url);
 }

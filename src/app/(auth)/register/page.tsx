@@ -1,6 +1,7 @@
 'use client';
 
-import { ArrowRight, Loader2, Sparkles } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { ArrowRight, Building2, CheckCircle2, Loader2, Sparkles, XCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import * as React from 'react';
@@ -8,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { ErrorBanner } from '@/components/ui/error-banner';
 import { Field, Input } from '@/components/ui/input';
 import { landingPathFor, useRegister } from '@/hooks/use-auth';
+import { orgLookupQuery } from '@/hooks/use-organization';
 import { fieldErrors } from '@/lib/errors';
 
 export default function RegisterPage() {
@@ -18,11 +20,21 @@ export default function RegisterPage() {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [phone, setPhone] = React.useState('');
+  const [orgCode, setOrgCode] = React.useState('');
+
+  const cleanOrgCode = orgCode.trim();
+  const isSixDigits = /^\d{6}$/.test(cleanOrgCode);
+  const lookupQuery = useQuery(orgLookupQuery(cleanOrgCode));
 
   const issues = fieldErrors(register.error);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (cleanOrgCode) {
+      if (!isSixDigits || lookupQuery.isError) {
+        return;
+      }
+    }
     register.mutate(
       {
         name: name.trim(),
@@ -30,6 +42,7 @@ export default function RegisterPage() {
         password,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata',
         ...(phone.trim() ? { phone: phone.trim() } : {}),
+        ...(cleanOrgCode && isSixDigits ? { organizationCode: cleanOrgCode } : {}),
       },
       {
         onSuccess: (res) => {
@@ -110,12 +123,73 @@ export default function RegisterPage() {
           />
         </Field>
 
+        <Field
+          id="reg-orgcode"
+          label="Organization Code (optional)"
+          hint="Have a 6-digit code from your company, NGO, or partner? Enter it here to link your account."
+          error={
+            cleanOrgCode.length > 0 && !isSixDigits
+              ? 'Organization code must be exactly 6 digits.'
+              : lookupQuery.isError
+                ? (lookupQuery.error as { message?: string })?.message ||
+                  'No approved organization found with this code.'
+                : issues.organizationCode
+          }
+        >
+          <div className="relative">
+            <Input
+              id="reg-orgcode"
+              type="text"
+              inputMode="numeric"
+              maxLength={6}
+              placeholder="e.g. 482910"
+              className="font-mono tracking-widest uppercase pr-10"
+              value={orgCode}
+              onChange={(e) => setOrgCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+            />
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+              {lookupQuery.isFetching && (
+                <Loader2 className="size-4 animate-spin text-muted-foreground" aria-hidden="true" />
+              )}
+              {!lookupQuery.isFetching && isSixDigits && lookupQuery.data?.valid && (
+                <CheckCircle2 className="size-4 text-positive" aria-hidden="true" />
+              )}
+              {!lookupQuery.isFetching && isSixDigits && lookupQuery.isError && (
+                <XCircle className="size-4 text-destructive" aria-hidden="true" />
+              )}
+            </div>
+          </div>
+
+          {/* Validated Organization Preview Banner */}
+          {isSixDigits && lookupQuery.data?.valid && (
+            <div className="mt-2 flex items-center gap-2 rounded-xs border border-positive/30 bg-positive/5 px-2.5 py-1.5 text-xs text-positive font-medium">
+              <Building2 className="size-3.5 shrink-0" aria-hidden="true" />
+              <span>
+                Linking to: <strong>{lookupQuery.data.name}</strong> (
+                {lookupQuery.data.type === 'industry'
+                  ? 'Corporate'
+                  : lookupQuery.data.type === 'ngo'
+                    ? 'Community'
+                    : 'Marketplace'}{' '}
+                Partner)
+              </span>
+            </div>
+          )}
+        </Field>
+
         <Button
           type="submit"
           variant="primary"
           size="lg"
           className="w-full"
-          disabled={register.isPending || !name.trim() || !email.trim() || password.length < 8}
+          disabled={
+            register.isPending ||
+            !name.trim() ||
+            !email.trim() ||
+            password.length < 8 ||
+            (cleanOrgCode.length > 0 &&
+              (!isSixDigits || lookupQuery.isError || lookupQuery.isFetching))
+          }
         >
           {register.isPending ? (
             <>
@@ -135,6 +209,13 @@ export default function RegisterPage() {
         Already have an account?{' '}
         <Link href="/login" className="font-semibold text-positive hover:underline">
           Sign in
+        </Link>
+      </div>
+
+      <div className="rounded-sm border border-primary/20 bg-primary/5 p-3 text-center text-xs text-muted-foreground">
+        Represent an industry, NGO, or eco-brand?{' '}
+        <Link href="/partner-register" className="font-semibold text-primary hover:underline">
+          Register as a Partner Organization &rarr;
         </Link>
       </div>
     </div>

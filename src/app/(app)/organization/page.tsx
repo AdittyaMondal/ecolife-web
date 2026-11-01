@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 import * as React from 'react';
 import { OrgAnalytics } from '@/components/blocks/organization/org-analytics';
 import { OrgEditDialog } from '@/components/blocks/organization/org-edit-dialog';
@@ -76,6 +77,7 @@ function OrganizationSkeletons() {
 }
 
 export default function OrganizationPage() {
+  const router = useRouter();
   const [editDialogOpen, setEditDialogOpen] = React.useState(false);
 
   const { data: me } = useQuery(meQuery());
@@ -83,6 +85,18 @@ export default function OrganizationPage() {
 
   const org = myOrgData?.organization ?? null;
   const role = myOrgData?.role ?? 'member';
+
+  // Automatically navigate to dedicated portal if enrolled
+  React.useEffect(() => {
+    if (!org) return;
+    if (org.type === 'industry') {
+      router.replace('/organization/corporate');
+    } else if (org.type === 'ngo') {
+      router.replace('/organization/community');
+    } else if (org.type === 'seller') {
+      router.replace('/marketplace/seller');
+    }
+  }, [org, router]);
 
   const { data: membersData } = useQuery({
     ...orgMembersQuery(org?.id ?? 0),

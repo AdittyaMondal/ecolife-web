@@ -47,6 +47,7 @@ import {
   useCompleteOnboarding,
   useSaveOnboardingStep,
 } from '@/hooks/use-onboarding';
+import { myOrgOnboardingQuery } from '@/hooks/use-organization';
 import { ApiError } from '@/lib/fetcher';
 import { formatKg } from '@/lib/format';
 import { qk } from '@/lib/query-keys';
@@ -180,6 +181,12 @@ function OnboardingStepContent() {
   const StepIcon = meta.icon;
 
   const { data: state, isPending, error, refetch, isFetching } = useQuery(onboardingQuery());
+  const { data: orgOnboarding } = useQuery(myOrgOnboardingQuery());
+  const hasOrgQuestions = Boolean(
+    orgOnboarding?.organization &&
+      (orgOnboarding?.questions?.length ?? 0) > 0 &&
+      !orgOnboarding?.isCompleted,
+  );
   const { data: regions } = useQuery(regionsQuery());
 
   const saveStep = useSaveOnboardingStep();
@@ -480,10 +487,14 @@ function OnboardingStepContent() {
             <Button
               variant="primary"
               size="lg"
-              className="w-full"
-              onClick={() => router.push('/home')}
+              className="w-full gap-2"
+              onClick={() => router.push(hasOrgQuestions ? '/organization-onboarding' : '/home')}
             >
-              <span>Enter EcoLife Home</span>
+              <span>
+                {hasOrgQuestions
+                  ? `Continue to ${orgOnboarding?.organization.name} Questions`
+                  : 'Enter EcoLife Home'}
+              </span>
               <ArrowRight className="size-4" aria-hidden="true" />
             </Button>
           </Card>

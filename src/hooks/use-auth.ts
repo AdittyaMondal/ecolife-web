@@ -18,11 +18,7 @@ export const meQuery = () =>
     staleTime: 30_000,
   });
 
-/** Where a signed-in user belongs: the wizard until onboarding is complete. */
-export function landingPathFor(me: Pick<Me, 'onboardingComplete' | 'completedSteps'>) {
-  if (me.onboardingComplete) return '/home';
-  return `/step/${Math.min(5, Math.max(1, me.completedSteps + 1))}`;
-}
+export { landingPathFor } from '@/lib/routing';
 
 function useSignedIn() {
   const qc = useQueryClient();

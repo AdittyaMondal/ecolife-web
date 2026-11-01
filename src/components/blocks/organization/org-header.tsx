@@ -13,6 +13,7 @@ import {
   Mail,
   MapPin,
   Phone,
+  RefreshCw,
   ShieldAlert,
   ShieldCheck,
   UserCheck,
@@ -24,7 +25,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ConfirmDialog } from '@/components/ui/dialog';
-import { useLeaveOrganization } from '@/hooks/use-organization';
+import { useLeaveOrganization, useRegenerateOrgCode } from '@/hooks/use-organization';
 import { initials } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import type { Organization } from '@/types/api';
@@ -39,17 +40,35 @@ export interface OrgHeaderProps {
 export function OrgHeader({ organization, role, isAdmin, onEditClick }: OrgHeaderProps) {
   const [copied, setCopied] = React.useState(false);
   const [leaveDialogOpen, setLeaveDialogOpen] = React.useState(false);
+  const [regenDialogOpen, setRegenDialogOpen] = React.useState(false);
   const leaveOrg = useLeaveOrganization();
+  const regenCode = useRegenerateOrgCode();
+
+  const activeCode = organization.code || organization.slug;
 
   const handleCopyCode = async () => {
     try {
-      await navigator.clipboard.writeText(organization.slug);
+      await navigator.clipboard.writeText(activeCode);
       setCopied(true);
       toast.success('Organization code copied to clipboard!');
       setTimeout(() => setCopied(false), 2000);
     } catch {
       toast.error('Could not copy code to clipboard.');
     }
+  };
+
+  const handleRegenerateConfirm = () => {
+    regenCode.mutate(undefined, {
+      onSuccess: (res) => {
+        toast.success(`Organization code regenerated: ${res.code}`);
+        setRegenDialogOpen(false);
+      },
+      onError: (err: unknown) => {
+        const apiErr = err as { message?: string };
+        toast.error(apiErr?.message || 'Could not regenerate code.');
+        setRegenDialogOpen(false);
+      },
+    });
   };
 
   const handleLeaveConfirm = () => {
@@ -226,19 +245,24 @@ export function OrgHeader({ organization, role, isAdmin, onEditClick }: OrgHeade
           </div>
         </div>
 
-        {/* Shareable Code / Slug Banner */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-sm border border-secondary/30 bg-muted/50 p-3 sm:px-4">
+        {/* Shareable 6-digit Code Banner */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-lg border border-primary/20 bg-primary/5 p-3.5 sm:px-4">
           <div className="space-y-0.5">
-            <p className="text-xs font-semibold text-foreground">Organization Join Code / Slug</p>
+            <div className="flex items-center gap-2">
+              <p className="text-xs font-semibold text-foreground">Organization Join Code</p>
+              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-sm bg-primary/10 text-primary">
+                6-digit code
+              </span>
+            </div>
             <p className="text-xs text-muted-foreground">
-              Share this code with your employees and colleagues so they can enroll into your team
-              portal.
+              Employees and colleagues enter this 6-digit code during registration or in profile
+              settings to link to your organization.
             </p>
           </div>
 
           <div className="flex items-center gap-2">
-            <code className="font-mono text-sm font-bold bg-card border border-border px-3 py-1.5 rounded-xs text-primary tracking-wide">
-              {organization.slug}
+            <code className="font-mono text-base font-black bg-card border border-border px-3 py-1 rounded-md text-primary tracking-widest select-all">
+              {activeCode}
             </code>
             <Button
               variant="outline"
@@ -254,10 +278,22 @@ export function OrgHeader({ organization, role, isAdmin, onEditClick }: OrgHeade
               ) : (
                 <>
                   <Copy className="size-3.5" aria-hidden="true" />
-                  <span>Copy Code</span>
+                  <span>Copy</span>
                 </>
               )}
             </Button>
+            {isOwner && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setRegenDialogOpen(true)}
+                className="gap-1.5 text-xs shrink-0 hover:text-warning hover:border-warning/40"
+                title="Generate a new 6-digit code"
+              >
+                <RefreshCw className="size-3.5" aria-hidden="true" />
+                <span>Regenerate</span>
+              </Button>
+            )}
           </div>
         </div>
 
@@ -313,6 +349,18 @@ export function OrgHeader({ organization, role, isAdmin, onEditClick }: OrgHeade
         confirmText="Leave Organization"
         confirmVariant="destructive"
         loading={leaveOrg.isPending}
+      />
+
+      {/* Regenerate Organization Code Dialog */}
+      <ConfirmDialog
+        open={regenDialogOpen}
+        onClose={() => setRegenDialogOpen(false)}
+        onConfirm={handleRegenerateConfirm}
+        title="Regenerate Organization Code?"
+        description="This will invalidate the current 6-digit code immediately. New employees must use the newly generated code to link during signup or in settings. Existing members remain unaffected."
+        confirmText="Regenerate Code"
+        confirmVariant="primary"
+        loading={regenCode.isPending}
       />
     </>
   );
