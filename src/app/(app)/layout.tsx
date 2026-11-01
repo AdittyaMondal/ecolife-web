@@ -13,9 +13,10 @@ import {
   LogOut,
   MailWarning,
   Moon,
+  ShieldCheck,
   ShoppingBag,
   Sun,
-  ShieldCheck,
+  Trees,
   Trophy,
   User,
 } from 'lucide-react';
@@ -40,6 +41,7 @@ const PRIMARY_NAV = [
 ] as const;
 
 const SECONDARY_NAV = [
+  { href: '/garden', label: 'Garden', icon: Trees },
   { href: '/organization', label: 'Organization', icon: Building2 },
   { href: '/leaderboard', label: 'Leaderboard', icon: Trophy },
   { href: '/profile', label: 'Profile', icon: User },
@@ -328,6 +330,14 @@ function AppLayoutShell({ children }: { children: React.ReactNode }) {
               <span className="tabular">{formatNumber(me.wallet.coinsBalance)}</span>
             </Link>
           )}
+
+          <Link
+            href="/garden"
+            aria-label="Garden"
+            className="inline-flex size-9 items-center justify-center rounded-xs border border-border bg-muted text-foreground"
+          >
+            <Trees className="size-4" aria-hidden="true" />
+          </Link>
 
           <Link
             href="/organization"

@@ -23,3 +23,12 @@ export type AddOrganizationMemberBody = Schema<'AddOrganizationMemberBody'>;
 export type JoinOrganizationBody = Schema<'JoinOrganizationBody'>;
 export type JoinOrganizationResult = Schema<'JoinOrganizationResult'>;
 export type ReviewOrganizationBody = Schema<'ReviewOrganizationBody'>;
+
+export type {
+  GardenInventoryItem,
+  GardenState,
+  GrowthStage,
+  PlantedTree,
+  Tree,
+  TreeRarity,
+} from './trees';

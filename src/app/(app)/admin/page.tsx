@@ -177,9 +177,7 @@ export default function AdminPage() {
       { id: reviewDialog.org.id, body: payload },
       {
         onSuccess: () => {
-          toast.success(
-            `Organization "${reviewDialog.org?.name}" ${reviewDialog.decision}ed.`,
-          );
+          toast.success(`Organization "${reviewDialog.org?.name}" ${reviewDialog.decision}ed.`);
           setReviewDialog({ open: false, org: null, decision: 'reject', note: '' });
           refetch();
         },
@@ -254,9 +252,7 @@ export default function AdminPage() {
           <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-secondary text-primary">
             <CheckCircle2 className="size-6" aria-hidden="true" />
           </div>
-          <h2 className="text-base font-bold text-foreground">
-            No organizations in this queue
-          </h2>
+          <h2 className="text-base font-bold text-foreground">No organizations in this queue</h2>
           <p className="text-xs text-muted-foreground max-w-sm mx-auto">
             {selectedStatus === 'pending'
               ? 'All pending organization applications have been reviewed. Good job!'
@@ -340,7 +336,8 @@ export default function AdminPage() {
                         )}
 
                         <span className="text-[11px] text-muted-foreground">
-                          · Enrolled: {org.memberCount} {org.memberCount === 1 ? 'member' : 'members'}
+                          · Enrolled: {org.memberCount}{' '}
+                          {org.memberCount === 1 ? 'member' : 'members'}
                         </span>
                         <span className="text-[11px] text-muted-foreground">
                           · Applied {formatDateLong(org.createdAt)}
@@ -501,7 +498,8 @@ export default function AdminPage() {
                 {org.reviewNote && (
                   <div className="rounded-sm border border-border bg-muted/60 p-3 text-xs space-y-0.5">
                     <span className="font-semibold text-foreground">
-                      Admin Working Note ({org.reviewedAt ? formatDateLong(org.reviewedAt) : 'Logged'}):
+                      Admin Working Note (
+                      {org.reviewedAt ? formatDateLong(org.reviewedAt) : 'Logged'}):
                     </span>
                     <p className="text-muted-foreground">{org.reviewNote}</p>
                   </div>
@@ -536,9 +534,7 @@ export default function AdminPage() {
                   : 'e.g. Temporary suspension due to investigation into spoofed employee accounts...'
               }
               value={reviewDialog.note}
-              onChange={(e) =>
-                setReviewDialog((prev) => ({ ...prev, note: e.target.value }))
-              }
+              onChange={(e) => setReviewDialog((prev) => ({ ...prev, note: e.target.value }))}
               rows={3}
               required
               autoFocus
