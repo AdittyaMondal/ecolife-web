@@ -1,16 +1,22 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import * as React from 'react';
 import { GardenCanvas } from '@/components/blocks/garden/garden-canvas';
 import { GardenHeader } from '@/components/blocks/garden/garden-header';
 import { GardenHotbar } from '@/components/blocks/garden/garden-hotbar';
 import { GardenInventoryDialog } from '@/components/blocks/garden/garden-inventory-dialog';
+import { GardenShopDialog } from '@/components/blocks/garden/garden-shop-dialog';
 import { TreeRewardDialog } from '@/components/blocks/garden/tree-reward-dialog';
 import { Card } from '@/components/ui/card';
+import { meQuery } from '@/hooks/use-auth';
 import { useGarden } from '@/hooks/use-garden';
 import type { Tree } from '@/types/trees';
 
 export default function GardenPage() {
+  const me = useQuery(meQuery());
+  const userCoins = me.data?.wallet?.coinsBalance ?? 0;
+
   const {
     state,
     isLoaded,
@@ -24,12 +30,17 @@ export default function GardenPage() {
     setActiveHotbarIndex,
     assignToHotbar,
     claimReward,
+    equipSkin,
+    buyAndEquipSkin,
+    equipBiome,
+    buyAndEquipBiome,
   } = useGarden();
 
   const [activeTool, setActiveTool] = React.useState<'plant' | 'water' | 'remove' | 'move'>(
     'plant',
   );
   const [inventoryOpen, setInventoryOpen] = React.useState(false);
+  const [shopOpen, setShopOpen] = React.useState(false);
   const [rewardTree, setRewardTree] = React.useState<Tree | null>(null);
 
   // Click on a garden tile
@@ -107,7 +118,12 @@ export default function GardenPage() {
   return (
     <div className="space-y-6 animate-fade-in max-w-5xl mx-auto">
       {/* Garden Header & Metrics */}
-      <GardenHeader state={state} onClaimRewardSeed={handleClaimReward} />
+      <GardenHeader
+        state={state}
+        userCoins={userCoins}
+        onClaimRewardSeed={handleClaimReward}
+        onOpenShop={() => setShopOpen(true)}
+      />
 
       {/* 2D Pixel Art Canvas Viewport */}
       <GardenCanvas
@@ -141,6 +157,18 @@ export default function GardenPage() {
         state={state}
         onAssignToHotbar={assignToHotbar}
         onPlantNow={handlePlantNowFromInventory}
+      />
+
+      {/* Wardrobe & Garden Shop Dialog */}
+      <GardenShopDialog
+        open={shopOpen}
+        onClose={() => setShopOpen(false)}
+        state={state}
+        userCoins={userCoins}
+        onEquipSkin={equipSkin}
+        onBuySkin={(skin) => buyAndEquipSkin(skin, userCoins)}
+        onEquipBiome={equipBiome}
+        onBuyBiome={(biome) => buyAndEquipBiome(biome, userCoins)}
       />
 
       {/* Reward Seed Unlocked Dialog */}

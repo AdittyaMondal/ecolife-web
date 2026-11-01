@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { toast } from 'sonner';
 import { getTreeBySlug, rollTreeReward, TREE_CATALOGUE } from '@/lib/tree-catalogue';
-import type { GardenState, PlantedTree, Tree } from '@/types/trees';
+import type { CharacterSkinId, GardenBiomeId, GardenState, PlantedTree, ShopItemBiome, ShopItemSkin, Tree } from '@/types/trees';
 
 const STORAGE_KEY = 'ecolife_garden_v1';
 
@@ -55,6 +55,10 @@ export const INITIAL_GARDEN_STATE: GardenState = {
     totalOffsetKgPerYear: 118.5,
     timesWatered: 2,
   },
+  activeSkinId: 'gardener_default',
+  unlockedSkins: ['gardener_default'],
+  activeBiomeId: 'meadow',
+  unlockedBiomes: ['meadow'],
 };
 
 function calculateTotalOffset(planted: PlantedTree[]): number {
@@ -400,6 +404,62 @@ export function useGarden() {
     return awarded;
   }, [state, saveState]);
 
+  // Equip an unlocked character skin
+  const equipSkin = React.useCallback(
+    (skinId: CharacterSkinId) => {
+      saveState({ ...state, activeSkinId: skinId });
+      toast.success('Equipped new character skin!');
+    },
+    [state, saveState],
+  );
+
+  // Buy and equip character skin with EcoCoins
+  const buyAndEquipSkin = React.useCallback(
+    (skin: ShopItemSkin, userCoins: number): boolean => {
+      if (skin.priceCoins > userCoins) {
+        toast.error(`Not enough EcoCoins! You have ${userCoins} and need ${skin.priceCoins}.`);
+        return false;
+      }
+      const unlocked = Array.from(new Set([...(state.unlockedSkins || ['gardener_default']), skin.id]));
+      saveState({
+        ...state,
+        unlockedSkins: unlocked,
+        activeSkinId: skin.id,
+      });
+      toast.success(`Purchased and equipped ${skin.name}!`);
+      return true;
+    },
+    [state, saveState],
+  );
+
+  // Equip an unlocked biome / layout
+  const equipBiome = React.useCallback(
+    (biomeId: GardenBiomeId) => {
+      saveState({ ...state, activeBiomeId: biomeId });
+      toast.success('Applied garden biome!');
+    },
+    [state, saveState],
+  );
+
+  // Buy and equip biome layout with EcoCoins
+  const buyAndEquipBiome = React.useCallback(
+    (biome: ShopItemBiome, userCoins: number): boolean => {
+      if (biome.priceCoins > userCoins) {
+        toast.error(`Not enough EcoCoins! You have ${userCoins} and need ${biome.priceCoins}.`);
+        return false;
+      }
+      const unlocked = Array.from(new Set([...(state.unlockedBiomes || ['meadow']), biome.id]));
+      saveState({
+        ...state,
+        unlockedBiomes: unlocked,
+        activeBiomeId: biome.id,
+      });
+      toast.success(`Purchased and applied ${biome.name} biome!`);
+      return true;
+    },
+    [state, saveState],
+  );
+
   return {
     state,
     isLoaded,
@@ -414,5 +474,9 @@ export function useGarden() {
     assignToHotbar,
     claimReward,
     isTileBlocked,
+    equipSkin,
+    buyAndEquipSkin,
+    equipBiome,
+    buyAndEquipBiome,
   };
 }

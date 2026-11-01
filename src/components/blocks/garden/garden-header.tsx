@@ -1,19 +1,21 @@
 'use client';
 
-import { Gift, HelpCircle, Leaf, Sprout, Trees } from 'lucide-react';
+import { Coins, Gift, HelpCircle, Leaf, Palette, Sprout, Trees } from 'lucide-react';
 import * as React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ModalDialog } from '@/components/ui/dialog';
-import { formatKg } from '@/lib/format';
+import { formatKg, formatNumber } from '@/lib/format';
 import type { GardenState } from '@/types/trees';
 
 export interface GardenHeaderProps {
   state: GardenState;
+  userCoins?: number;
   onClaimRewardSeed: () => void;
+  onOpenShop?: () => void;
 }
 
-export function GardenHeader({ state, onClaimRewardSeed }: GardenHeaderProps) {
+export function GardenHeader({ state, userCoins = 0, onClaimRewardSeed, onOpenShop }: GardenHeaderProps) {
   const [helpOpen, setHelpOpen] = React.useState(false);
 
   const plantedCount = state.plantedTrees.length;
@@ -45,7 +47,27 @@ export function GardenHeader({ state, onClaimRewardSeed }: GardenHeaderProps) {
             </p>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Garden Shop & Wardrobe modal button */}
+            {onOpenShop && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onOpenShop}
+                className="gap-1.5 text-xs h-9 bg-card hover:bg-accent border-border"
+                title="Customize character skin and garden layout"
+              >
+                <Palette className="size-3.5 text-primary" aria-hidden="true" />
+                <span>Shop & Wardrobe</span>
+                {userCoins > 0 && (
+                  <span className="flex items-center gap-1 rounded-full bg-amber-500/10 text-amber-600 px-1.5 py-0.2 text-[10px] font-bold">
+                    <Coins className="size-2.5" />
+                    {formatNumber(userCoins)}
+                  </span>
+                )}
+              </Button>
+            )}
+
             {/* Help / Controls modal button */}
             <Button
               variant="outline"
