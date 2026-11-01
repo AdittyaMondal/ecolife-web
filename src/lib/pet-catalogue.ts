@@ -84,3 +84,4 @@ export const PET_ITEMS: ShopItemPet[] = [
 export function getPetById(id: PetId): ShopItemPet {
   return PET_ITEMS.find((p) => p.id === id) || PET_ITEMS[0];
 }
+

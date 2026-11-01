@@ -1093,3 +1093,4 @@ await generateUnicorn();
 await generatePegasus();
 
 console.log('★ All 7 pet species multi-frame pixel sprites generated successfully!');
+
