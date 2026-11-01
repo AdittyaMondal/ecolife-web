@@ -41,3 +41,12 @@ export type OrgAnswerItem = Schema<'OrgAnswerItem'>;
 export type OrgAnswerInput = Schema<'OrgAnswerInput'>;
 export type SubmitOrgOnboardingAnswersBody = Schema<'SubmitOrgOnboardingAnswersBody'>;
 export type OrgEmployeeAnswers = Schema<'OrgEmployeeAnswers'>;
+
+export type {
+  GardenInventoryItem,
+  GardenState,
+  GrowthStage,
+  PlantedTree,
+  Tree,
+  TreeRarity,
+} from './trees';

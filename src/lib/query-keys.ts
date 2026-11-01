@@ -60,4 +60,9 @@ export const qk = {
   orgMemberAnswers: (id: number, userId: number) =>
     [...root, 'organization', id, 'members', userId, 'answers'] as const,
   adminOrgs: (status?: string) => [...root, 'admin', 'organizations', status ?? 'all'] as const,
+
+  trees: () => [...root, 'trees'] as const,
+  treeList: (rarity?: string) => [...root, 'trees', 'list', rarity ?? 'all'] as const,
+  treeDetail: (slug: string) => [...root, 'trees', 'detail', slug] as const,
+  treeRarities: () => [...root, 'trees', 'rarities'] as const,
 };
