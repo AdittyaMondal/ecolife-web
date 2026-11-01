@@ -58,6 +58,30 @@ export type GardenBiomeId =
   | 'desert_oasis'
   | 'crystal_glade';
 
+export type PetId =
+  | 'dog'
+  | 'cat'
+  | 'horse'
+  | 'tiger'
+  | 'peacock'
+  | 'unicorn'
+  | 'pegasus';
+
+export type PetRarity = 'common' | 'exotic' | 'legendary';
+
+export interface ShopItemPet {
+  id: PetId;
+  name: string;
+  species: string;
+  description: string;
+  idleBehavior: string;
+  rarity: PetRarity;
+  priceCoins: number;
+  previewColor: string;
+  accentColor: string;
+  unlockedByDefault?: boolean;
+}
+
 export interface ShopItemSkin {
   id: CharacterSkinId;
   name: string;
@@ -102,4 +126,6 @@ export interface GardenState {
   unlockedSkins?: CharacterSkinId[];
   activeBiomeId?: GardenBiomeId;
   unlockedBiomes?: GardenBiomeId[];
+  unlockedPets?: PetId[];
+  activePetIds?: PetId[];
 }

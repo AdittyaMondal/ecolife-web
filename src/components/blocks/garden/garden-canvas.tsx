@@ -11,7 +11,19 @@ import {
   TILE_SIZE,
 } from '@/components/blocks/garden/pixel-sprites';
 import { getTreeBySlug } from '@/lib/tree-catalogue';
-import type { GardenState, PlantedTree } from '@/types/trees';
+import type { GardenState, PetId, PlantedTree } from '@/types/trees';
+
+interface ActivePetState {
+  id: PetId;
+  x: number;
+  y: number;
+  targetX: number;
+  targetY: number;
+  facing: 'left' | 'right';
+  state: 'idle' | 'walking';
+  timer: number;
+  speed: number;
+}
 
 export interface GardenCanvasProps {
   state: GardenState;
@@ -54,6 +66,11 @@ export function GardenCanvas({
   const tileImageCacheRef = React.useRef<Map<string, HTMLImageElement>>(new Map());
   // Cache for full unified empty garden layout map images
   const mapImageCacheRef = React.useRef<Map<string, HTMLImageElement>>(new Map());
+  // Cache for free-roaming companion pet sprite images
+  const petImageCacheRef = React.useRef<Map<string, HTMLImageElement>>(new Map());
+
+  // Autonomous wandering pets state map
+  const petsRef = React.useRef<Map<PetId, ActivePetState>>(new Map());
 
   // Preload tree sprites, multi-frame character sprites & biome tiles
   React.useEffect(() => {
@@ -142,6 +159,21 @@ export function GardenCanvas({
           const img = new Image();
           img.src = `/tiles/${key}.png`;
           tileImageCacheRef.current.set(key, img);
+        }
+      }
+    }
+
+    // 5. Preload all free-roaming companion pet sprites (walk & special idle)
+    const petIds = ['dog', 'cat', 'horse', 'tiger', 'peacock', 'unicorn', 'pegasus'];
+    const petAnims = ['walk_0', 'walk_1', 'walk_2', 'idle_0', 'idle_1', 'idle_2'];
+
+    for (const p of petIds) {
+      for (const a of petAnims) {
+        const key = `${p}_${a}`;
+        if (!petImageCacheRef.current.has(key)) {
+          const img = new Image();
+          img.src = `/sprites/pets/${key}.png`;
+          petImageCacheRef.current.set(key, img);
         }
       }
     }
@@ -290,20 +322,12 @@ export function GardenCanvas({
                 drawFenceTile(ctx, px, py, currentBiome);
               }
             }
-            // Garden Cobblestone Pathway
-            else if (r === 5 || (c === 7 && r < 7)) {
+            // Garden Cobblestone Pathway (horizontal row 5, vertical col 7 down to row 7)
+            else if (r === 5 || (c === 7 && r <= 7)) {
               if (pathImg && pathImg.complete && pathImg.naturalWidth > 0) {
                 ctx.drawImage(pathImg, px, py, TILE_SIZE, TILE_SIZE);
               } else {
                 drawPathTile(ctx, px, py, seed, currentBiome);
-              }
-            }
-            // Garden Pond at (7, 7) and (8, 7)
-            else if ((c === 7 || c === 8) && (r === 7 || r === 8)) {
-              if (waterImg && waterImg.complete && waterImg.naturalWidth > 0) {
-                ctx.drawImage(waterImg, px, py, TILE_SIZE, TILE_SIZE);
-              } else {
-                drawWaterTile(ctx, px, py, tick, c === 7 && r === 7, currentBiome);
               }
             }
             // Biome Ground Terrain
@@ -337,8 +361,7 @@ export function GardenCanvas({
           x > 0 &&
           x < state.gridCols - 1 &&
           y > 0 &&
-          y < state.gridRows - 1 &&
-          !((x === 7 || x === 8) && (y === 7 || y === 8));
+          y < state.gridRows - 1;
 
         ctx.strokeStyle = isHoverInBounds ? '#7EBF52' : '#ef4444';
         ctx.lineWidth = 2;
@@ -385,14 +408,96 @@ export function GardenCanvas({
         );
       }
 
-      // 5. Draw Planted Trees & Player with Y-Sorting (Depth Buffering)
-      const renderEntities: Array<{
-        type: 'tree' | 'player';
-        y: number;
-        tree?: PlantedTree;
-      }> = [
-        ...state.plantedTrees.map((tree) => ({ type: 'tree' as const, y: tree.y, tree })),
-        { type: 'player' as const, y: state.playerPos.y },
+      // 5. Update Free-Roaming Companion Pets AI & Motion
+      const activePetIds = state.activePetIds || ['dog'];
+      const petSpeeds: Record<PetId, number> = {
+        dog: 1.1,
+        cat: 1.0,
+        horse: 1.3,
+        tiger: 1.25,
+        peacock: 0.9,
+        unicorn: 1.25,
+        pegasus: 1.2,
+      };
+
+      // Add missing pets
+      for (const petId of activePetIds) {
+        if (!petsRef.current.has(petId)) {
+          const startCol = 2 + Math.floor(Math.random() * (state.gridCols - 4));
+          const startRow = 2 + Math.floor(Math.random() * (state.gridRows - 4));
+          petsRef.current.set(petId, {
+            id: petId,
+            x: startCol * TILE_SIZE,
+            y: startRow * TILE_SIZE,
+            targetX: startCol * TILE_SIZE,
+            targetY: startRow * TILE_SIZE,
+            facing: Math.random() > 0.5 ? 'right' : 'left',
+            state: 'idle',
+            timer: 80 + Math.floor(Math.random() * 160),
+            speed: petSpeeds[petId] || 1.1,
+          });
+        }
+      }
+
+      // Remove inactive pets
+      for (const petId of Array.from(petsRef.current.keys())) {
+        if (!activePetIds.includes(petId)) {
+          petsRef.current.delete(petId);
+        }
+      }
+
+      // Update AI & motion for each roaming pet
+      for (const pet of Array.from(petsRef.current.values())) {
+        if (pet.state === 'walking') {
+          const dx = pet.targetX - pet.x;
+          const dy = pet.targetY - pet.y;
+          const dist = Math.hypot(dx, dy);
+
+          if (dist <= pet.speed) {
+            pet.x = pet.targetX;
+            pet.y = pet.targetY;
+            pet.state = 'idle';
+            pet.timer = 180 + Math.floor(Math.random() * 240); // 3 to 7 seconds idle behavior
+          } else {
+            pet.x += (dx / dist) * pet.speed;
+            pet.y += (dy / dist) * pet.speed;
+            pet.facing = dx < 0 ? 'left' : 'right';
+          }
+        } else if (pet.state === 'idle') {
+          pet.timer--;
+          if (pet.timer <= 0) {
+            const newCol = 1 + Math.floor(Math.random() * (state.gridCols - 2));
+            const newRow = 1 + Math.floor(Math.random() * (state.gridRows - 2));
+            const hasTree = state.plantedTrees.some((t) => t.x === newCol && t.y === newRow);
+            if (!hasTree) {
+              pet.targetX = newCol * TILE_SIZE;
+              pet.targetY = newRow * TILE_SIZE;
+              pet.state = 'walking';
+              pet.facing = pet.targetX < pet.x ? 'left' : 'right';
+            } else {
+              pet.timer = 40;
+            }
+          }
+        }
+      }
+
+      // 6. Draw Planted Trees, Player & Roaming Pets with Y-Sorting (Depth Buffering)
+      const renderEntities: Array<
+        | { type: 'tree'; y: number; tree: PlantedTree }
+        | { type: 'player'; y: number }
+        | { type: 'pet'; y: number; pet: ActivePetState }
+      > = [
+        ...state.plantedTrees.map((tree) => ({
+          type: 'tree' as const,
+          y: tree.y * TILE_SIZE + TILE_SIZE,
+          tree,
+        })),
+        { type: 'player' as const, y: state.playerPos.y * TILE_SIZE + TILE_SIZE },
+        ...Array.from(petsRef.current.values()).map((pet) => ({
+          type: 'pet' as const,
+          y: pet.y + TILE_SIZE,
+          pet,
+        })),
       ];
 
       renderEntities.sort((a, b) => a.y - b.y);
@@ -457,7 +562,7 @@ export function GardenCanvas({
               currentSkin,
             );
           }
-        } else if (entity.tree) {
+        } else if (entity.type === 'tree') {
           const pt = entity.tree;
           const tileX = pt.x * TILE_SIZE;
           const tileY = pt.y * TILE_SIZE;
@@ -499,6 +604,45 @@ export function GardenCanvas({
           if (pt.wateredAt) {
             ctx.fillStyle = '#60a5fa';
             ctx.fillRect(cx - 3, bottomY - 6, 6, 2);
+          }
+        } else if (entity.type === 'pet' && entity.pet) {
+          const pet = entity.pet;
+          const cx = pet.x + TILE_SIZE / 2;
+          const bottomY = pet.y + TILE_SIZE;
+
+          // Pet ground shadow
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+          ctx.beginPath();
+          ctx.ellipse(cx, bottomY - 3, 13, 4, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Determine animation frame
+          let animKey = 'walk_0';
+          if (pet.state === 'walking') {
+            const step = Math.floor((tick / 7) % 3);
+            animKey = `walk_${step}`;
+          } else {
+            // Special idle behavior cycle (idle_0 -> idle_1 -> idle_2)
+            const phase = Math.floor((tick / 35) % 4);
+            if (phase === 0) animKey = 'idle_0';
+            else if (phase === 1 || phase === 3) animKey = 'idle_1';
+            else animKey = 'idle_2';
+          }
+
+          const spriteKey = `${pet.id}_${animKey}`;
+          const spriteImg = petImageCacheRef.current.get(spriteKey);
+
+          if (spriteImg && spriteImg.complete && spriteImg.naturalWidth > 0) {
+            ctx.save();
+            ctx.translate(cx, bottomY - 24);
+
+            // Flip horizontally if facing left
+            if (pet.facing === 'left') {
+              ctx.scale(-1, 1);
+            }
+
+            ctx.drawImage(spriteImg, -24, -24, 48, 48);
+            ctx.restore();
           }
         }
       }

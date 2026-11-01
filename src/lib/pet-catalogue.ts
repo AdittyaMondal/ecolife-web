@@ -1,0 +1,86 @@
+import type { PetId, ShopItemPet } from '@/types/trees';
+
+export const PET_ITEMS: ShopItemPet[] = [
+  {
+    id: 'dog',
+    name: 'Golden Retriever Pup',
+    species: 'Canis lupus familiaris',
+    description: 'A loyal, cheerful pup with warm golden fur that merrily trots along cobblestones and sits to wag its tail.',
+    idleBehavior: 'Sits down on hind legs with tongue out and tail wagging excitedly',
+    rarity: 'common',
+    priceCoins: 120,
+    previewColor: '#eab308',
+    accentColor: '#ca8a04',
+    unlockedByDefault: true, // User starts with a friendly dog!
+  },
+  {
+    id: 'cat',
+    name: 'Calico Garden Cat',
+    species: 'Felis catus',
+    description: 'A sleek tricolor feline with inquisitive emerald eyes that stealthily explores the flowers and grooms its paws.',
+    idleBehavior: 'Sits gracefully, twitches tail, and grooms its paw and whiskers',
+    rarity: 'common',
+    priceCoins: 150,
+    previewColor: '#f97316',
+    accentColor: '#ea580c',
+  },
+  {
+    id: 'horse',
+    name: 'Chestnut Garden Steed',
+    species: 'Equus caballus',
+    description: 'A gentle, sturdy steed with a flowing dark mane and glossy chestnut coat that loves grazing in the lush lawn.',
+    idleBehavior: 'Lowers head to graze sweet grass, bobbing head contentedly with tail twitches',
+    rarity: 'common',
+    priceCoins: 300,
+    previewColor: '#854d0e',
+    accentColor: '#a16207',
+  },
+  {
+    id: 'tiger',
+    name: 'Royal Bengal Tiger',
+    species: 'Panthera tigris',
+    description: 'A majestic amber-and-black striped big cat that stalks the garden perimeter with silent power and regal calm.',
+    idleBehavior: 'Sits regally upright on the grass, slowly turning its head and flicking tail',
+    rarity: 'exotic',
+    priceCoins: 600,
+    previewColor: '#ea580c',
+    accentColor: '#c2410c',
+  },
+  {
+    id: 'peacock',
+    name: 'Emerald Royal Peacock',
+    species: 'Pavo cristatus',
+    description: 'An iridescent sapphire and emerald peacock that struts with royal dignity and fans its eye-spotted plumage.',
+    idleBehavior: 'Fans out its glorious glowing emerald tail feathers in a shimmering arc',
+    rarity: 'exotic',
+    priceCoins: 500,
+    previewColor: '#059669',
+    accentColor: '#0284c7',
+  },
+  {
+    id: 'unicorn',
+    name: 'Celestial Silver Unicorn',
+    species: 'Monoceros caelestis',
+    description: 'A mythical silver-white horned steed of ancient lore whose spiral horn radiates starlight while grazing.',
+    idleBehavior: 'Lowers head to graze starlight clover while its spiraled horn pulses cyan stardust sparkles',
+    rarity: 'legendary',
+    priceCoins: 1000,
+    previewColor: '#38bdf8',
+    accentColor: '#818cf8',
+  },
+  {
+    id: 'pegasus',
+    name: 'Divine Winged Pegasus',
+    species: 'Pegasus divinus',
+    description: 'A majestic divine winged steed from the high heavens that grazes peacefully and unfurls feather-soft white wings.',
+    idleBehavior: 'Grazes clover peacefully while slowly extending and fluttering its majestic feathered wings',
+    rarity: 'legendary',
+    priceCoins: 1200,
+    previewColor: '#c084fc',
+    accentColor: '#e879f9',
+  },
+];
+
+export function getPetById(id: PetId): ShopItemPet {
+  return PET_ITEMS.find((p) => p.id === id) || PET_ITEMS[0];
+}

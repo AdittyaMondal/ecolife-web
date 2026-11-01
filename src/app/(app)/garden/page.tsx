@@ -34,6 +34,8 @@ export default function GardenPage() {
     buyAndEquipSkin,
     equipBiome,
     buyAndEquipBiome,
+    togglePetRoam,
+    buyPet,
   } = useGarden();
 
   const [activeTool, setActiveTool] = React.useState<'plant' | 'water' | 'remove' | 'move'>(
@@ -159,7 +161,7 @@ export default function GardenPage() {
         onPlantNow={handlePlantNowFromInventory}
       />
 
-      {/* Wardrobe & Garden Shop Dialog */}
+      {/* Wardrobe, Biomes & Companions Garden Shop Dialog */}
       <GardenShopDialog
         open={shopOpen}
         onClose={() => setShopOpen(false)}
@@ -169,6 +171,8 @@ export default function GardenPage() {
         onBuySkin={(skin) => buyAndEquipSkin(skin, userCoins)}
         onEquipBiome={equipBiome}
         onBuyBiome={(biome) => buyAndEquipBiome(biome, userCoins)}
+        onTogglePetRoam={togglePetRoam}
+        onBuyPet={(pet) => buyPet(pet, userCoins)}
       />
 
       {/* Reward Seed Unlocked Dialog */}

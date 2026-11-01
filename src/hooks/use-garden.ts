@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { toast } from 'sonner';
 import { getTreeBySlug, rollTreeReward, TREE_CATALOGUE } from '@/lib/tree-catalogue';
-import type { CharacterSkinId, GardenBiomeId, GardenState, PlantedTree, ShopItemBiome, ShopItemSkin, Tree } from '@/types/trees';
+import type { CharacterSkinId, GardenBiomeId, GardenState, PetId, PlantedTree, ShopItemBiome, ShopItemPet, ShopItemSkin, Tree } from '@/types/trees';
 
 const STORAGE_KEY = 'ecolife_garden_v2';
 
@@ -35,6 +35,8 @@ export const INITIAL_GARDEN_STATE: GardenState = {
   unlockedSkins: ['gardener_default'],
   activeBiomeId: 'meadow',
   unlockedBiomes: ['meadow'],
+  unlockedPets: ['dog'],
+  activePetIds: ['dog'],
 };
 
 function calculateTotalOffset(planted: PlantedTree[]): number {
@@ -101,15 +103,11 @@ export function useGarden() {
     }
   }, []);
 
-  // Check if a tile has obstacles (fence, pond, or planted tree)
+  // Check if a tile has obstacles (fence or planted tree)
   const isTileBlocked = React.useCallback(
     (x: number, y: number, currentPlanted = state.plantedTrees) => {
       // Perimeter fence
       if (x <= 0 || x >= state.gridCols - 1 || y <= 0 || y >= state.gridRows - 1) {
-        return true;
-      }
-      // Garden decorative pond at (7, 7) and (8, 7)
-      if ((x === 7 || x === 8) && (y === 7 || y === 8)) {
         return true;
       }
       // Planted tree
@@ -130,8 +128,7 @@ export function useGarden() {
           newX <= 0 ||
           newX >= prev.gridCols - 1 ||
           newY <= 0 ||
-          newY >= prev.gridRows - 1 ||
-          ((newX === 7 || newX === 8) && (newY === 7 || newY === 8))
+          newY >= prev.gridRows - 1
         ) {
           // Just change facing direction if blocked
           const updated = {
@@ -455,6 +452,43 @@ export function useGarden() {
     [state, saveState],
   );
 
+  // Toggle pet roaming in garden
+  const togglePetRoam = React.useCallback(
+    (petId: PetId) => {
+      const currentActive = state.activePetIds || ['dog'];
+      let nextActive: PetId[];
+      if (currentActive.includes(petId)) {
+        nextActive = currentActive.filter((id) => id !== petId);
+        toast.info('Pet returned to sanctuary.');
+      } else {
+        nextActive = [...currentActive, petId];
+        toast.success('Pet is now roaming freely in your garden!');
+      }
+      saveState({ ...state, activePetIds: nextActive });
+    },
+    [state, saveState],
+  );
+
+  // Buy pet with EcoCoins
+  const buyPet = React.useCallback(
+    (pet: ShopItemPet, userCoins: number): boolean => {
+      if (pet.priceCoins > userCoins) {
+        toast.error(`Not enough EcoCoins! You have ${userCoins} and need ${pet.priceCoins}.`);
+        return false;
+      }
+      const unlocked = Array.from(new Set([...(state.unlockedPets || ['dog']), pet.id]));
+      const active = Array.from(new Set([...(state.activePetIds || ['dog']), pet.id]));
+      saveState({
+        ...state,
+        unlockedPets: unlocked,
+        activePetIds: active,
+      });
+      toast.success(`Adopted ${pet.name}! They are now roaming in your garden.`);
+      return true;
+    },
+    [state, saveState],
+  );
+
   return {
     state,
     isLoaded,
@@ -473,5 +507,7 @@ export function useGarden() {
     buyAndEquipSkin,
     equipBiome,
     buyAndEquipBiome,
+    togglePetRoam,
+    buyPet,
   };
 }

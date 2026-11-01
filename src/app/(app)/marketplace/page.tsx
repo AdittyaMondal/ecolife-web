@@ -18,6 +18,7 @@ import {
   Trash2,
   Trees,
   User,
+  PawPrint,
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -49,6 +50,7 @@ import {
   useSetCartQuantity,
 } from '@/hooks/use-marketplace';
 import { BIOME_ITEMS, SKIN_ITEMS } from '@/lib/garden-shop-catalogue';
+import { PET_ITEMS } from '@/lib/pet-catalogue';
 import { formatKg, formatNumber, formatPaise } from '@/lib/format';
 import { getProductImageUrl } from '@/lib/images';
 import { cn } from '@/lib/utils';
@@ -80,7 +82,7 @@ const CATEGORY_LABEL: Record<string, string> = {
 export default function MarketplacePage() {
   const router = useRouter();
   const [marketTab, setMarketTab] = React.useState<'products' | 'garden'>('products');
-  const [gardenTab, setGardenTab] = React.useState<'skins' | 'biomes'>('skins');
+  const [gardenTab, setGardenTab] = React.useState<'skins' | 'biomes' | 'pets'>('skins');
   const [category, setCategory] = React.useState<ProductCategory | 'all'>('all');
   const [sort, setSort] = React.useState<ProductSort>('newest');
   const [searchInput, setSearchInput] = React.useState('');
@@ -93,6 +95,8 @@ export default function MarketplacePage() {
     buyAndEquipSkin,
     equipBiome,
     buyAndEquipBiome,
+    togglePetRoam,
+    buyPet,
   } = useGarden();
 
   React.useEffect(() => {
@@ -264,6 +268,20 @@ export default function MarketplacePage() {
             >
               <Palette className="size-4" />
               <span>Garden Biomes ({BIOME_ITEMS.length})</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setGardenTab('pets')}
+              className={cn(
+                'flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-md transition-all',
+                gardenTab === 'pets'
+                  ? 'bg-primary text-primary-foreground shadow-2xs'
+                  : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+              )}
+            >
+              <PawPrint className="size-4" />
+              <span>Companions & Pets ({PET_ITEMS.length})</span>
             </button>
           </div>
 
@@ -453,6 +471,116 @@ export default function MarketplacePage() {
                         >
                           <Coins className="size-3.5 mr-1.5" />
                           Buy for {biome.priceCoins} Coins
+                        </Button>
+                      )}
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Pets Grid */}
+          {gardenTab === 'pets' && (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {PET_ITEMS.map((pet) => {
+                const isUnlocked = (gardenState.unlockedPets || ['dog']).includes(pet.id);
+                const isRoaming = (gardenState.activePetIds || ['dog']).includes(pet.id);
+                const canAfford = coinsBalance >= pet.priceCoins;
+
+                const rarityBadge =
+                  pet.rarity === 'legendary'
+                    ? 'bg-amber-500/10 text-amber-500 border-amber-500/30'
+                    : pet.rarity === 'exotic'
+                      ? 'bg-purple-500/10 text-purple-500 border-purple-500/30'
+                      : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30';
+
+                return (
+                  <Card
+                    key={pet.id}
+                    className={cn(
+                      'p-4 flex flex-col justify-between transition-all border',
+                      isRoaming
+                        ? 'border-primary/80 ring-1 ring-primary/40 bg-primary/5'
+                        : 'border-border bg-card hover:border-border/80',
+                    )}
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-3">
+                          <div className="size-14 rounded-lg border border-border shadow-xs bg-muted/60 flex items-center justify-center shrink-0 overflow-hidden">
+                            <img
+                              src={`/sprites/pets/${pet.id}_idle_0.png`}
+                              alt={pet.name}
+                              className="size-11 object-contain hover:scale-110 transition-transform"
+                              style={{ imageRendering: 'pixelated' }}
+                            />
+                          </div>
+                          <div>
+                            <h3 className="text-base font-bold text-foreground">{pet.name}</h3>
+                            <span className="text-xs font-mono font-semibold text-muted-foreground block">
+                              {pet.unlockedByDefault
+                                ? 'Starter Companion (Free)'
+                                : `${pet.priceCoins} EcoCoins`}
+                            </span>
+                          </div>
+                        </div>
+
+                        <span
+                          className={cn(
+                            'text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border',
+                            rarityBadge,
+                          )}
+                        >
+                          {pet.rarity}
+                        </span>
+                      </div>
+
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        {pet.description}
+                      </p>
+
+                      <div className="rounded-md bg-muted/60 p-2 border border-border/60 flex items-center gap-2 text-xs text-foreground font-medium">
+                        <Sparkles className="size-3.5 text-amber-500 shrink-0" />
+                        <span className="line-clamp-1">{pet.idleBehavior}</span>
+                      </div>
+                    </div>
+
+                    <div className="pt-4 mt-3 border-t border-border/60">
+                      {isUnlocked ? (
+                        <Button
+                          variant={isRoaming ? 'primary' : 'outline'}
+                          size="sm"
+                          className={cn(
+                            'w-full text-xs font-semibold transition-all',
+                            isRoaming
+                              ? 'bg-primary text-primary-foreground shadow-2xs'
+                              : 'hover:bg-primary/10 hover:text-primary',
+                          )}
+                          onClick={() => togglePetRoam(pet.id)}
+                        >
+                          {isRoaming ? (
+                            <>
+                              <Check className="size-3.5 mr-1.5" />
+                              Roaming in Garden (Active)
+                            </>
+                          ) : (
+                            <>
+                              <PawPrint className="size-3.5 mr-1.5" />
+                              Release into Garden
+                            </>
+                          )}
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          disabled={!canAfford}
+                          className="w-full text-xs"
+                          onClick={() => buyPet(pet, coinsBalance)}
+                        >
+                          <Coins className="size-3.5 mr-1.5" />
+                          Adopt for {pet.priceCoins} Coins
                         </Button>
                       )}
                     </div>

@@ -1,15 +1,16 @@
 'use client';
 
-import { Check, Coins, Lock, Palette, Sparkles, User, Wand2 } from 'lucide-react';
+import { Check, Coins, Lock, Palette, PawPrint, Sparkles, User, Wand2 } from 'lucide-react';
 import * as React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ModalDialog } from '@/components/ui/dialog';
 import { BIOME_ITEMS, SKIN_ITEMS } from '@/lib/garden-shop-catalogue';
+import { PET_ITEMS } from '@/lib/pet-catalogue';
 import { formatNumber } from '@/lib/format';
 import { cn } from '@/lib/utils';
-import type { CharacterSkinId, GardenBiomeId, GardenState, ShopItemBiome, ShopItemSkin } from '@/types/trees';
+import type { CharacterSkinId, GardenBiomeId, GardenState, PetId, ShopItemBiome, ShopItemPet, ShopItemSkin } from '@/types/trees';
 
 export interface GardenShopDialogProps {
   open: boolean;
@@ -20,6 +21,8 @@ export interface GardenShopDialogProps {
   onBuySkin: (skin: ShopItemSkin) => void;
   onEquipBiome: (biomeId: GardenBiomeId) => void;
   onBuyBiome: (biome: ShopItemBiome) => void;
+  onTogglePetRoam: (petId: PetId) => void;
+  onBuyPet: (pet: ShopItemPet) => void;
 }
 
 export function GardenShopDialog({
@@ -31,8 +34,10 @@ export function GardenShopDialog({
   onBuySkin,
   onEquipBiome,
   onBuyBiome,
+  onTogglePetRoam,
+  onBuyPet,
 }: GardenShopDialogProps) {
-  const [activeTab, setActiveTab] = React.useState<'skins' | 'biomes'>('skins');
+  const [activeTab, setActiveTab] = React.useState<'skins' | 'biomes' | 'pets'>('skins');
 
   const unlockedSkins = React.useMemo(
     () => new Set(state.unlockedSkins || ['gardener_default']),
@@ -44,6 +49,16 @@ export function GardenShopDialog({
     [state.unlockedBiomes],
   );
 
+  const unlockedPets = React.useMemo(
+    () => new Set(state.unlockedPets || ['dog']),
+    [state.unlockedPets],
+  );
+
+  const activePetIds = React.useMemo(
+    () => new Set(state.activePetIds || ['dog']),
+    [state.activePetIds],
+  );
+
   const currentSkinId = state.activeSkinId || 'gardener_default';
   const currentBiomeId = state.activeBiomeId || 'meadow';
 
@@ -51,8 +66,8 @@ export function GardenShopDialog({
     <ModalDialog
       open={open}
       onClose={onClose}
-      title="Botanical Garden Shop & Wardrobe"
-      description="Spend your earned EcoCoins to unlock stylish gardener skins and breathtaking environmental garden biomes."
+      title="Botanical Garden Shop & Sanctuary"
+      description="Spend your earned EcoCoins to unlock stylish gardener skins, garden biomes, and free-roaming animal companions."
       className="sm:max-w-2xl max-h-[85vh] flex flex-col"
     >
       <div className="space-y-4 pt-2 flex-1 overflow-y-auto pr-1">
@@ -85,28 +100,42 @@ export function GardenShopDialog({
             type="button"
             onClick={() => setActiveTab('skins')}
             className={cn(
-              'flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-md transition-all',
+              'flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-md transition-all',
               activeTab === 'skins'
                 ? 'bg-primary text-primary-foreground shadow-2xs'
                 : 'text-muted-foreground hover:bg-muted hover:text-foreground',
             )}
           >
             <User className="size-4" />
-            <span>Character Outfits ({SKIN_ITEMS.length})</span>
+            <span>Outfits ({SKIN_ITEMS.length})</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('biomes')}
             className={cn(
-              'flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-md transition-all',
+              'flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-md transition-all',
               activeTab === 'biomes'
                 ? 'bg-primary text-primary-foreground shadow-2xs'
                 : 'text-muted-foreground hover:bg-muted hover:text-foreground',
             )}
           >
             <Palette className="size-4" />
-            <span>Garden Biomes ({BIOME_ITEMS.length})</span>
+            <span>Biomes ({BIOME_ITEMS.length})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('pets')}
+            className={cn(
+              'flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-md transition-all',
+              activeTab === 'pets'
+                ? 'bg-primary text-primary-foreground shadow-2xs'
+                : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+            )}
+          >
+            <PawPrint className="size-4" />
+            <span>Companions ({PET_ITEMS.length})</span>
           </button>
         </div>
 
@@ -314,11 +343,130 @@ export function GardenShopDialog({
             })}
           </div>
         )}
+
+        {/* TAB 3: Animal Companions & Legendary Pets */}
+        {activeTab === 'pets' && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {PET_ITEMS.map((pet) => {
+              const isUnlocked = unlockedPets.has(pet.id);
+              const isRoaming = activePetIds.has(pet.id);
+              const canAfford = userCoins >= pet.priceCoins;
+
+              const rarityBadge =
+                pet.rarity === 'legendary'
+                  ? 'bg-amber-500/10 text-amber-500 border-amber-500/30'
+                  : pet.rarity === 'exotic'
+                    ? 'bg-purple-500/10 text-purple-500 border-purple-500/30'
+                    : 'bg-emerald-500/10 text-emerald-500 border-emerald-500/30';
+
+              return (
+                <Card
+                  key={pet.id}
+                  className={cn(
+                    'p-4 flex flex-col justify-between transition-all border',
+                    isRoaming
+                      ? 'border-primary/80 ring-1 ring-primary/40 bg-primary/5'
+                      : 'border-border bg-card hover:border-border/80',
+                  )}
+                >
+                  <div className="space-y-2.5">
+                    {/* Header info */}
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-3">
+                        {/* Pet Sprite Preview */}
+                        <div className="size-12 rounded-lg border border-border/80 shadow-xs bg-muted/60 flex items-center justify-center shrink-0 overflow-hidden">
+                          <img
+                            src={`/sprites/pets/${pet.id}_idle_0.png`}
+                            alt={pet.name}
+                            className="size-10 object-contain hover:scale-110 transition-transform"
+                            style={{ imageRendering: 'pixelated' }}
+                          />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <h4 className="text-sm font-bold text-foreground leading-tight">
+                              {pet.name}
+                            </h4>
+                          </div>
+                          <span className="text-[11px] font-mono text-muted-foreground block">
+                            {pet.unlockedByDefault
+                              ? 'Starter Companion (Free)'
+                              : `${pet.priceCoins} EcoCoins`}
+                          </span>
+                        </div>
+                      </div>
+
+                      <span
+                        className={cn(
+                          'text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border',
+                          rarityBadge,
+                        )}
+                      >
+                        {pet.rarity}
+                      </span>
+                    </div>
+
+                    {/* Description */}
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      {pet.description}
+                    </p>
+
+                    {/* Special Idle Behavior Banner */}
+                    <div className="rounded-md bg-muted/50 p-2 border border-border/60 flex items-center gap-1.5 text-[11px] text-foreground font-medium">
+                      <Sparkles className="size-3 text-amber-500 shrink-0" />
+                      <span className="line-clamp-1">{pet.idleBehavior}</span>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="pt-3 mt-2 border-t border-border/60 flex items-center justify-end">
+                    {isUnlocked ? (
+                      <Button
+                        variant={isRoaming ? 'primary' : 'outline'}
+                        size="sm"
+                        className={cn(
+                          'w-full text-xs h-8 font-semibold transition-all',
+                          isRoaming
+                            ? 'bg-primary text-primary-foreground shadow-2xs'
+                            : 'hover:bg-primary/10 hover:text-primary',
+                        )}
+                        onClick={() => onTogglePetRoam(pet.id)}
+                      >
+                        {isRoaming ? (
+                          <>
+                            <Check className="size-3.5 mr-1" />
+                            Roaming in Garden (Active)
+                          </>
+                        ) : (
+                          <>
+                            <PawPrint className="size-3.5 mr-1" />
+                            Release into Garden
+                          </>
+                        )}
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        disabled={!canAfford}
+                        className="w-full text-xs h-8"
+                        onClick={() => onBuyPet(pet)}
+                      >
+                        <Coins className="size-3.5 mr-1" />
+                        Adopt for {pet.priceCoins} Coins
+                      </Button>
+                    )}
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <div className="mt-4 pt-3 border-t border-border flex items-center justify-between">
         <span className="text-xs text-muted-foreground">
-          Tip: You can change your outfits and biomes any time for free once unlocked!
+          Tip: You can adopt pets and choose which ones roam freely in your garden!
         </span>
         <Button variant="outline" size="sm" onClick={onClose}>
           Done
