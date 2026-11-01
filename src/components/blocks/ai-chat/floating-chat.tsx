@@ -1,17 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import {
-  ChevronDown,
-  Info,
-  Loader2,
-  Maximize2,
-  Minimize2,
-  Send,
-  Sparkles,
-  Trash2,
-  X,
-} from 'lucide-react';
+import { Info, Loader2, Maximize2, Minimize2, Send, Sparkles, Trash2, X } from 'lucide-react';
 import Image from 'next/image';
 import * as React from 'react';
 import { toast } from 'sonner';
@@ -107,7 +97,10 @@ function FormattedMessage({ text }: { text: string }) {
         }
         if (trimmed.startsWith('# ')) {
           return (
-            <h2 key={lineIdx} className="font-extrabold text-foreground text-base pt-2 tracking-tight">
+            <h2
+              key={lineIdx}
+              className="font-extrabold text-foreground text-base pt-2 tracking-tight"
+            >
               {formatInline(trimmed.slice(2))}
             </h2>
           );
@@ -345,32 +338,41 @@ export function FloatingChat() {
             setIsMinimized(false);
           }}
           aria-label="Open EcoLife AI Advisor"
+          title="EcoLife AI Advisor"
           className={cn(
             'fixed right-4 bottom-20 md:right-6 md:bottom-6 z-40',
-            'group flex items-center gap-2.5 rounded-full p-2.5 md:px-4 md:py-2.5',
-            'bg-secondary text-secondary-foreground border border-border/80 shadow-lg shadow-forest-900/10',
-            'hover:bg-secondary/90 hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200',
-            'ring-2 ring-primary/30 hover:ring-primary/60 backdrop-blur-md',
+            'group flex items-center gap-2.5 rounded-full p-2 sm:pl-2 sm:pr-4 sm:py-2 md:pl-2.5 md:pr-4 md:py-2',
+            'bg-secondary text-secondary-foreground border border-white/15',
+            'shadow-lg shadow-forest-950/20 hover:shadow-xl hover:shadow-primary/10',
+            'ring-2 ring-primary/40 hover:ring-primary/70',
+            'transition-all duration-300 ease-out hover:scale-105 active:scale-95',
+            'backdrop-blur-md cursor-pointer select-none',
           )}
         >
-          <div className="relative flex size-7 md:size-8 items-center justify-center shrink-0">
+          {/* Framed Avatar Pod */}
+          <div className="relative flex size-8 md:size-9 items-center justify-center rounded-full bg-white/10 dark:bg-white/5 p-1 border border-white/15 shrink-0 shadow-inner">
             <Image
               src="/logo.png"
               alt="EcoLife Logo"
               width={28}
               height={28}
-              className="size-7 md:size-8 object-contain transition-transform group-hover:rotate-6"
+              className="size-6 md:size-7 object-contain transition-transform duration-300 group-hover:scale-110"
               priority
             />
-            <span className="absolute -top-0.5 -right-0.5 size-2.5 rounded-full bg-primary ring-2 ring-secondary animate-ping" />
-            <span className="absolute -top-0.5 -right-0.5 size-2.5 rounded-full bg-primary ring-2 ring-secondary" />
+            {/* Neatly Positioned Online Status Indicator */}
+            <span className="absolute -bottom-0.5 -right-0.5 flex size-2.5 pointer-events-none">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+              <span className="relative inline-flex size-2.5 rounded-full bg-primary ring-2 ring-secondary" />
+            </span>
           </div>
-          <div className="hidden flex-col items-start text-left md:flex pr-1">
-            <span className="text-xs font-bold tracking-tight leading-none text-foreground">
+
+          {/* Crisp, High-Contrast Title & Subtitle */}
+          <div className="hidden flex-col items-start text-left sm:flex pr-0.5">
+            <span className="text-xs font-bold tracking-tight leading-tight text-white drop-shadow-xs">
               EcoLife AI
             </span>
-            <span className="text-[10px] text-muted-foreground mt-0.5 flex items-center gap-1">
-              <Sparkles className="size-2.5 text-primary" /> Advisor
+            <span className="text-[10px] font-medium text-emerald-200/90 flex items-center gap-1 leading-tight mt-0.5">
+              <Sparkles className="size-2.5 text-tertiary shrink-0" /> Advisor
             </span>
           </div>
         </button>
@@ -448,11 +450,7 @@ export function FloatingChat() {
                 aria-label={isMinimized ? 'Expand chat' : 'Minimize chat'}
                 className="rounded-xs p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition"
               >
-                {isMinimized ? (
-                  <Maximize2 className="size-4" />
-                ) : (
-                  <Minimize2 className="size-4" />
-                )}
+                {isMinimized ? <Maximize2 className="size-4" /> : <Minimize2 className="size-4" />}
               </button>
               <button
                 type="button"
@@ -482,11 +480,15 @@ export function FloatingChat() {
                   <div className="grid grid-cols-2 gap-1.5 text-[11px] text-muted-foreground">
                     <div className="flex items-center gap-1.5 rounded-xs bg-card/60 border border-border/50 px-2 py-1">
                       <span className="size-1.5 rounded-full bg-positive shrink-0" />
-                      <span className="truncate">15Q Baseline: {onboarding?.complete ? 'Complete' : 'Pending'}</span>
+                      <span className="truncate">
+                        15Q Baseline: {onboarding?.complete ? 'Complete' : 'Pending'}
+                      </span>
                     </div>
                     <div className="flex items-center gap-1.5 rounded-xs bg-card/60 border border-border/50 px-2 py-1">
                       <span className="size-1.5 rounded-full bg-positive shrink-0" />
-                      <span className="truncate">Daily Log: {trackToday?.existingLog ? 'Logged' : 'Pending'}</span>
+                      <span className="truncate">
+                        Daily Log: {trackToday?.existingLog ? 'Logged' : 'Pending'}
+                      </span>
                     </div>
                     <div className="flex items-center gap-1.5 rounded-xs bg-card/60 border border-border/50 px-2 py-1">
                       <span className="size-1.5 rounded-full bg-positive shrink-0" />
@@ -507,10 +509,7 @@ export function FloatingChat() {
                   return (
                     <div
                       key={msg.id}
-                      className={cn(
-                        'flex flex-col',
-                        isUser ? 'items-end' : 'items-start',
-                      )}
+                      className={cn('flex flex-col', isUser ? 'items-end' : 'items-start')}
                     >
                       <div className="flex items-end gap-2 max-w-[88%]">
                         {!isUser && (
@@ -565,7 +564,9 @@ export function FloatingChat() {
                       <span className="size-1.5 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]" />
                       <span className="size-1.5 rounded-full bg-primary animate-bounce" />
                     </div>
-                    <span className="text-[11px] text-muted-foreground">EcoLife AI is thinking...</span>
+                    <span className="text-[11px] text-muted-foreground">
+                      EcoLife AI is thinking...
+                    </span>
                   </div>
                 )}
 

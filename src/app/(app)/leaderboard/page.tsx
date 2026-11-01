@@ -1,12 +1,13 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { ArrowRight, Trophy } from 'lucide-react';
 import Link from 'next/link';
 import * as React from 'react';
 import { Podium } from '@/components/blocks/leaderboard/podium';
 import { RankList } from '@/components/blocks/leaderboard/rank-list';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorBanner } from '@/components/ui/error-banner';
@@ -15,7 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import {
   type LeaderboardPeriod,
   type LeaderboardScope,
-  leaderboardQuery,
+  leaderboardInfiniteQuery,
   myRankQuery,
 } from '@/hooks/use-leaderboard';
 
@@ -58,7 +59,10 @@ export default function LeaderboardPage() {
     error: leaderboardError,
     isPending: isLeaderboardPending,
     refetch: refetchLeaderboard,
-  } = useQuery(leaderboardQuery(period, scope));
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useInfiniteQuery(leaderboardInfiniteQuery(period, scope));
 
   const {
     data: myRankData,
@@ -66,7 +70,10 @@ export default function LeaderboardPage() {
     isPending: isMyRankPending,
   } = useQuery(myRankQuery());
 
-  const items = leaderboardData?.items ?? [];
+  const items = React.useMemo(
+    () => leaderboardData?.pages.flatMap((p) => p.items) ?? [],
+    [leaderboardData],
+  );
   const topThree = items.slice(0, 3);
   const remainingRows = items.slice(3);
 
@@ -174,6 +181,18 @@ export default function LeaderboardPage() {
         <div className="space-y-6">
           <Podium topUsers={topThree} />
           {remainingRows.length > 0 && <RankList rows={remainingRows} />}
+
+          {hasNextPage && (
+            <div className="flex justify-center pt-2">
+              <Button
+                variant="outline"
+                loading={isFetchingNextPage}
+                onClick={() => fetchNextPage()}
+              >
+                Load more
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </div>
