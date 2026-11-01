@@ -45,8 +45,7 @@ export function GardenHotbar({
       label: 'Plant',
       shortcut: 'Space',
       icon: Sprout,
-      activeColor:
-        'bg-emerald-600 text-white shadow-sm ring-1 ring-emerald-500/50 scale-[1.02]',
+      activeColor: 'bg-emerald-600 text-white shadow-sm ring-1 ring-emerald-500/50 scale-[1.02]',
       title: 'Plant selected tree [Space or Click]',
     },
     {
@@ -54,8 +53,7 @@ export function GardenHotbar({
       label: 'Water',
       shortcut: 'W',
       icon: Droplets,
-      activeColor:
-        'bg-sky-600 text-white shadow-sm ring-1 ring-sky-500/50 scale-[1.02]',
+      activeColor: 'bg-sky-600 text-white shadow-sm ring-1 ring-sky-500/50 scale-[1.02]',
       title: 'Water planted trees [Click tile]',
     },
     {
@@ -63,8 +61,7 @@ export function GardenHotbar({
       label: 'Relocate',
       shortcut: 'M',
       icon: Move,
-      activeColor:
-        'bg-amber-600 text-white shadow-sm ring-1 ring-amber-500/50 scale-[1.02]',
+      activeColor: 'bg-amber-600 text-white shadow-sm ring-1 ring-amber-500/50 scale-[1.02]',
       title: 'Relocate planted tree [M or Click]',
     },
     {
@@ -72,8 +69,7 @@ export function GardenHotbar({
       label: 'Remove',
       shortcut: 'R',
       icon: Shovel,
-      activeColor:
-        'bg-rose-600 text-white shadow-sm ring-1 ring-rose-500/50 scale-[1.02]',
+      activeColor: 'bg-rose-600 text-white shadow-sm ring-1 ring-rose-500/50 scale-[1.02]',
       title: 'Dig up and return to backpack [R or Click]',
     },
   ];
@@ -128,13 +124,10 @@ export function GardenHotbar({
         </div>
 
         {/* Subtle Visual Divider 1 */}
-        <div
-          className="hidden lg:block h-9 w-px bg-border/80 shrink-0"
-          aria-hidden="true"
-        />
+        <div className="hidden lg:block h-9 w-px bg-border/80 shrink-0" aria-hidden="true" />
 
         {/* Group 2: Center 6 Hotbar Tree Slots with Fade Edges on Mobile */}
-        <div className="relative flex items-center justify-center max-w-full overflow-hidden flex-1">
+        <div className="relative flex min-w-0 flex-1 items-center justify-center">
           {/* Left subtle fade mask on mobile */}
           <div
             className="pointer-events-none absolute left-0 top-0 bottom-0 w-4 bg-gradient-to-r from-card to-transparent z-10 lg:hidden"
@@ -144,7 +137,13 @@ export function GardenHotbar({
           <div
             role="listbox"
             aria-label="Seed hotbar"
-            className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1 px-1 max-w-full justify-center"
+            /* `w-max max-w-full` with justify-START, not justify-center.
+             Centering a horizontally scrollable track pushes the overflow out
+             of BOTH ends, which clipped the first and last slots (Neem and
+             Sacred) and made the start unreachable. w-max sizes the track to
+             its content so the parent centres it when it fits, max-w-full caps
+             it so it scrolls from slot 1 when it does not. */
+            className="flex w-max max-w-full items-center justify-start gap-2 overflow-x-auto scroll-px-1 px-1 py-1 snap-x scrollbar-none"
           >
             {state.hotbar.map((slug, idx) => {
               const isSelected = state.activeHotbarIndex === idx;
@@ -156,7 +155,7 @@ export function GardenHotbar({
               return (
                 <div
                   key={HOTBAR_SLOT_IDS[idx] || `hotbar_${idx}`}
-                  className="relative group shrink-0"
+                  className="relative group shrink-0 snap-start"
                 >
                   <button
                     type="button"
@@ -231,9 +230,7 @@ export function GardenHotbar({
                     role="tooltip"
                     className="pointer-events-none absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-150 z-30 px-2 py-0.5 rounded-md bg-popover text-popover-foreground border border-border shadow-md text-[10px] font-semibold whitespace-nowrap"
                   >
-                    {tree
-                      ? `${tree.name} [${idx + 1}] • ×${invCount}`
-                      : `Empty Slot [${idx + 1}]`}
+                    {tree ? `${tree.name} [${idx + 1}] • ×${invCount}` : `Empty Slot [${idx + 1}]`}
                   </div>
                 </div>
               );
@@ -248,10 +245,7 @@ export function GardenHotbar({
         </div>
 
         {/* Subtle Visual Divider 2 */}
-        <div
-          className="hidden lg:block h-9 w-px bg-border/80 shrink-0"
-          aria-hidden="true"
-        />
+        <div className="hidden lg:block h-9 w-px bg-border/80 shrink-0" aria-hidden="true" />
 
         {/* Group 3: Backpack & Nursery Open Button */}
         <Button
